@@ -1,4 +1,4 @@
-import type { CalibrationProfile, CalibrationStorageEnvelope } from "./calibrationSchema";
+import type { CalibrationProfile } from "./calibrationSchema";
 
 /** Requests that the sandbox persist a completed calibration profile */
 export interface CalibrationSaveMessage {
@@ -14,7 +14,8 @@ export interface CalibrationLoadMessage {
 /** Returns the profile selected by the sandbox's storage resolution rule */
 export interface CalibrationLoadedMessage {
   type: "CALIBRATION_LOADED";
-  envelope: CalibrationStorageEnvelope | null;
+  profile: CalibrationProfile | null;
+  resolvedScope: "file" | "user" | null;
 }
 
 /** Reports that the sandbox could not persist a calibration profile. */
@@ -23,11 +24,16 @@ export interface CalibrationSaveFailedMessage {
   message: string;
 }
 
+export interface CalibrationSavedMessage {
+  type: "CALIBRATION_SAVED";
+}
+
 /** Messages sent from the UI iframe to the plugin sandbox. */
 export type UiToPluginMessage = CalibrationLoadMessage | CalibrationSaveMessage;
 
 /** Messages sent from the plugin sandbox to the UI iframe. */
-export type PluginToUiMessage = CalibrationLoadedMessage | CalibrationSaveFailedMessage;
+export type PluginToUiMessage =
+  CalibrationLoadedMessage | CalibrationSaveFailedMessage | CalibrationSavedMessage;
 
 /** Every message permitted across the plugin boundary. */
 export type PluginMessage = UiToPluginMessage | PluginToUiMessage;

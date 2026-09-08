@@ -10,7 +10,18 @@ export interface CalibrationProfile {
 }
 
 /** A sandbox-only wrapper that records where a profile was persisted */
-export interface CalibrationStorageEnvelope {
-  scope: "file" | "user";
-  profile: CalibrationProfile;
+export function isCalibrationProfile(value: unknown): value is CalibrationProfile {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const profile = value as Record<string, unknown>;
+  return (
+    typeof profile.schemaVersion === "number" &&
+    typeof profile.completedAt === "string" &&
+    typeof profile.loggingConsent === "boolean" &&
+    typeof profile.answers === "object" &&
+    profile.answers !== null &&
+    !Array.isArray(profile.answers)
+  );
 }
