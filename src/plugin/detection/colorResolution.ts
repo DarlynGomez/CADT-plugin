@@ -20,7 +20,15 @@ export interface ColorResolutionResult {
   indeterminateReasons: readonly string[];
 }
 
-const NORMAL_BLEND_MODE = "NORMAL";
+/**
+ * Blend modes that do not alter how a layer composites with what is behind it, so they
+ * are not indeterminate. Figma's own default for a frame or group is "PASS_THROUGH",
+ * not "NORMAL": it means the container applies no blending of its own and its children
+ * composite straight through. Treating that as indeterminate would flag nearly every
+ * ordinary frame in a real file, which is exactly the bug this comment is here to keep
+ * from coming back.
+ */
+const NON_BLOCKING_BLEND_MODES = new Set(["NORMAL", "PASS_THROUGH"]);
 
 function checkLayerValidity(layer: ChainLayer, reasons: Set<string>): void {
   if (!layer.visible) {
@@ -29,7 +37,7 @@ function checkLayerValidity(layer: ChainLayer, reasons: Set<string>): void {
   if (layer.nodeOpacity < 1) {
     reasons.add("opacity-below-one");
   }
-  if (layer.blendMode !== NORMAL_BLEND_MODE) {
+  if (!NON_BLOCKING_BLEND_MODES.has(layer.blendMode)) {
     reasons.add("blend-mode");
   }
 }

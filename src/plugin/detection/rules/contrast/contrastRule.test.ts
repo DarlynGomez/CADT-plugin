@@ -36,7 +36,7 @@ describe("contrastRule", () => {
     expect(finding).not.toBeNull();
     expect(finding?.ruleId).toBe("contrast");
     expect(finding?.nodeId).toBe("1:1");
-    expect(finding?.requiredRatio).toBe(4.5);
+    expect(finding?.evidence.requiredRatio).toBe(4.5);
     expect(finding?.severity).toBe("medium");
   });
 

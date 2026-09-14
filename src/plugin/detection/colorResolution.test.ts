@@ -68,6 +68,12 @@ describe("resolveColors", () => {
     expect(result.indeterminateReasons).toContain("blend-mode");
   });
 
+  it("does not treat PASS_THROUGH as a blend mode, since it is Figma's own default for an ordinary frame or group", () => {
+    const result = resolveColors([solidLayer(BLACK), solidLayer(WHITE, { blendMode: "PASS_THROUGH" })]);
+    expect(result.indeterminateReasons).toEqual([]);
+    expect(result).toEqual({ foreground: BLACK, background: WHITE, indeterminateReasons: [] });
+  });
+
   it("is indeterminate when the text node or an ancestor is invisible", () => {
     const result = resolveColors([solidLayer(BLACK), solidLayer(WHITE, { visible: false })]);
     expect(result.indeterminateReasons).toContain("node-invisible");

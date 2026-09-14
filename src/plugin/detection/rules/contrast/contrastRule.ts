@@ -7,15 +7,21 @@ import { classifyTextSize } from "./textSizeClass";
 
 const RULE_ID = "contrast";
 
+/** Contrast's rule-specific evidence: the measured ratio against what was required */
+export interface ContrastEvidence {
+  measuredRatio: number;
+  requiredRatio: number;
+}
+
 /**
  * Composes the phase 9 pure modules over a snapshot and stays thin: every real
  * decision lives in contrastRatio, textSizeClass, or severity, not here. A finding
  * exists only when the measured ratio actually falls short of what is required.
  */
-export const contrastRule: Rule = {
+export const contrastRule = {
   id: RULE_ID,
 
-  evaluate(snapshot: NodeSnapshot): Finding | null {
+  evaluate(snapshot: NodeSnapshot): Finding<ContrastEvidence> | null {
     if (snapshot.indeterminateReasons.length > 0) {
       return null;
     }
@@ -41,8 +47,7 @@ export const contrastRule: Rule = {
       ruleId: RULE_ID,
       nodeId: snapshot.nodeId,
       severity: computeSeverity(measuredRatio, requiredRatio),
-      measuredRatio,
-      requiredRatio
+      evidence: { measuredRatio, requiredRatio }
     };
   }
-};
+} satisfies Rule;

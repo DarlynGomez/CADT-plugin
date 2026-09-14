@@ -18,6 +18,13 @@ const ui: {
   postMessage: typeof uiPostMessage;
 } = { onmessage: null, postMessage: uiPostMessage };
 
+// Detection lifecycle surface: an empty page and no documentchange activity is enough
+// for these calibration-focused tests, which do not exercise live detection itself.
+const loadAllPagesAsync = vi.fn(async () => undefined);
+const documentChangeOn = vi.fn();
+const findAllWithCriteria = vi.fn(() => []);
+const getNodeByIdAsync = vi.fn(async () => null);
+
 function stubFigma(command: string | undefined) {
   ui.onmessage = null;
   vi.stubGlobal("__html__", "<html>calibration</html>");
@@ -28,7 +35,11 @@ function stubFigma(command: string | undefined) {
     ui,
     showUI,
     notify,
-    closePlugin
+    closePlugin,
+    loadAllPagesAsync,
+    on: documentChangeOn,
+    currentPage: { findAllWithCriteria },
+    getNodeByIdAsync
   });
 }
 
@@ -37,6 +48,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.spyOn(console, "error").mockImplementation(() => undefined);
   vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  vi.spyOn(console, "log").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -58,6 +70,22 @@ describe("plugin entry routing", () => {
     await import("./main");
 
     expect(showUI).toHaveBeenCalledWith("<html>calibration</html>", { width: 460, height: 680 });
+  });
+
+  it("starts the detection lifecycle alongside the calibration UI on normal startup", async () => {
+    stubFigma("open");
+    await import("./main");
+
+    await vi.waitFor(() => expect(documentChangeOn).toHaveBeenCalledWith("documentchange", expect.any(Function)));
+    expect(loadAllPagesAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not start the detection lifecycle for the reset command", async () => {
+    stubFigma("reset-calibration");
+    await import("./main");
+
+    await vi.waitFor(() => expect(closePlugin).toHaveBeenCalledTimes(1));
+    expect(loadAllPagesAsync).not.toHaveBeenCalled();
   });
 
   it("runs the reset command instead of the UI, then closes the plugin", async () => {

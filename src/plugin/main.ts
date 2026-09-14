@@ -1,4 +1,5 @@
 import { isCalibrationProfile } from "../shared/calibrationSchema";
+import { startDetectionLifecycle } from "./lifecycle/startup";
 import { resolveCalibration, saveCalibration } from "./storage/calibrationStore";
 import { resetCalibration, type CalibrationResetResult } from "./storage/resetCalibration";
 
@@ -124,4 +125,9 @@ if (figma.command === RESET_COMMAND) {
   void runReset();
 } else {
   startCalibrationUi();
+  // Fire-and-forget: the calibration UI does not wait on live detection, and a
+  // failure here (a hostile document, a rejected loadAllPagesAsync) must not block it.
+  startDetectionLifecycle().catch((error: unknown) => {
+    console.error("Detection lifecycle failed to start", error);
+  });
 }

@@ -25,11 +25,16 @@ export interface NodeSnapshot {
   indeterminateReasons: readonly string[];
 }
 
-/** One rule's verdict on one node: only produced when the rule found a real problem */
-export interface Finding {
+/**
+ * One rule's verdict on one node: only produced when the rule found a real problem.
+ * The spine (ruleId, nodeId, severity) is generic across every rule; evidence is
+ * whatever that specific rule needs to justify and later display the finding. See
+ * ADR-016: this stays generic on purpose, even with only one rule registered, so the
+ * shape does not have to change under pressure the moment a second rule arrives.
+ */
+export interface Finding<TEvidence = unknown> {
   ruleId: string;
   nodeId: string;
   severity: Severity;
-  measuredRatio: number;
-  requiredRatio: number;
+  evidence: TEvidence;
 }

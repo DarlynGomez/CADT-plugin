@@ -51,15 +51,53 @@ export default tseslint.config(
     // imports it; restricting an import statement would never fire. The real boundary
     // is the ambient `figma` global itself, so that is what CI checks. See CLAUDE.md
     // rule 8 and docs/ENGINEERING_STANDARDS.md section 7.2.
-    files: ["src/plugin/detection/**/*.{ts,tsx}"],
-    ignores: ["src/plugin/detection/adapter/**/*.{ts,tsx}"],
+    //
+    // Phase 11 broadens this from detection/** to all of src/plugin/**, now that the
+    // detection startup sequence (loadAllPagesAsync, listener registration, the initial
+    // scan) has moved out of main.ts into lifecycle/. main.ts itself stays an explicit
+    // exception rather than being forced pure: it is the plugin's entry point and still
+    // legitimately owns the pre-existing calibration UI wiring (figma.ui.onmessage,
+    // showUI, notify, closePlugin), which was never part of this slice's purity claim.
+    // Phase 12 adds accountability/** to the restricted set; phase 13 adds
+    // src/ui/issues/fade.ts. Each is a deliverable of its phase, not cleanup.
+    files: ["src/plugin/**/*.{ts,tsx}"],
+    ignores: [
+      "src/plugin/detection/adapter/**/*.{ts,tsx}",
+      "src/plugin/storage/**/*.{ts,tsx}",
+      "src/plugin/lifecycle/**/*.{ts,tsx}",
+      "src/plugin/main.ts"
+    ],
     rules: {
       "no-restricted-globals": [
         "error",
         {
           name: "figma",
           message:
-            "Detection code is pure and must not touch the Figma API. Only src/plugin/detection/adapter/** may."
+            "This module must stay pure. Only the adapter, storage, or lifecycle layers may touch the Figma API."
+        }
+      ],
+      // The globals rule alone misses a pure-looking module that accepts a
+      // Figma-typed value as a parameter and reads properties off it without ever
+      // referencing the `figma` global itself; its test would then need a Figma
+      // mock while still passing the rule above. This bans the type names, not
+      // just the global, closing that gap. List covers the ambient types the
+      // adapter and lifecycle touch today (BaseNode, PageNode, Paint, SolidPaint,
+      // BlendMode, RGB) plus the node types most likely to appear by copy-paste
+      // (SceneNode, TextNode, FrameNode); extend it if a new one shows up.
+      "@typescript-eslint/no-restricted-types": [
+        "error",
+        {
+          types: {
+            SceneNode: "Figma node type. Only the adapter or lifecycle layers may reference it.",
+            TextNode: "Figma node type. Only the adapter or lifecycle layers may reference it.",
+            FrameNode: "Figma node type. Only the adapter or lifecycle layers may reference it.",
+            PageNode: "Figma node type. Only the adapter or lifecycle layers may reference it.",
+            BaseNode: "Figma node type. Only the adapter or lifecycle layers may reference it.",
+            Paint: "Figma paint type. Only the adapter or lifecycle layers may reference it.",
+            SolidPaint: "Figma paint type. Only the adapter or lifecycle layers may reference it.",
+            BlendMode: "Figma type. Only the adapter or lifecycle layers may reference it.",
+            RGB: "Figma color type. Use the shared RGBColor plain type instead."
+          }
         }
       ]
     }
