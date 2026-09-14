@@ -32,3 +32,13 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Vercel CLI project linkage
+.vercel
+
+docs/
+CLAUDE.md
+ENGINEERING_STANDARDS.md
+DESIGN_SYSTEM.md
+DECISIONS.md
+ACCOUNTABILITY_SPEC.md
