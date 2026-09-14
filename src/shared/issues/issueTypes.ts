@@ -38,3 +38,30 @@ export interface Finding<TEvidence = unknown> {
   severity: Severity;
   evidence: TEvidence;
 }
+
+/** The five states from spec section 5. Four are designer-controlled, one is a consequence. */
+export type IssueState = "open" | "deferred" | "acknowledged" | "important" | "resolved";
+
+/**
+ * The persisted record for one rule applied to one node, keyed by id in issueStore.ts
+ * under cadt.issues.v1. See ADR-011: file-scoped by nature, unlike calibration.
+ *
+ * waitingForSelectionToLeave, the immediate-resurface guard from spec section 5.3, is
+ * deliberately absent here: it is runtime-only session state owned by reEncounter.ts,
+ * not persisted, since persisting it would suppress a legitimate re-encounter after the
+ * plugin is closed and reopened with the node still selected.
+ */
+export interface Issue {
+  id: string;
+  ruleId: string;
+  nodeId: string;
+  state: IssueState;
+  severityAtLastDetection: Severity;
+  encounterCount: number;
+  lastDetectedAt: string;
+  acknowledgedReason?: string;
+  acknowledgedAt?: string;
+  severityAtAcknowledgment?: Severity;
+  /** Set when a worse-than-acknowledged finding reopened this issue. See ADR-014. */
+  changedSinceAcknowledgment?: boolean;
+}

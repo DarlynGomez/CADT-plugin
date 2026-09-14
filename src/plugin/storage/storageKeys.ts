@@ -1,1 +1,2 @@
 export const STORAGE_KEY_PROFILE = "cadt.calibration.profile";
+export const STORAGE_KEY_ISSUES = "cadt.issues.v1";

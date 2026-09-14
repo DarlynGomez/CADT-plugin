@@ -58,13 +58,16 @@ export default tseslint.config(
     // exception rather than being forced pure: it is the plugin's entry point and still
     // legitimately owns the pre-existing calibration UI wiring (figma.ui.onmessage,
     // showUI, notify, closePlugin), which was never part of this slice's purity claim.
-    // Phase 12 adds accountability/** to the restricted set; phase 13 adds
-    // src/ui/issues/fade.ts. Each is a deliverable of its phase, not cleanup.
+    // Phase 12 adds accountability/** to this restricted set (already implied by the
+    // src/plugin/** glob below; the actual change is issueStore.ts joining the
+    // exceptions, since it is a storage surface, not a pure module). Phase 13 adds
+    // src/ui/issues/fade.ts to a UI-side rule. Each is a deliverable of its phase.
     files: ["src/plugin/**/*.{ts,tsx}"],
     ignores: [
       "src/plugin/detection/adapter/**/*.{ts,tsx}",
       "src/plugin/storage/**/*.{ts,tsx}",
       "src/plugin/lifecycle/**/*.{ts,tsx}",
+      "src/plugin/accountability/issueStore.ts",
       "src/plugin/main.ts"
     ],
     rules: {
@@ -73,7 +76,7 @@ export default tseslint.config(
         {
           name: "figma",
           message:
-            "This module must stay pure. Only the adapter, storage, or lifecycle layers may touch the Figma API."
+            "This module must stay pure. Only the adapter, storage, lifecycle, or issueStore layers may touch the Figma API."
         }
       ],
       // The globals rule alone misses a pure-looking module that accepts a

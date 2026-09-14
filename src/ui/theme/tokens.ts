@@ -7,6 +7,10 @@ export const TOKEN_VALUES = {
   "--color-accent": "#14161A",
   "--color-accent-text": "#FFFFFF",
   "--color-focus-ring": "#14161A",
+  // Desaturated red-orange, issue surface only, never the calibration flow. Measured
+  // 5.60:1 against --color-background (#FAFAF8), above the 4.5:1 floor. See
+  // DESIGN_SYSTEM.md section 2.
+  "--color-warning": "#A8471F",
   "--font-headline": "Georgia, serif",
   "--font-body": "-apple-system, BlinkMacSystemFont, " + '"Segoe UI", sans-serif',
   "--font-size-question": "26px",
