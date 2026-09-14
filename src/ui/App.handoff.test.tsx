@@ -27,6 +27,10 @@ function fakeSandbox(handlers: {
       const profile = message.profile;
       setTimeout(() => handlers.onSave?.(profile), 0);
     }
+    // The issue panel subscribes as soon as it mounts, right after hand-off.
+    if (message?.type === "ISSUES_SUBSCRIBE") {
+      setTimeout(() => respond({ type: "ISSUES_UPDATED", issues: [] }), 0);
+    }
   });
 }
 
@@ -36,7 +40,7 @@ describe("App calibration save and hand-off", () => {
     vi.restoreAllMocks();
   });
 
-  it("persists the profile and hands off to the returning-user surface", async () => {
+  it("persists the profile and hands off to the accountability panel", async () => {
     fakeSandbox({
       onLoad: () => respond({ type: "CALIBRATION_LOADED", profile: null, resolvedScope: null }),
       onSave: (profile) => {
@@ -53,11 +57,8 @@ describe("App calibration save and hand-off", () => {
     await user.click(screen.getByRole("button", { name: "Start designing" }));
 
     await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Temporary returning-user screen" })
-      ).toBeInTheDocument()
+      expect(screen.getByRole("main", { name: "Accessibility issues" })).toBeInTheDocument()
     );
-    expect(screen.getByText(/Resolved storage scope: file/)).toBeInTheDocument();
   });
 
   it("keeps the user on Review with a retry when the save fails", async () => {
@@ -79,8 +80,6 @@ describe("App calibration save and hand-off", () => {
 
     await screen.findByText("The setup could not be saved. Check your connection and retry.");
     expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled();
-    expect(
-      screen.queryByRole("heading", { name: "Temporary returning-user screen" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("main", { name: "Accessibility issues" })).not.toBeInTheDocument();
   });
 });

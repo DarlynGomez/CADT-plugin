@@ -1,21 +1,17 @@
 import { createChangeBuffer } from "../detection/changeBuffer";
-import { runDetection } from "../detection/engine";
 import { isRelevantPropertyChange } from "../detection/relevance";
-import { logFindings } from "./logFindings";
-import { resolveTextNodeSnapshot } from "./resolveSnapshot";
+import { scanAndSync } from "./scanAndSync";
 
 /**
  * Wires figma's documentchange event through the pure change buffer and relevance
- * filter to the detection engine. Registered by startup.ts only after
- * figma.loadAllPagesAsync() has resolved; see that file for why the order matters.
- * Console output only, phase 11 has no UI and no persistence yet.
+ * filter to the detection engine, and from there into the issue store. Registered by
+ * startup.ts only after figma.loadAllPagesAsync() has resolved; see that file for why
+ * the order matters.
  */
 export function registerDocumentChangeListener(): void {
   const buffer = createChangeBuffer({
     onFlush: (nodeIds) => {
-      void runDetection(nodeIds, resolveTextNodeSnapshot).then((findings) => {
-        logFindings("scan", nodeIds, findings);
-      });
+      void scanAndSync(nodeIds, "scan");
     },
     scheduleTimeout: (callback, delayMs) => setTimeout(callback, delayMs),
     clearScheduledTimeout: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>)

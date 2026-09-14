@@ -1,20 +1,18 @@
 import { CalibrationFlow } from "./calibration/CalibrationFlow";
 import { useCalibrationPersistence } from "./hooks/useCalibrationPersistence";
-import { ReturningUserScreen } from "./ReturningUserScreen";
+import { IssuePanel } from "./issues/IssuePanel";
 
 export function App() {
-  const { loadedProfile, loading, resolvedScope, saveProfile, saveError } =
-    useCalibrationPersistence();
+  const { loadedProfile, loading, saveProfile, saveError } = useCalibrationPersistence();
 
   if (loading) {
     return <p>Loading calibration...</p>;
   }
 
-  // Any resolved profile hands off to the returning-user surface, whether it was
-  // loaded on open or just saved at the end of calibration. Scope is display-only
-  // diagnostic metadata that may not be resolved yet, so it never gates this.
+  // A resolved profile, whether loaded on open or just saved at the end of
+  // calibration, hands off to the real plugin surface: the accountability panel.
   if (loadedProfile) {
-    return <ReturningUserScreen profile={loadedProfile} resolvedScope={resolvedScope} />;
+    return <IssuePanel />;
   }
 
   return <CalibrationFlow onComplete={saveProfile} saveError={saveError} />;

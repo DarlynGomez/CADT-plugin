@@ -65,3 +65,15 @@ export interface Issue {
   /** Set when a worse-than-acknowledged finding reopened this issue. See ADR-014. */
   changedSinceAcknowledgment?: boolean;
 }
+
+/**
+ * What the panel needs beyond the persisted record: the node's current name and the
+ * rule's current evidence, for example contrast's measured and required ratio.
+ * Deliberately not part of Issue and not persisted; both are recomputed live when the
+ * sandbox builds this message, so the panel never shows a stale number. evidence stays
+ * unknown here for the same reason Finding's does: see ADR-016.
+ */
+export interface IssueSummary extends Issue {
+  nodeName: string;
+  evidence?: unknown;
+}

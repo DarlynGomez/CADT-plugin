@@ -21,6 +21,8 @@
   --font-size-helper: 14px;
   --font-size-button: 15px;
   --font-size-step-counter: 13px;
+  --font-size-issue-title: 15px;
+  --font-size-severity-label: 12px;
   --font-line-height-question: 1.25;
   --font-line-height-welcome: 1.2;
   --font-line-height-option-label: 1.4;
@@ -28,6 +30,8 @@
   --font-line-height-helper: 1.5;
   --font-line-height-button: 1;
   --font-line-height-step-counter: 1;
+  --font-line-height-issue-title: 1.4;
+  --font-line-height-severity-label: 1;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
 
@@ -39,6 +43,10 @@
   --radius-tile: 14px;
   --radius-button: 10px;
   --radius-pill: 999px;
+  --size-target-min: 44px;
+  --size-hairline: 1px;
+  --size-focus-ring: 2px;
+  --size-focus-offset: 2px;
 
   --motion-instant: 100ms;
   --motion-fast: 160ms;

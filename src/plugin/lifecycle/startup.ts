@@ -1,7 +1,9 @@
-import { runDetection } from "../detection/engine";
-import { logFindings } from "./logFindings";
 import { registerDocumentChangeListener } from "./listeners";
-import { resolveTextNodeSnapshot } from "./resolveSnapshot";
+import { scanAndSync } from "./scanAndSync";
+import {
+  initializeReEncounterFromCurrentSelection,
+  registerSelectionChangeListener
+} from "./selectionListener";
 
 function collectTextNodeIds(page: PageNode): Set<string> {
   const textNodes = page.findAllWithCriteria({ types: ["TEXT"] });
@@ -10,9 +12,7 @@ function collectTextNodeIds(page: PageNode): Set<string> {
 
 /** The current page only, a deliberate performance limit, not an oversight. See spec 3.1. */
 async function scanCurrentPage(): Promise<void> {
-  const nodeIds = collectTextNodeIds(figma.currentPage);
-  const findings = await runDetection(nodeIds, resolveTextNodeSnapshot);
-  logFindings("initial scan", nodeIds, findings);
+  await scanAndSync(collectTextNodeIds(figma.currentPage), "initial scan");
 }
 
 /**
@@ -22,9 +22,15 @@ async function scanCurrentPage(): Promise<void> {
  * single most common cause of a plugin that silently detects nothing. The order below,
  * load, then listen, then scan, is deliberate and must not be rearranged for
  * convenience.
+ *
+ * The re-encounter guard is initialized from whatever is already selected before the
+ * first selectionchange event, so a deferred issue whose node is still selected from a
+ * prior session does not resurface the instant the plugin reopens.
  */
 export async function startDetectionLifecycle(): Promise<void> {
   await figma.loadAllPagesAsync();
   registerDocumentChangeListener();
+  registerSelectionChangeListener();
+  await initializeReEncounterFromCurrentSelection();
   await scanCurrentPage();
 }

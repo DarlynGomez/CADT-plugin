@@ -46,21 +46,41 @@ function toPersistedFields(issue: Issue): PersistedIssueFields {
 }
 
 /**
+ * Load the persisted record with no existence check. This is the one path that must
+ * never prune: scanAndSync reconciles a DELETE against exactly this, and a node just
+ * deleted resolves to null from getNodeByIdAsync immediately, before reconciliation
+ * ever runs. Pruning here would drop the record instead of marking it resolved,
+ * contradicting spec section 3.1 ("a delete removes the node's issues from the active
+ * list but not from the record"). Reconciliation is itself how a genuinely gone node
+ * gets accounted for; this function's job is only to not get in its way.
+ */
+export function loadRawIssues(): IssueRecordMap {
+  const persisted = parsePersistedMap(figma.root.getPluginData(STORAGE_KEY_ISSUES));
+  const entries = Object.entries(persisted)
+    .map(([id, fields]): readonly [string, Issue] | null => {
+      const issue = toIssue(id, fields);
+      return issue ? [id, issue] : null;
+    })
+    .filter((entry): entry is readonly [string, Issue] => entry !== null);
+  return Object.fromEntries(entries);
+}
+
+/**
  * Load the persisted issue record and prune entries whose node no longer exists in
- * this file. Figma enforces a size limit on plugin data, so pruning on every load is
- * not optional, not an optimization. This is the one file in accountability/ that
- * touches the Figma API, the same category as the storage modules: only the snapshot
- * adapter and the storage surfaces read Figma state, and this is a storage surface.
+ * this file. For every read that is not itself reconciling a scan, this is the right
+ * view: a node that vanished across a session boundary, without CADT ever seeing the
+ * delete event live, will never be scanned again to earn a "resolved" verdict, so
+ * pruning on load is the only cleanup path that ever reaches it. Figma enforces a size
+ * limit on plugin data, so this is not optional. This is the one file in
+ * accountability/ that touches the Figma API, the same category as the storage
+ * modules: only the snapshot adapter and the storage surfaces read Figma state, and
+ * this is a storage surface.
  */
 export async function loadIssues(): Promise<IssueRecordMap> {
-  const persisted = parsePersistedMap(figma.root.getPluginData(STORAGE_KEY_ISSUES));
+  const record = loadRawIssues();
 
   const survivors = await Promise.all(
-    Object.entries(persisted).map(async ([id, fields]): Promise<readonly [string, Issue] | null> => {
-      const issue = toIssue(id, fields);
-      if (!issue) {
-        return null;
-      }
+    Object.entries(record).map(async ([id, issue]): Promise<readonly [string, Issue] | null> => {
       const node = await figma.getNodeByIdAsync(issue.nodeId);
       return node ? [id, issue] : null;
     })

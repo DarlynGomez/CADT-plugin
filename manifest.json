@@ -16,6 +16,10 @@
     {
       "name": "Reset calibration (dev)",
       "command": "reset-calibration"
+    },
+    {
+      "name": "Export issues JSON (dev, temporary)",
+      "command": "export-issues"
     }
   ],
   "documentAccess": "dynamic-page",

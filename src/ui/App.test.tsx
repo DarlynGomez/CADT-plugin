@@ -46,25 +46,22 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  it("hands off to the returning-user screen as soon as a profile resolves, before scope catches up", () => {
+  it("hands off to the issue panel as soon as a profile resolves, before scope catches up", () => {
     hookState({ loadedProfile: profile, resolvedScope: null });
 
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", { name: "Temporary returning-user screen" })
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Resolved storage scope: not yet resolved/)).toBeInTheDocument();
+    // The panel itself subscribes over postMessage, unmocked here, so it renders its
+    // own loading state rather than the full panel; that this appears at all is what
+    // proves hand-off happened. App.handoff.test.tsx exercises the full round trip.
+    expect(screen.getByText("Loading issues...")).toBeInTheDocument();
   });
 
-  it("shows the returning user screen with the resolved scope when both are present", () => {
+  it("hands off to the issue panel with the resolved scope when both are present", () => {
     hookState({ loadedProfile: profile, resolvedScope: "file" });
 
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", { name: "Temporary returning-user screen" })
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Resolved storage scope: file/)).toBeInTheDocument();
+    expect(screen.getByText("Loading issues...")).toBeInTheDocument();
   });
 });

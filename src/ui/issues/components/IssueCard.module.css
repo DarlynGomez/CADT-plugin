@@ -1,0 +1,60 @@
+.card {
+  position: relative;
+  padding: var(--space-3);
+  padding-left: calc(var(--space-3) + var(--space-1));
+  border-radius: var(--radius-tile);
+  list-style: none;
+}
+
+/*
+ * The card's background and border are a decorative layer behind the content, faded
+ * by the pure fade function's opacity value. The text above it stays at full ink
+ * contrast always, so fading the surface can never fade the words on it below their
+ * own contrast floor.
+ */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--color-card);
+  border: var(--size-hairline) solid var(--color-line);
+  opacity: var(--issue-opacity);
+}
+
+/* Severity's shift toward the warning color, an accent stripe rather than a text recolor */
+.card::after {
+  content: "";
+  position: absolute;
+  left: var(--space-1);
+  top: var(--space-2);
+  bottom: var(--space-2);
+  width: var(--size-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--color-warning);
+  opacity: var(--issue-warning-mix);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-issue-title);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-line-height-issue-title);
+}
+
+.meta {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ink);
+  font-size: var(--font-size-helper);
+  line-height: var(--font-line-height-helper);
+}

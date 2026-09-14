@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Issue } from "../../shared/issues/issueTypes";
-import { loadIssues, saveIssues } from "./issueStore";
+import { loadIssues, loadRawIssues, saveIssues } from "./issueStore";
 import { STORAGE_KEY_ISSUES } from "../storage/storageKeys";
 
 const ALIVE: Issue = {
@@ -85,6 +85,41 @@ describe("loadIssues", () => {
     );
 
     expect(await loadIssues()).toEqual({ [ALIVE.id]: ALIVE });
+  });
+});
+
+describe("loadRawIssues", () => {
+  const getPluginData = vi.fn();
+
+  beforeEach(() => {
+    getPluginData.mockReset();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("figma", { root: { getPluginData } });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("does not prune an entry whose node no longer resolves, unlike loadIssues", () => {
+    getPluginData.mockReturnValue(
+      JSON.stringify({ [ALIVE.id]: persistedFieldsOf(ALIVE), [DEAD.id]: persistedFieldsOf(DEAD) })
+    );
+    // No getNodeByIdAsync stubbed at all: loadRawIssues must never call it. If it did,
+    // this would throw, since figma.getNodeByIdAsync is not a function here.
+    expect(loadRawIssues()).toEqual({ [ALIVE.id]: ALIVE, [DEAD.id]: DEAD });
+  });
+
+  it("still drops entries that fail schema validation or key parsing", () => {
+    getPluginData.mockReturnValue(
+      JSON.stringify({
+        [ALIVE.id]: persistedFieldsOf(ALIVE),
+        malformed: { state: "bogus" },
+        "not-an-issue-id": persistedFieldsOf(DEAD)
+      })
+    );
+    expect(loadRawIssues()).toEqual({ [ALIVE.id]: ALIVE });
   });
 });
 

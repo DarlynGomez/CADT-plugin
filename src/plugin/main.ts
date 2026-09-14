@@ -1,9 +1,13 @@
 import { isCalibrationProfile } from "../shared/calibrationSchema";
+// TEMPORARY, see exportIssuesDebug.ts for the removal checklist.
+import { exportIssuesToConsole } from "./lifecycle/exportIssuesDebug";
+import { handleIssueMessage, isIssueMessage } from "./lifecycle/issuesProtocol";
 import { startDetectionLifecycle } from "./lifecycle/startup";
 import { resolveCalibration, saveCalibration } from "./storage/calibrationStore";
 import { resetCalibration, type CalibrationResetResult } from "./storage/resetCalibration";
 
 const RESET_COMMAND = "reset-calibration";
+const EXPORT_ISSUES_COMMAND = "export-issues"; // TEMPORARY, see exportIssuesDebug.ts
 const UI_WIDTH = 460;
 const UI_HEIGHT = 680;
 
@@ -80,6 +84,11 @@ async function handleUiMessage(rawMessage: unknown): Promise<void> {
     return;
   }
 
+  if (isIssueMessage(message)) {
+    await handleIssueMessage(message, (reply) => figma.ui.postMessage(reply));
+    return;
+  }
+
   console.warn("Dropped an unrecognized plugin message", message.type);
 }
 
@@ -123,6 +132,8 @@ export function startCalibrationUi(): void {
 
 if (figma.command === RESET_COMMAND) {
   void runReset();
+} else if (figma.command === EXPORT_ISSUES_COMMAND) {
+  void exportIssuesToConsole().finally(() => figma.closePlugin());
 } else {
   startCalibrationUi();
   // Fire-and-forget: the calibration UI does not wait on live detection, and a

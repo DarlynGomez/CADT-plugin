@@ -1,0 +1,21 @@
+.label {
+  display: inline-block;
+  font-size: var(--font-size-severity-label);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-line-height-severity-label);
+  letter-spacing: 0.02em;
+}
+
+/*
+ * --color-muted is forbidden below 14px per DESIGN_SYSTEM.md section 2, and this label
+ * is 12px, so low and medium share the always-safe ink color rather than reaching for
+ * muted here. The text itself, not the color, is what actually distinguishes them.
+ */
+.low,
+.medium {
+  color: var(--color-ink);
+}
+
+.high {
+  color: var(--color-warning);
+}
