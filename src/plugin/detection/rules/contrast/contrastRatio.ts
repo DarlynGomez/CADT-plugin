@@ -1,9 +1,4 @@
-/** A color in the 0 to 1 range per channel, matching Figma's own Paint.color shape */
-export interface RGBColor {
-  r: number;
-  g: number;
-  b: number;
-}
+import type { RGBColor } from "../../../../shared/issues/issueTypes";
 
 /** One sRGB channel, linearized per the WCAG 2.1 relative luminance formula */
 function linearizeChannel(channel: number): number {
