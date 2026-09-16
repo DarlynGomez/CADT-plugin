@@ -61,10 +61,14 @@ export default tseslint.config(
     // Phase 12 adds accountability/** to this restricted set (already implied by the
     // src/plugin/** glob below; the actual change is issueStore.ts joining the
     // exceptions, since it is a storage surface, not a pure module). Phase 13 adds
-    // src/ui/issues/fade.ts to a UI-side rule. Each is a deliverable of its phase.
+    // src/ui/issues/fade.ts to a UI-side rule. Phase 16 adds adjust/adapter/**, a
+    // sibling of detection/adapter rather than an extension of it, since it is the
+    // one place permitted to write a node (see ADR-017), not just read one. Each is
+    // a deliverable of its phase.
     files: ["src/plugin/**/*.{ts,tsx}"],
     ignores: [
       "src/plugin/detection/adapter/**/*.{ts,tsx}",
+      "src/plugin/adjust/adapter/**/*.{ts,tsx}",
       "src/plugin/storage/**/*.{ts,tsx}",
       "src/plugin/lifecycle/**/*.{ts,tsx}",
       "src/plugin/accountability/issueStore.ts",

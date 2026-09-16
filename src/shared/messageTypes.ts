@@ -1,3 +1,4 @@
+import type { AdjustMessage, AdjustReplyMessage } from "./adjustMessageTypes";
 import type { CalibrationProfile } from "./calibrationSchema";
 import type { IssueSummary } from "./issues/issueTypes";
 
@@ -91,7 +92,11 @@ export interface IssueActionFailedMessage {
 export type IssuesPluginMessage = IssuesUpdatedMessage | IssueActionFailedMessage;
 
 /** Messages sent from the UI iframe to the plugin sandbox. */
-export type UiToPluginMessage = CalibrationLoadMessage | CalibrationSaveMessage | IssueMessage;
+export type UiToPluginMessage =
+  | CalibrationLoadMessage
+  | CalibrationSaveMessage
+  | IssueMessage
+  | AdjustMessage;
 
 /** Messages sent from the plugin sandbox to the UI iframe. */
 export type PluginToUiMessage =
@@ -99,7 +104,8 @@ export type PluginToUiMessage =
   | CalibrationSaveFailedMessage
   | CalibrationSavedMessage
   | IssuesUpdatedMessage
-  | IssueActionFailedMessage;
+  | IssueActionFailedMessage
+  | AdjustReplyMessage;
 
 /** Every message permitted across the plugin boundary. */
 export type PluginMessage = UiToPluginMessage | PluginToUiMessage;

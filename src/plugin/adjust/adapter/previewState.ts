@@ -1,0 +1,77 @@
+import type { RGBColor } from "../../../shared/issues/issueTypes";
+import { solidFill, writeFill } from "./paintWriter";
+
+interface ActivePreview {
+  nodeId: string;
+  node: TextNode;
+  originalFills: Paint[];
+}
+
+// Module-level singleton, the same pattern as selectionListener.ts's reEncounterState.
+// Holds a live node reference rather than an id so restorePreviewSync can write
+// without an async lookup; see startup.ts and ADR-018 for why that matters
+let activePreview: ActivePreview | null = null;
+
+/**
+ * Writes a candidate colour to node, capturing its original fill first if nothing is
+ * currently being previewed on it. Restores any preview active on a DIFFERENT node
+ * first, so a stray mutation is never left behind mid session
+ *
+ * Assumes node.fills is a plain array, never figma.mixed: the only path that reaches
+ * this is a finding, and a mixed-fill node never produces one today
+ */
+export async function beginPreview(node: TextNode, color: RGBColor): Promise<void> {
+  if (activePreview && activePreview.nodeId !== node.id) {
+    await restorePreview();
+  }
+
+  if (!activePreview) {
+    const fills = node.fills;
+    if (fills === figma.mixed) {
+      throw new Error("Cannot preview a node whose fill is mixed");
+    }
+    activePreview = { nodeId: node.id, node, originalFills: [...fills] };
+  }
+
+  await writeFill(node, solidFill(color));
+}
+
+/** Restores the active preview's original fill and clears the session, if one exists */
+export async function restorePreview(): Promise<void> {
+  if (!activePreview) {
+    return;
+  }
+  const { node, originalFills } = activePreview;
+  activePreview = null;
+  await writeFill(node, originalFills);
+}
+
+/**
+ * The synchronous twin of restorePreview, for figma.on("close") only: that handler
+ * cannot await anything, so this writes directly against the held node reference
+ * rather than going through writeFill's range-aware, always-async path
+ */
+export function restorePreviewSync(): void {
+  if (!activePreview) {
+    return;
+  }
+  const { node, originalFills } = activePreview;
+  activePreview = null;
+  node.fills = originalFills;
+}
+
+/**
+ * Writes fills for real and forgets any tracked preview on that node, without
+ * restoring. Always writes, whether or not a preview was already active, so apply is
+ * correct even if it is reached without a prior preview
+ */
+export async function applyFill(node: TextNode, fills: Paint[]): Promise<void> {
+  await writeFill(node, fills);
+  if (activePreview?.nodeId === node.id) {
+    activePreview = null;
+  }
+}
+
+export function activePreviewNodeId(): string | null {
+  return activePreview?.nodeId ?? null;
+}

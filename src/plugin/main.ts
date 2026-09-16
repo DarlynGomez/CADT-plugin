@@ -1,4 +1,6 @@
 import { isCalibrationProfile } from "../shared/calibrationSchema";
+import { handleAdjustMessage, isAdjustMessage } from "./lifecycle/adjustProtocol";
+import { registerAdjustCloseRestore, registerAdjustSelectionRestore } from "./lifecycle/adjustLifecycle";
 // TEMPORARY, see exportIssuesDebug.ts for the removal checklist.
 import { exportIssuesToConsole } from "./lifecycle/exportIssuesDebug";
 import { handleIssueMessage, isIssueMessage } from "./lifecycle/issuesProtocol";
@@ -89,6 +91,11 @@ async function handleUiMessage(rawMessage: unknown): Promise<void> {
     return;
   }
 
+  if (isAdjustMessage(message)) {
+    await handleAdjustMessage(message, (reply) => figma.ui.postMessage(reply));
+    return;
+  }
+
   console.warn("Dropped an unrecognized plugin message", message.type);
 }
 
@@ -136,6 +143,8 @@ if (figma.command === RESET_COMMAND) {
   void exportIssuesToConsole().finally(() => figma.closePlugin());
 } else {
   startCalibrationUi();
+  registerAdjustSelectionRestore();
+  registerAdjustCloseRestore();
   // Fire-and-forget: the calibration UI does not wait on live detection, and a
   // failure here (a hostile document, a rejected loadAllPagesAsync) must not block it.
   startDetectionLifecycle().catch((error: unknown) => {
