@@ -18,6 +18,7 @@ function textNode(overrides: Record<string, unknown> = {}) {
     type: "TEXT",
     fontSize: 16,
     fontName: { family: "Inter", style: "Regular" },
+    fontWeight: 400,
     fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
     opacity: 1,
     blendMode: "NORMAL",
@@ -37,17 +38,59 @@ describe("snapshotTextNode", () => {
       nodeName: "Body copy",
       nodeType: "TEXT",
       foreground: { r: 0, g: 0, b: 0 },
+      foregroundAlpha: 1,
       background: { r: 1, g: 1, b: 1 },
+      backgroundAlpha: 1,
+      backgroundSource: { kind: "page" },
       fontSizePx: 16,
       isBold: false,
+      fontStyleName: "Regular",
       indeterminateReasons: []
     });
   });
 
-  it("reads a bold style name into isBold", async () => {
+  it("names the ancestor that supplied the background, not just the page fallback", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const page = { type: "PAGE", backgrounds: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }] };
+    const card = {
+      type: "FRAME",
+      id: "2:2",
+      name: "Card",
+      fills: [{ type: "SOLID", color: { r: 0.9, g: 0.9, b: 0.9 } }],
+      parent: page
+    };
+    const snapshot = snapshotTextNode(textNode({ parent: card }));
+
+    expect(snapshot.background).toEqual({ r: 0.9, g: 0.9, b: 0.9 });
+    expect(snapshot.backgroundSource).toEqual({ kind: "node", nodeId: "2:2", nodeName: "Card" });
+  });
+
+  it("nulls fontStyleName when the font name is mixed, even if the numeric weight resolved", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const snapshot = snapshotTextNode(textNode({ fontName: FIGMA_MIXED }));
+    expect(snapshot.fontStyleName).toBeNull();
+  });
+
+  it("prefers the numeric fontWeight over the style name when it resolves", async () => {
     const { snapshotTextNode } = await import("./snapshot");
     const snapshot = snapshotTextNode(
-      textNode({ fontName: { family: "Inter", style: "Bold" } })
+      textNode({ fontWeight: 700, fontName: { family: "Inter", style: "Regular" } })
+    );
+    expect(snapshot.isBold).toBe(true);
+  });
+
+  it("reads a non-bold numeric fontWeight even against a misleading style name", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const snapshot = snapshotTextNode(
+      textNode({ fontWeight: 400, fontName: { family: "Inter", style: "Bold" } })
+    );
+    expect(snapshot.isBold).toBe(false);
+  });
+
+  it("falls back to the style name heuristic when fontWeight is mixed", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const snapshot = snapshotTextNode(
+      textNode({ fontWeight: FIGMA_MIXED, fontName: { family: "Inter", style: "Bold" } })
     );
     expect(snapshot.isBold).toBe(true);
   });
@@ -60,9 +103,11 @@ describe("snapshotTextNode", () => {
     expect(snapshot.indeterminateReasons).toContain("font-size-mixed");
   });
 
-  it("nulls the bold determination and records the reason when the font name is mixed", async () => {
+  it("nulls the bold determination and records the reason when the font weight and name are both mixed", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fontName: FIGMA_MIXED }));
+    const snapshot = snapshotTextNode(
+      textNode({ fontWeight: FIGMA_MIXED, fontName: FIGMA_MIXED })
+    );
 
     expect(snapshot.isBold).toBeNull();
     expect(snapshot.indeterminateReasons).toContain("font-name-mixed");

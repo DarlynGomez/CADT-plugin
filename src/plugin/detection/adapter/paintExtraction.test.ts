@@ -11,7 +11,7 @@ afterEach(() => {
 });
 
 function node(overrides: Record<string, unknown>): BaseNode {
-  return overrides as unknown as BaseNode;
+  return { id: "1:1", name: "Layer", ...overrides } as unknown as BaseNode;
 }
 
 describe("extractNodeLayer", () => {
@@ -29,7 +29,8 @@ describe("extractNodeLayer", () => {
       fill: { kind: "solid", color: { r: 1, g: 0, b: 0 }, opacity: 0.8 },
       nodeOpacity: 1,
       blendMode: "NORMAL",
-      visible: true
+      visible: true,
+      source: { kind: "node", nodeId: "1:1", nodeName: "Layer" }
     });
   });
 
@@ -72,6 +73,12 @@ describe("extractNodeLayer", () => {
     const layer = extractNodeLayer(node({ fills: [] }));
     expect(layer.fill).toEqual({ kind: "empty" });
   });
+
+  it("names the node itself in source, as an id and name pair for evidence display", async () => {
+    const { extractNodeLayer } = await import("./paintExtraction");
+    const layer = extractNodeLayer(node({ id: "3:4", name: "Description text" }));
+    expect(layer.source).toEqual({ kind: "node", nodeId: "3:4", nodeName: "Description text" });
+  });
 });
 
 describe("extractPageBackgroundLayer", () => {
@@ -83,7 +90,8 @@ describe("extractPageBackgroundLayer", () => {
       fill: { kind: "solid", color: { r: 1, g: 1, b: 1 }, opacity: 1 },
       nodeOpacity: 1,
       blendMode: "NORMAL",
-      visible: true
+      visible: true,
+      source: { kind: "page" }
     });
   });
 });

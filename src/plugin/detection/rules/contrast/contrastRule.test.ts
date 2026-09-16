@@ -14,9 +14,13 @@ function baseSnapshot(overrides: Partial<NodeSnapshot> = {}): NodeSnapshot {
     nodeName: "Body copy",
     nodeType: "TEXT",
     foreground: BLACK,
+    foregroundAlpha: 1,
     background: WHITE,
+    backgroundAlpha: 1,
+    backgroundSource: { kind: "node", nodeId: "1:2", nodeName: "Card" },
     fontSizePx: 16,
     isBold: false,
+    fontStyleName: "Regular",
     indeterminateReasons: [],
     ...overrides
   };
@@ -38,6 +42,37 @@ describe("contrastRule", () => {
     expect(finding?.nodeId).toBe("1:1");
     expect(finding?.evidence.requiredRatio).toBe(4.5);
     expect(finding?.severity).toBe("medium");
+  });
+
+  it("carries the resolved inputs behind the ratio in the evidence, not just the ratio itself", () => {
+    const finding = contrastRule.evaluate(baseSnapshot({ foreground: MID_GRAY }));
+    expect(finding?.evidence).toEqual({
+      measuredRatio: expect.any(Number),
+      requiredRatio: 4.5,
+      foregroundHex: "#898989",
+      foregroundAlpha: 1,
+      backgroundHex: "#FFFFFF",
+      backgroundAlpha: 1,
+      backgroundSource: { kind: "node", nodeId: "1:2", nodeName: "Card" },
+      fontSizePx: 16,
+      isBold: false,
+      fontStyleName: "Regular",
+      sizeClass: "normal"
+    });
+  });
+
+  it("reports a null fontStyleName in evidence when the font name itself was mixed", () => {
+    const finding = contrastRule.evaluate(
+      baseSnapshot({ foreground: MID_GRAY, fontStyleName: null })
+    );
+    expect(finding?.evidence.fontStyleName).toBeNull();
+  });
+
+  it("names the page as the background source when no ancestor supplied the fill", () => {
+    const finding = contrastRule.evaluate(
+      baseSnapshot({ foreground: MID_GRAY, backgroundSource: { kind: "page" } })
+    );
+    expect(finding?.evidence.backgroundSource).toEqual({ kind: "page" });
   });
 
   it("uses the relaxed 3.0 threshold for large text, so a mid-range ratio passes", () => {
@@ -63,7 +98,10 @@ describe("contrastRule", () => {
 
   it("produces no finding when a required field is missing despite no stated reason", () => {
     expect(contrastRule.evaluate(baseSnapshot({ foreground: null }))).toBeNull();
+    expect(contrastRule.evaluate(baseSnapshot({ foregroundAlpha: null }))).toBeNull();
     expect(contrastRule.evaluate(baseSnapshot({ background: null }))).toBeNull();
+    expect(contrastRule.evaluate(baseSnapshot({ backgroundAlpha: null }))).toBeNull();
+    expect(contrastRule.evaluate(baseSnapshot({ backgroundSource: null }))).toBeNull();
     expect(contrastRule.evaluate(baseSnapshot({ fontSizePx: null }))).toBeNull();
     expect(contrastRule.evaluate(baseSnapshot({ isBold: null }))).toBeNull();
   });

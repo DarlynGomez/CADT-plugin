@@ -1,4 +1,4 @@
-import type { RGBColor } from "../../shared/issues/issueTypes";
+import type { BackgroundSource, RGBColor } from "../../shared/issues/issueTypes";
 
 /** One node's paint, reduced to what resolution needs. No Figma type appears here. */
 export type PaintLayer =
@@ -12,12 +12,22 @@ export interface ChainLayer {
   nodeOpacity: number;
   blendMode: string;
   visible: boolean;
+  /** This layer's identity, carried through so a resolved background can name its source */
+  source: BackgroundSource;
 }
 
 export interface ColorResolutionResult {
   foreground: RGBColor | null;
+  foregroundAlpha: number | null;
   background: RGBColor | null;
+  backgroundAlpha: number | null;
+  backgroundSource: BackgroundSource | null;
   indeterminateReasons: readonly string[];
+}
+
+interface ResolvedFill {
+  color: RGBColor;
+  alpha: number;
 }
 
 /**
@@ -42,8 +52,8 @@ function checkLayerValidity(layer: ChainLayer, reasons: Set<string>): void {
   }
 }
 
-/** Resolve one layer's own fill to a color, recording why it could not stand as one */
-function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): RGBColor | null {
+/** Resolve one layer's own fill to a color and its alpha, recording why it could not stand as one */
+function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): ResolvedFill | null {
   if (fill === "mixed") {
     reasons.add("fill-mixed");
     return null;
@@ -58,7 +68,7 @@ function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): RGBColor
   if (fill.opacity < 1) {
     reasons.add("opacity-below-one");
   }
-  return fill.color;
+  return { color: fill.color, alpha: fill.opacity };
 }
 
 /**
@@ -70,31 +80,54 @@ function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): RGBColor
 export function resolveColors(chain: readonly ChainLayer[]): ColorResolutionResult {
   const [textLayer, ...ancestors] = chain;
   if (!textLayer) {
-    return { foreground: null, background: null, indeterminateReasons: ["missing-node-data"] };
+    return {
+      foreground: null,
+      foregroundAlpha: null,
+      background: null,
+      backgroundAlpha: null,
+      backgroundSource: null,
+      indeterminateReasons: ["missing-node-data"]
+    };
   }
 
   const reasons = new Set<string>();
   checkLayerValidity(textLayer, reasons);
-  const foreground = resolveFill(textLayer.fill, reasons);
-  if (foreground === null && textLayer.fill !== "mixed" && textLayer.fill.kind === "empty") {
+  const resolvedForeground = resolveFill(textLayer.fill, reasons);
+  if (resolvedForeground === null && textLayer.fill !== "mixed" && textLayer.fill.kind === "empty") {
     reasons.add("no-foreground-fill");
   }
 
-  let background: RGBColor | null = null;
+  let resolvedBackground: ResolvedFill | null = null;
+  let backgroundSource: BackgroundSource | null = null;
   for (const layer of ancestors) {
     checkLayerValidity(layer, reasons);
     if (layer.fill !== "mixed" && layer.fill.kind === "empty") {
       continue;
     }
-    background = resolveFill(layer.fill, reasons);
+    resolvedBackground = resolveFill(layer.fill, reasons);
+    backgroundSource = layer.source;
     break;
   }
-  if (background === null) {
+  if (resolvedBackground === null) {
     reasons.add("no-background-resolved");
   }
 
-  if (reasons.size > 0) {
-    return { foreground: null, background: null, indeterminateReasons: Array.from(reasons) };
+  if (reasons.size > 0 || resolvedForeground === null || resolvedBackground === null) {
+    return {
+      foreground: null,
+      foregroundAlpha: null,
+      background: null,
+      backgroundAlpha: null,
+      backgroundSource: null,
+      indeterminateReasons: Array.from(reasons)
+    };
   }
-  return { foreground, background, indeterminateReasons: [] };
+  return {
+    foreground: resolvedForeground.color,
+    foregroundAlpha: resolvedForeground.alpha,
+    background: resolvedBackground.color,
+    backgroundAlpha: resolvedBackground.alpha,
+    backgroundSource,
+    indeterminateReasons: []
+  };
 }

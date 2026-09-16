@@ -1,16 +1,30 @@
-import type { Finding, NodeSnapshot } from "../../../../shared/issues/issueTypes";
+import type { BackgroundSource, Finding, NodeSnapshot } from "../../../../shared/issues/issueTypes";
 import type { Rule } from "../ruleTypes";
+import { rgbToHex } from "./colorHex";
 import { contrastRatio } from "./contrastRatio";
 import { computeSeverity } from "./severity";
 import { CONTRAST_THRESHOLD_LARGE_TEXT, CONTRAST_THRESHOLD_NORMAL_TEXT } from "./thresholds";
-import { classifyTextSize } from "./textSizeClass";
+import { classifyTextSize, type TextSizeClass } from "./textSizeClass";
 
 const RULE_ID = "contrast";
 
-/** Contrast's rule-specific evidence: the measured ratio against what was required */
+/**
+ * Contrast's rule-specific evidence. measuredRatio and requiredRatio drive severity;
+ * everything else lets the ratio be checked against its own inputs, not trusted on faith
+ */
 export interface ContrastEvidence {
   measuredRatio: number;
   requiredRatio: number;
+  foregroundHex: string;
+  foregroundAlpha: number;
+  backgroundHex: string;
+  backgroundAlpha: number;
+  backgroundSource: BackgroundSource;
+  fontSizePx: number;
+  isBold: boolean;
+  /** Null when the font name itself was mixed */
+  fontStyleName: string | null;
+  sizeClass: TextSizeClass;
 }
 
 /**
@@ -27,7 +41,10 @@ export const contrastRule = {
     }
     if (
       snapshot.foreground === null ||
+      snapshot.foregroundAlpha === null ||
       snapshot.background === null ||
+      snapshot.backgroundAlpha === null ||
+      snapshot.backgroundSource === null ||
       snapshot.fontSizePx === null ||
       snapshot.isBold === null
     ) {
@@ -47,7 +64,19 @@ export const contrastRule = {
       ruleId: RULE_ID,
       nodeId: snapshot.nodeId,
       severity: computeSeverity(measuredRatio, requiredRatio),
-      evidence: { measuredRatio, requiredRatio }
+      evidence: {
+        measuredRatio,
+        requiredRatio,
+        foregroundHex: rgbToHex(snapshot.foreground),
+        foregroundAlpha: snapshot.foregroundAlpha,
+        backgroundHex: rgbToHex(snapshot.background),
+        backgroundAlpha: snapshot.backgroundAlpha,
+        backgroundSource: snapshot.backgroundSource,
+        fontSizePx: snapshot.fontSizePx,
+        isBold: snapshot.isBold,
+        fontStyleName: snapshot.fontStyleName,
+        sizeClass
+      }
     };
   }
 } satisfies Rule;

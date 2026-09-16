@@ -13,9 +13,13 @@ function textSnapshot(nodeId: string, overrides: Partial<NodeSnapshot> = {}): No
     nodeName: "Body copy",
     nodeType: "TEXT",
     foreground: BLACK,
+    foregroundAlpha: 1,
     background: WHITE,
+    backgroundAlpha: 1,
+    backgroundSource: { kind: "page" },
     fontSizePx: 16,
     isBold: false,
+    fontStyleName: "Regular",
     indeterminateReasons: [],
     ...overrides
   };

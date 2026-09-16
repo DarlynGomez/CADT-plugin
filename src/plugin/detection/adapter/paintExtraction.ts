@@ -39,7 +39,8 @@ export function extractNodeLayer(node: BaseNode): ChainLayer {
     fill: partial.fills !== undefined ? classifyFill(partial.fills) : { kind: "empty" },
     nodeOpacity: partial.opacity ?? 1,
     blendMode: partial.blendMode ?? NORMAL_BLEND_MODE,
-    visible: partial.visible ?? true
+    visible: partial.visible ?? true,
+    source: { kind: "node", nodeId: node.id, nodeName: node.name }
   };
 }
 
@@ -49,6 +50,7 @@ export function extractPageBackgroundLayer(page: PageNode): ChainLayer {
     fill: classifyFill(page.backgrounds),
     nodeOpacity: 1,
     blendMode: NORMAL_BLEND_MODE,
-    visible: true
+    visible: true,
+    source: { kind: "page" }
   };
 }

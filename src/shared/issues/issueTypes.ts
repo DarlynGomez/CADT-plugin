@@ -9,19 +9,30 @@ export interface RGBColor {
 }
 
 /**
- * A node reduced to what detection rules need. Produced only by the snapshot adapter,
- * never by anything that reads a Figma node directly. A null color, size, or weight
- * means it could not be resolved; indeterminateReasons says why and a rule must treat
- * that as no finding rather than guessing.
+ * Which layer in the ancestor chain supplied a resolved background: a real node, named
+ * so evidence can point back to it, or the page itself, the walk's final fallback
+ */
+export type BackgroundSource = { kind: "node"; nodeId: string; nodeName: string } | { kind: "page" };
+
+/**
+ * A node reduced to what detection rules need. Produced only by the snapshot adapter
+ * A null color, size, weight, or source means it could not be resolved; a rule must
+ * treat that as no finding rather than guessing. Alpha, source, and style-name exist for
+ * evidence, not detection math: they let a finding be checked against its own inputs
  */
 export interface NodeSnapshot {
   nodeId: string;
   nodeName: string;
   nodeType: string;
   foreground: RGBColor | null;
+  foregroundAlpha: number | null;
   background: RGBColor | null;
+  backgroundAlpha: number | null;
+  backgroundSource: BackgroundSource | null;
   fontSizePx: number | null;
   isBold: boolean | null;
+  /** The exact Figma font style string, when the font name resolved, evidence only */
+  fontStyleName: string | null;
   indeterminateReasons: readonly string[];
 }
 

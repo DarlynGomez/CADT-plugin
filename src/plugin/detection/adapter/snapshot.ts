@@ -1,5 +1,6 @@
 import type { NodeSnapshot } from "../../../shared/issues/issueTypes";
 import { isBoldStyleName } from "../rules/contrast/textSizeClass";
+import { BOLD_MIN_FONT_WEIGHT } from "../rules/contrast/thresholds";
 import { resolveColors } from "../colorResolution";
 import { buildAncestorChain } from "./ancestorChain";
 import { extractNodeLayer } from "./paintExtraction";
@@ -20,12 +21,8 @@ export function snapshotTextNode(node: TextNode): NodeSnapshot {
   }
 
   const fontName = node.fontName;
-  let isBold: boolean | null = null;
-  if (fontName === figma.mixed) {
-    reasons.add("font-name-mixed");
-  } else {
-    isBold = isBoldStyleName(fontName.style);
-  }
+  const fontStyleName = fontName === figma.mixed ? null : fontName.style;
+  const isBold = resolveIsBold(node, fontName, reasons);
 
   const chain = [extractNodeLayer(node), ...buildAncestorChain(node)];
   const colorResult = resolveColors(chain);
@@ -38,9 +35,40 @@ export function snapshotTextNode(node: TextNode): NodeSnapshot {
     nodeName: node.name,
     nodeType: node.type,
     foreground: colorResult.foreground,
+    foregroundAlpha: colorResult.foregroundAlpha,
     background: colorResult.background,
+    backgroundAlpha: colorResult.backgroundAlpha,
+    backgroundSource: colorResult.backgroundSource,
     fontSizePx,
     isBold,
+    fontStyleName,
     indeterminateReasons: Array.from(reasons)
   };
+}
+
+/**
+ * Prefers the numeric fontWeight, since it is exact where a style name is a guess
+ *
+ * The fontName.style fallback is likely unreachable in real Figma data: per the
+ * typings, fontName and fontWeight go mixed under the same conditions, so a resolved
+ * fontName should never pair with a mixed fontWeight
+ *
+ * Kept anyway as a hedge: this is inferred from docs, not verified live, and wrongly
+ * nulling a bold call is worse than one extra branch
+ */
+function resolveIsBold(
+  node: TextNode,
+  fontName: TextNode["fontName"],
+  reasons: Set<string>
+): boolean | null {
+  const fontWeight = node.fontWeight;
+  if (fontWeight !== figma.mixed) {
+    return fontWeight >= BOLD_MIN_FONT_WEIGHT;
+  }
+
+  if (fontName === figma.mixed) {
+    reasons.add("font-name-mixed");
+    return null;
+  }
+  return isBoldStyleName(fontName.style);
 }

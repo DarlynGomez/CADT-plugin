@@ -3,19 +3,29 @@ import { describe, expect, it } from "vitest";
 import { classifyTextSize, isBoldStyleName } from "./textSizeClass";
 
 describe("isBoldStyleName", () => {
-  it.each(["Bold", "Extra Bold", "Black", "Heavy", "Semibold", "SEMIBOLD"])(
+  it.each(["Bold", "Extra Bold", "Black", "Heavy", "Ultra", "Ultra Bold"])(
     "treats %s as bold",
     (styleName) => {
       expect(isBoldStyleName(styleName)).toBe(true);
     }
   );
 
-  it.each(["Regular", "Medium", "Light", "Condensed Italic"])(
-    "does not treat %s as bold",
-    (styleName) => {
-      expect(isBoldStyleName(styleName)).toBe(false);
-    }
-  );
+  it.each([
+    "Regular",
+    "Medium",
+    "Light",
+    "Condensed Italic",
+    "Semibold",
+    "SEMIBOLD",
+    "Semi Bold",
+    "SEMI BOLD",
+    "Demibold",
+    "Demi",
+    "Demi Bold",
+    "Book"
+  ])("does not treat %s as bold, since it sits below WCAG's 700-weight floor", (styleName) => {
+    expect(isBoldStyleName(styleName)).toBe(false);
+  });
 });
 
 describe("classifyTextSize", () => {
@@ -41,5 +51,17 @@ describe("classifyTextSize", () => {
 
   it("is large above the bold floor even without needing the regular floor", () => {
     expect(classifyTextSize(20, true)).toBe("large");
+  });
+
+  it("is normal at the 18.66px bold floor for Semibold, which does not meet the 700-weight bold definition", () => {
+    expect(classifyTextSize(18.66, isBoldStyleName("Semibold"))).toBe("normal");
+  });
+
+  it("is normal at 23px for Semibold, the last whole pixel before the weight-independent 24px floor", () => {
+    expect(classifyTextSize(23, isBoldStyleName("Semibold"))).toBe("normal");
+  });
+
+  it("is large at the 24px regular floor for Semibold, since that floor applies regardless of weight", () => {
+    expect(classifyTextSize(24, isBoldStyleName("Semibold"))).toBe("large");
   });
 });
