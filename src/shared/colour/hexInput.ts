@@ -1,5 +1,5 @@
-import { contrastRatio } from "../../plugin/detection/rules/contrast/contrastRatio";
 import type { RGBColor } from "../issues/issueTypes";
+import { contrastRatio } from "./contrastRatio";
 import { CONTRAST_ADJUST_HEADROOM } from "./headroom";
 import { keepHue } from "./keepHue";
 
@@ -26,7 +26,8 @@ function expandShortHex(hex: string): string {
     : hex;
 }
 
-function parseHex(input: string): RGBColor | null {
+/** Parses a hex string (3 or 6 digit, with or without a leading hash) to an RGBColor */
+export function parseHex(input: string): RGBColor | null {
   const match = HEX_PATTERN.exec(input.trim());
   if (!match) {
     return null;

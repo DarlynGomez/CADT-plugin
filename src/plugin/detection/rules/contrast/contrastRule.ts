@@ -1,7 +1,7 @@
 import type { BackgroundSource, Finding, NodeSnapshot } from "../../../../shared/issues/issueTypes";
 import type { Rule } from "../ruleTypes";
-import { rgbToHex } from "./colorHex";
-import { contrastRatio } from "./contrastRatio";
+import { contrastRatio } from "../../../../shared/colour/contrastRatio";
+import { rgbToHex } from "../../../../shared/colour/colorHex";
 import { computeSeverity } from "./severity";
 import { CONTRAST_THRESHOLD_LARGE_TEXT, CONTRAST_THRESHOLD_NORMAL_TEXT } from "./thresholds";
 import { classifyTextSize, type TextSizeClass } from "./textSizeClass";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { contrastRatio } from "../../plugin/detection/rules/contrast/contrastRatio";
+import { contrastRatio } from "./contrastRatio";
 import { luminanceCeiling } from "./luminanceCeiling";
 
 /** Inverse of contrastRatio.ts's channel linearization, so a target luminance can be

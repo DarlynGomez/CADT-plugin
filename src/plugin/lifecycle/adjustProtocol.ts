@@ -1,11 +1,11 @@
-import { classifyTextSize } from "../detection/rules/contrast/textSizeClass";
-import { CONTRAST_THRESHOLD_LARGE_TEXT, CONTRAST_THRESHOLD_NORMAL_TEXT } from "../detection/rules/contrast/thresholds";
-import { contrastRatio } from "../detection/rules/contrast/contrastRatio";
 import type { AdjustMessage, AdjustReplyMessage } from "../../shared/adjustMessageTypes";
 import { parseIssueId } from "../../shared/issues/issueId";
-import { applyFill, restorePreview, beginPreview } from "../adjust/adapter/previewState";
-import { solidFill } from "../adjust/adapter/paintWriter";
-import { resolveTextNodeSnapshot } from "./resolveSnapshot";
+import { logAdjustEvent } from "../adjust/adapter/adjustLogging";
+import { detectFillBinding } from "../adjust/adapter/bindingLookup";
+import { collectFilePalette } from "../adjust/adapter/filePalette";
+import { restorePreview, beginPreview } from "../adjust/adapter/previewState";
+import { applyAdjustment } from "../adjust/adapter/applyAdjustment";
+import { captureAdjustLogState } from "../adjust/adapter/adjustLogCapture";
 
 type Reply = (message: AdjustReplyMessage) => void;
 
@@ -18,13 +18,25 @@ export function isAdjustMessage(value: unknown): value is AdjustMessage {
     typeof message.color === "object" &&
     message.color !== null &&
     typeof (message.color as Record<string, unknown>).r === "number";
+  const hasSessionFlags = () =>
+    typeof message.wheelOpened === "boolean" && typeof message.hexRejected === "boolean";
 
   switch (message.type) {
     case "ADJUST_CLEAR_PREVIEW":
       return true;
+    case "ADJUST_OPTIONS_REQUEST":
+      return typeof message.issueId === "string";
     case "ADJUST_PREVIEW":
-    case "ADJUST_APPLY":
       return typeof message.issueId === "string" && hasColor();
+    case "ADJUST_APPLY":
+      return (
+        typeof message.issueId === "string" &&
+        hasColor() &&
+        hasSessionFlags() &&
+        (message.optionChosen === "a" || message.optionChosen === "b" || message.optionChosen === "c")
+      );
+    case "ADJUST_ABANDONED":
+      return typeof message.issueId === "string" && hasSessionFlags();
     default:
       return false;
   }
@@ -43,24 +55,7 @@ async function resolveTextNode(issueId: string): Promise<TextNode | null> {
   return node && node.type === "TEXT" ? node : null;
 }
 
-/**
- * Re-derives the ratio a candidate colour needs against the node's current background,
- * never trusting the colour the UI sent. Uses the base requiredRatio, not the padded
- * generation target: the sandbox's job is refusing an outright failure, not enforcing
- * the UI's own headroom policy
- */
-async function meetsRequiredRatio(node: TextNode, colorRgb: { r: number; g: number; b: number }): Promise<boolean> {
-  const snapshot = await resolveTextNodeSnapshot(node.id);
-  if (!snapshot || snapshot.background === null || snapshot.fontSizePx === null || snapshot.isBold === null) {
-    return false;
-  }
-  const sizeClass = classifyTextSize(snapshot.fontSizePx, snapshot.isBold);
-  const requiredRatio =
-    sizeClass === "large" ? CONTRAST_THRESHOLD_LARGE_TEXT : CONTRAST_THRESHOLD_NORMAL_TEXT;
-  return contrastRatio(colorRgb, snapshot.background) >= requiredRatio;
-}
-
-/** Handles the three adjust messages, per ADJUST_SPEC.md section 5 */
+/** Handles every adjust message, per ADJUST_SPEC.md sections 5 and 9 */
 export async function handleAdjustMessage(message: AdjustMessage, reply: Reply): Promise<void> {
   if (message.type === "ADJUST_CLEAR_PREVIEW") {
     await restorePreview();
@@ -70,7 +65,15 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
 
   const node = await resolveTextNode(message.issueId);
   if (!node) {
-    reply(failed(message.issueId, "That node no longer exists in this file."));
+    if (message.type !== "ADJUST_ABANDONED") {
+      reply(failed(message.issueId, "That node no longer exists in this file."));
+    }
+    return;
+  }
+
+  if (message.type === "ADJUST_OPTIONS_REQUEST") {
+    const [palette, binding] = await Promise.all([collectFilePalette(), detectFillBinding(node)]);
+    reply({ type: "ADJUST_OPTIONS_READY", issueId: message.issueId, palette, binding });
     return;
   }
 
@@ -80,14 +83,36 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
     return;
   }
 
-  // ADJUST_APPLY
-  if (!(await meetsRequiredRatio(node, message.color))) {
-    await restorePreview();
-    reply(failed(message.issueId, "That colour no longer meets the required contrast ratio."));
+  if (message.type === "ADJUST_ABANDONED") {
+    const before = await captureAdjustLogState(node);
+    await logAdjustEvent({
+      issueId: message.issueId,
+      optionChosen: null,
+      beforeHex: before?.hex ?? "",
+      beforeRatio: before?.ratio ?? 0,
+      afterHex: null,
+      afterRatio: null,
+      wasBound: before?.bound ?? false,
+      wheelOpened: message.wheelOpened,
+      hexRejected: message.hexRejected,
+      abandoned: true,
+      loggedAt: new Date().toISOString()
+    });
     return;
   }
 
-  await applyFill(node, solidFill(message.color));
-  figma.commitUndo();
+  // ADJUST_APPLY
+  const result = await applyAdjustment(
+    node,
+    message.issueId,
+    message.color,
+    message.optionChosen,
+    message.wheelOpened,
+    message.hexRejected
+  );
+  if (!result.ok) {
+    reply(failed(message.issueId, result.reason ?? "That colour could not be applied."));
+    return;
+  }
   reply({ type: "ADJUST_APPLIED", issueId: message.issueId });
 }

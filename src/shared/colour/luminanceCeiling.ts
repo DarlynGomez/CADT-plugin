@@ -1,5 +1,5 @@
-import { relativeLuminance } from "../../plugin/detection/rules/contrast/contrastRatio";
 import type { RGBColor } from "../issues/issueTypes";
+import { relativeLuminance } from "./contrastRatio";
 
 /**
  * The maximum relative luminance a foreground can have, against this background, while

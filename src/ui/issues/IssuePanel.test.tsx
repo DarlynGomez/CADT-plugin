@@ -28,7 +28,7 @@ describe("IssuePanel", () => {
   });
 
   it("is a labelled landmark with list semantics", async () => {
-    render(<IssuePanel />);
+    render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({ type: "ISSUES_UPDATED", issues: [issue("a", "open", "Body copy")] });
     });
@@ -39,7 +39,7 @@ describe("IssuePanel", () => {
   });
 
   it("groups important above open above deferred, regardless of arrival order", async () => {
-    render(<IssuePanel />);
+    render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({
         type: "ISSUES_UPDATED",
@@ -56,7 +56,7 @@ describe("IssuePanel", () => {
   });
 
   it("keeps acknowledged and resolved out of the main list but reachable", async () => {
-    render(<IssuePanel />);
+    render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({
         type: "ISSUES_UPDATED",
@@ -82,7 +82,7 @@ describe("IssuePanel", () => {
   });
 
   it("shows a plain status message when there are no open issues", async () => {
-    render(<IssuePanel />);
+    render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({ type: "ISSUES_UPDATED", issues: [] });
     });
@@ -92,7 +92,7 @@ describe("IssuePanel", () => {
   });
 
   it("surfaces an action failure as an alert without losing the current list", async () => {
-    render(<IssuePanel />);
+    render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({ type: "ISSUES_UPDATED", issues: [issue("o", "open", "Open one")] });
     });

@@ -12,8 +12,14 @@ function groupForMainList(issues: readonly IssueSummary[]): IssueSummary[] {
   return MAIN_LIST_ORDER.flatMap((state) => issues.filter((issue) => issue.state === state));
 }
 
+interface IssuePanelProps {
+  /** The raw 1 to 4 "How much should CADT do on its own?" answer, or null when no
+   *  calibration profile is loaded, which gates the Adjust control on each card */
+  aiAssistanceLevel: number | null;
+}
+
 /** The panel: important above open above deferred; acknowledged and resolved reachable, not listed */
-export function IssuePanel() {
+export function IssuePanel({ aiAssistanceLevel }: IssuePanelProps) {
   const {
     issues,
     loading,
@@ -40,6 +46,7 @@ export function IssuePanel() {
           <IssueCard
             key={issue.id}
             issue={issue}
+            aiAssistanceLevel={aiAssistanceLevel}
             onDefer={deferIssue}
             onFlagImportant={flagImportant}
             onReopen={reopenIssue}

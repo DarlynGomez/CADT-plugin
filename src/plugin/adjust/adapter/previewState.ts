@@ -64,12 +64,18 @@ export function restorePreviewSync(): void {
  * Writes fills for real and forgets any tracked preview on that node, without
  * restoring. Always writes, whether or not a preview was already active, so apply is
  * correct even if it is reached without a prior preview
+ *
+ * Clears the tracked preview BEFORE writing, not after: the detection loop's own
+ * documentchange listener skips a node while activePreviewNodeId() names it (see
+ * listeners.ts), specifically so a live preview never gets swept into an accountability
+ * rescan before the designer has committed to it. Apply is the moment that changes:
+ * clearing first lets this exact write be seen and resolve the issue normally
  */
 export async function applyFill(node: TextNode, fills: Paint[]): Promise<void> {
-  await writeFill(node, fills);
   if (activePreview?.nodeId === node.id) {
     activePreview = null;
   }
+  await writeFill(node, fills);
 }
 
 export function activePreviewNodeId(): string | null {

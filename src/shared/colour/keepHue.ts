@@ -1,5 +1,5 @@
-import { contrastRatio, relativeLuminance } from "../../plugin/detection/rules/contrast/contrastRatio";
 import type { RGBColor } from "../issues/issueTypes";
+import { contrastRatio, relativeLuminance } from "./contrastRatio";
 import { CONTRAST_ADJUST_HEADROOM } from "./headroom";
 import { hslToRgb, rgbToHsl } from "./hsl";
 

@@ -1,0 +1,12 @@
+.badge {
+  display: block;
+  margin-top: auto;
+  padding-top: var(--space-1);
+  color: var(--color-ink);
+  font-size: var(--font-size-helper);
+  line-height: var(--font-line-height-helper);
+}
+
+.level {
+  font-weight: var(--font-weight-medium);
+}

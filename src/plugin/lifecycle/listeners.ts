@@ -1,5 +1,6 @@
 import { createChangeBuffer } from "../detection/changeBuffer";
 import { isRelevantPropertyChange } from "../detection/relevance";
+import { activePreviewNodeId } from "../adjust/adapter/previewState";
 import { scanAndSync } from "./scanAndSync";
 
 /**
@@ -7,6 +8,15 @@ import { scanAndSync } from "./scanAndSync";
  * filter to the detection engine, and from there into the issue store. Registered by
  * startup.ts only after figma.loadAllPagesAsync() has resolved; see that file for why
  * the order matters.
+ *
+ * A node currently named by activePreviewNodeId() is skipped here entirely, even
+ * though its fill just changed and fills is a relevant property. Preview is a real
+ * write with no Figma overlay to fall back on, and without this exclusion, a single
+ * click on a passing option would get picked up by this same listener, rescanned, and
+ * resolved before the designer ever chose to keep it, silently removing the issue (and
+ * the open Adjust popup with it) out from under them. Apply clears the tracked preview
+ * before its own write, so that write is not skipped, and resolves through this normal
+ * path as intended. See ADR-018 and previewState.ts's applyFill.
  */
 export function registerDocumentChangeListener(): void {
   const buffer = createChangeBuffer({
@@ -19,6 +29,9 @@ export function registerDocumentChangeListener(): void {
 
   figma.on("documentchange", (event) => {
     for (const change of event.documentChanges) {
+      if (change.id === activePreviewNodeId()) {
+        continue;
+      }
       if (change.type === "CREATE" || change.type === "DELETE") {
         buffer.add(change.id);
         continue;

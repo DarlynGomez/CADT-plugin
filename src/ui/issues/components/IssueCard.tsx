@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
+import { AdjustPopup } from "../adjust/AdjustPopup";
 import { computeFade } from "../fade";
 import { AcknowledgeForm } from "./AcknowledgeForm";
 import { IssueActions } from "./IssueActions";
@@ -31,6 +32,7 @@ function describeEvidence(ruleId: string, evidence: unknown): string | null {
 
 interface IssueCardProps {
   issue: IssueSummary;
+  aiAssistanceLevel: number | null;
   onDefer: (issueId: string) => void;
   onFlagImportant: (issueId: string) => void;
   onReopen: (issueId: string) => void;
@@ -40,6 +42,7 @@ interface IssueCardProps {
 
 export function IssueCard({
   issue,
+  aiAssistanceLevel,
   onDefer,
   onFlagImportant,
   onReopen,
@@ -47,6 +50,7 @@ export function IssueCard({
   onFocus
 }: IssueCardProps) {
   const [acknowledging, setAcknowledging] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
   const fade = computeFade(
     issue.severityAtLastDetection,
     issue.encounterCount,
@@ -80,14 +84,23 @@ export function IssueCard({
           }}
           onCancel={() => setAcknowledging(false)}
         />
+      ) : adjusting ? (
+        <AdjustPopup
+          issue={issue}
+          aiAssistanceLevel={aiAssistanceLevel ?? 1}
+          onClose={() => setAdjusting(false)}
+        />
       ) : (
         <IssueActions
           state={issue.state}
+          ruleId={issue.ruleId}
+          aiAssistanceLevel={aiAssistanceLevel}
           onDefer={() => onDefer(issue.id)}
           onFlagImportant={() => onFlagImportant(issue.id)}
           onAcknowledgeClick={() => setAcknowledging(true)}
           onReopen={() => onReopen(issue.id)}
           onFocus={() => onFocus(issue.id)}
+          onAdjustClick={() => setAdjusting(true)}
         />
       )}
     </li>

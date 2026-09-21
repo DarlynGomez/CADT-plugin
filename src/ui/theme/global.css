@@ -47,6 +47,10 @@
   --size-hairline: 1px;
   --size-focus-ring: 2px;
   --size-focus-offset: 2px;
+  /* Selection on an Adjust tile, deliberately not a border width change: three tiles
+     sit in a row, and changing border width shifts every pixel inside all three.
+     See DESIGN_SYSTEM.md section 7. */
+  --size-selection-ring: 2px;
 
   --motion-instant: 100ms;
   --motion-fast: 160ms;

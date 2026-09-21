@@ -1,0 +1,61 @@
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.binding {
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-size: var(--font-size-helper);
+  line-height: var(--font-line-height-helper);
+}
+
+.tiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.cancel,
+.apply {
+  min-height: var(--size-target-min);
+  padding: var(--space-1) var(--space-3);
+  border: var(--size-hairline) solid var(--color-ink);
+  border-radius: var(--radius-button);
+  font: inherit;
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.cancel {
+  color: var(--color-ink);
+  background: transparent;
+}
+
+.apply {
+  color: var(--color-accent-text);
+  background: var(--color-ink);
+}
+
+.apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel:focus-visible,
+.apply:focus-visible {
+  outline: var(--size-focus-ring) solid var(--color-focus-ring);
+  outline-offset: var(--size-focus-offset);
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { contrastRatio } from "../../plugin/detection/rules/contrast/contrastRatio";
+import { contrastRatio } from "./contrastRatio";
 import { CONTRAST_ADJUST_HEADROOM } from "./headroom";
 import { rgbToHsl } from "./hsl";
 import { keepHue } from "./keepHue";

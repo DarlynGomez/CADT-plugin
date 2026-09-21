@@ -1,11 +1,11 @@
-import { contrastRatio } from "../../plugin/detection/rules/contrast/contrastRatio";
 import type { RGBColor } from "../issues/issueTypes";
+import { contrastRatio } from "./contrastRatio";
 import { CONTRAST_ADJUST_HEADROOM } from "./headroom";
 import { rgbToHsl } from "./hsl";
 
-/** One colour already present in the file, named by the variable or style it came from */
+/** One colour already present in the file, named by its binding where it has one */
 export interface NamedColor {
-  name: string;
+  name: string | null;
   color: RGBColor;
 }
 

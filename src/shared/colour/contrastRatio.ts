@@ -1,4 +1,4 @@
-import type { RGBColor } from "../../../../shared/issues/issueTypes";
+import type { RGBColor } from "../issues/issueTypes";
 
 /** One sRGB channel, linearized per the WCAG 2.1 relative luminance formula */
 function linearizeChannel(channel: number): number {
