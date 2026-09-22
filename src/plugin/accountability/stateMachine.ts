@@ -1,12 +1,7 @@
 import type { Issue, IssueState, Severity } from "../../shared/issues/issueTypes";
+import { isSeverityWorse } from "../../shared/issues/severityRank";
 
 export type TransitionOutcome = { ok: true; issue: Issue } | { ok: false; reason: string };
-
-const SEVERITY_RANK: Record<Severity, number> = { low: 0, medium: 1, high: 2 };
-
-function isSeverityWorse(candidate: Severity, baseline: Severity): boolean {
-  return SEVERITY_RANK[candidate] > SEVERITY_RANK[baseline];
-}
 
 function rejected(reason: string): TransitionOutcome {
   return { ok: false, reason };
@@ -111,7 +106,12 @@ export function reconcileDetection(
   }
 
   if (issue.state === "resolved") {
-    return { ...issue, state: "open", severityAtLastDetection: latestSeverity, lastDetectedAt: detectedAt };
+    return {
+      ...issue,
+      state: "open",
+      severityAtLastDetection: latestSeverity,
+      lastDetectedAt: detectedAt
+    };
   }
 
   if (issue.state === "acknowledged") {
