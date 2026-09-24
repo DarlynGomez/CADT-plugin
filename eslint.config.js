@@ -63,12 +63,18 @@ export default tseslint.config(
     // exceptions, since it is a storage surface, not a pure module). Phase 13 adds
     // src/ui/issues/fade.ts to a UI-side rule. Phase 16 adds adjust/adapter/**, a
     // sibling of detection/adapter rather than an extension of it, since it is the
-    // one place permitted to write a node (see ADR-017), not just read one. Each is
-    // a deliverable of its phase.
+    // one place permitted to write a node (see ADR-017), not just read one. Phase 20
+    // adds accountability/adapter/**, a sibling of detection/adapter and adjust/adapter
+    // rather than a widening of the issueStore.ts single-file exception, since more
+    // than one module lives there: canvasSelection.ts is the only place that writes
+    // figma.currentPage.selection, and reEncounter.ts and stateMachine.ts stay pure,
+    // still covered by this same restriction, exactly as intended since phase 12. Each
+    // is a deliverable of its phase.
     files: ["src/plugin/**/*.{ts,tsx}"],
     ignores: [
       "src/plugin/detection/adapter/**/*.{ts,tsx}",
       "src/plugin/adjust/adapter/**/*.{ts,tsx}",
+      "src/plugin/accountability/adapter/**/*.{ts,tsx}",
       "src/plugin/storage/**/*.{ts,tsx}",
       "src/plugin/lifecycle/**/*.{ts,tsx}",
       "src/plugin/accountability/issueStore.ts",

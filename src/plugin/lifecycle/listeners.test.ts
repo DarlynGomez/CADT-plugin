@@ -77,7 +77,7 @@ describe("registerDocumentChangeListener", () => {
 
     it("skips a fill change on the previewed node, so a single passing click cannot be swept into a resolve", async () => {
       const { beginPreview } = await import("../adjust/adapter/previewState");
-      await beginPreview(textNode("1:1"), { r: 1, g: 1, b: 1 });
+      await beginPreview([textNode("1:1")], { r: 1, g: 1, b: 1 });
 
       await fireAndFlush([{ type: "PROPERTY_CHANGE", id: "1:1", properties: ["fills"] }]);
       expect(scanAndSync).not.toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe("registerDocumentChangeListener", () => {
 
     it("still scans an unrelated node while a different node is being previewed", async () => {
       const { beginPreview } = await import("../adjust/adapter/previewState");
-      await beginPreview(textNode("1:1"), { r: 1, g: 1, b: 1 });
+      await beginPreview([textNode("1:1")], { r: 1, g: 1, b: 1 });
 
       await fireAndFlush([{ type: "PROPERTY_CHANGE", id: "1:9", properties: ["fills"] }]);
       expect(scanAndSync).toHaveBeenCalledWith(new Set(["1:9"]), "scan");
@@ -94,7 +94,7 @@ describe("registerDocumentChangeListener", () => {
     it("scans the node again once its preview is restored", async () => {
       const { beginPreview, restorePreview } = await import("../adjust/adapter/previewState");
       const node = textNode("1:1");
-      await beginPreview(node, { r: 1, g: 1, b: 1 });
+      await beginPreview([node], { r: 1, g: 1, b: 1 });
       await restorePreview();
 
       await fireAndFlush([{ type: "PROPERTY_CHANGE", id: "1:1", properties: ["fills"] }]);
@@ -104,11 +104,34 @@ describe("registerDocumentChangeListener", () => {
     it("scans apply's own write, since applyFill clears the tracked preview first", async () => {
       const { beginPreview, applyFill } = await import("../adjust/adapter/previewState");
       const node = textNode("1:1");
-      await beginPreview(node, { r: 1, g: 1, b: 1 });
+      await beginPreview([node], { r: 1, g: 1, b: 1 });
       await applyFill(node, [{ type: "SOLID", color: { r: 0, g: 0, b: 1 } }]);
 
       await fireAndFlush([{ type: "PROPERTY_CHANGE", id: "1:1", properties: ["fills"] }]);
       expect(scanAndSync).toHaveBeenCalledWith(new Set(["1:1"]), "scan");
+    });
+
+    it("skips a fill change on any of twelve previewed nodes, GROUPING_SPEC.md section 8", async () => {
+      const { beginPreview } = await import("../adjust/adapter/previewState");
+      const twelve = Array.from({ length: 12 }, (_, i) => textNode(`1:${i + 1}`));
+      await beginPreview(twelve, { r: 1, g: 1, b: 1 });
+
+      await fireAndFlush(
+        twelve.map((node) => ({ type: "PROPERTY_CHANGE", id: node.id, properties: ["fills"] }))
+      );
+      expect(scanAndSync).not.toHaveBeenCalled();
+    });
+
+    it("scans all twelve again once the group preview is restored", async () => {
+      const { beginPreview, restorePreview } = await import("../adjust/adapter/previewState");
+      const twelve = Array.from({ length: 12 }, (_, i) => textNode(`1:${i + 1}`));
+      await beginPreview(twelve, { r: 1, g: 1, b: 1 });
+      await restorePreview();
+
+      await fireAndFlush(
+        twelve.map((node) => ({ type: "PROPERTY_CHANGE", id: node.id, properties: ["fills"] }))
+      );
+      expect(scanAndSync).toHaveBeenCalledWith(new Set(twelve.map((n) => n.id)), "scan");
     });
   });
 });

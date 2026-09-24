@@ -1,4 +1,5 @@
 import { parseIssueId } from "../../shared/issues/issueId";
+import { selectResolvedNodesAndZoom } from "../accountability/adapter/canvasSelection";
 import type { Issue } from "../../shared/issues/issueTypes";
 import type { IssueMessage, PluginToUiMessage } from "../../shared/messageTypes";
 import { loadIssues, saveIssues, type IssueRecordMap } from "../accountability/issueStore";
@@ -76,7 +77,11 @@ async function applyTransition(
   reply({ type: "ISSUES_UPDATED", issues: await buildDisplayList(updated) });
 }
 
-function transitionFor(record: IssueRecordMap, issueId: string, apply: (issue: Issue) => TransitionOutcome) {
+function transitionFor(
+  record: IssueRecordMap,
+  issueId: string,
+  apply: (issue: Issue) => TransitionOutcome
+) {
   const issue = record[issueId];
   if (!issue) {
     return { ok: false as const, reason: "That issue no longer exists." };
@@ -98,8 +103,7 @@ async function focusIssue(issueId: string, reply: Reply): Promise<void> {
     return;
   }
 
-  figma.currentPage.selection = [node];
-  figma.viewport.scrollAndZoomIntoView([node]);
+  selectResolvedNodesAndZoom([node]);
 }
 
 /** Handles the six inbound issue messages, per spec section 6 */

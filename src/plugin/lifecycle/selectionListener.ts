@@ -6,6 +6,10 @@ import {
   type ReEncounterState
 } from "../accountability/reEncounter";
 import { recordResurface } from "../accountability/stateMachine";
+import {
+  consumePluginSetSelectionMarker,
+  recordDesignerSelection
+} from "../accountability/adapter/canvasSelection";
 import type { PluginToUiMessage } from "../../shared/messageTypes";
 import { loadIssues, saveIssues, type IssueRecordMap } from "../accountability/issueStore";
 import { buildDisplayList } from "./issueDisplay";
@@ -56,7 +60,20 @@ export function markIssueDeferred(issueId: string): void {
   reEncounterState = markDeferred(reEncounterState, issueId);
 }
 
-export async function handleSelectionChange(): Promise<void> {
+/**
+ * GROUPING_SPEC.md section 5.2, the critical rule: a selection this plugin set itself,
+ * to show a root or locate one instance, is not the designer returning to anything.
+ * isPluginOriginated defaults to false so every existing caller, real designer
+ * selections throughout, is unaffected; the real listener below always passes it
+ * explicitly, read fresh off the marker for this one event.
+ */
+export async function handleSelectionChange(isPluginOriginated: boolean = false): Promise<void> {
+  if (isPluginOriginated) {
+    return;
+  }
+
+  recordDesignerSelection(figma.currentPage.selection.map((node) => node.id));
+
   const record = await loadIssues();
   const outcome = applySelectionChange(
     reEncounterState,
@@ -83,12 +100,16 @@ export async function handleSelectionChange(): Promise<void> {
     return;
   }
 
-  const message: PluginToUiMessage = { type: "ISSUES_UPDATED", issues: await buildDisplayList(updated) };
+  const message: PluginToUiMessage = {
+    type: "ISSUES_UPDATED",
+    issues: await buildDisplayList(updated)
+  };
   figma.ui.postMessage(message);
 }
 
 export function registerSelectionChangeListener(): void {
   figma.on("selectionchange", () => {
-    void handleSelectionChange();
+    const isPluginOriginated = consumePluginSetSelectionMarker();
+    void handleSelectionChange(isPluginOriginated);
   });
 }

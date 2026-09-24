@@ -30,13 +30,36 @@ describe("registerAdjustCloseRestore", () => {
       id: "1:1",
       fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }]
     } as unknown as TextNode;
-    await beginPreview(node, { r: 1, g: 0, b: 0 });
+    await beginPreview([node], { r: 1, g: 0, b: 0 });
     expect(node.fills).toEqual([{ type: "SOLID", color: { r: 1, g: 0, b: 0 }, opacity: 1 }]);
 
     // figma.on("close") cannot await anything, so this must be a synchronous call
     handlers.close();
 
     expect(node.fills).toEqual([{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }]);
+  });
+
+  it("restores all twelve nodes synchronously when the plugin closes mid group preview", async () => {
+    const handlers = stubFigmaWithOn();
+    const { beginPreview } = await import("../adjust/adapter/previewState");
+    const { registerAdjustCloseRestore } = await import("./adjustLifecycle");
+    registerAdjustCloseRestore();
+
+    const twelve = Array.from(
+      { length: 12 },
+      (_, i) =>
+        ({
+          id: `1:${i + 1}`,
+          fills: [{ type: "SOLID", color: { r: 0, g: 0, b: i / 20 } }]
+        }) as unknown as TextNode
+    );
+    await beginPreview(twelve, { r: 1, g: 0, b: 0 });
+
+    handlers.close();
+
+    twelve.forEach((node, i) => {
+      expect(node.fills).toEqual([{ type: "SOLID", color: { r: 0, g: 0, b: i / 20 } }]);
+    });
   });
 
   it("does nothing on close when nothing was being previewed", async () => {
@@ -59,7 +82,7 @@ describe("registerAdjustSelectionRestore", () => {
       id: "1:1",
       fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }]
     } as unknown as TextNode;
-    await beginPreview(node, { r: 1, g: 0, b: 0 });
+    await beginPreview([node], { r: 1, g: 0, b: 0 });
 
     handlers.selectionchange();
     await Promise.resolve();

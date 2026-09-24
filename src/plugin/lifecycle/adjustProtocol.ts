@@ -33,7 +33,9 @@ export function isAdjustMessage(value: unknown): value is AdjustMessage {
         typeof message.issueId === "string" &&
         hasColor() &&
         hasSessionFlags() &&
-        (message.optionChosen === "a" || message.optionChosen === "b" || message.optionChosen === "c")
+        (message.optionChosen === "a" ||
+          message.optionChosen === "b" ||
+          message.optionChosen === "c")
       );
     case "ADJUST_ABANDONED":
       return typeof message.issueId === "string" && hasSessionFlags();
@@ -78,7 +80,7 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
   }
 
   if (message.type === "ADJUST_PREVIEW") {
-    await beginPreview(node, message.color);
+    await beginPreview([node], message.color);
     reply({ type: "ADJUST_PREVIEWED", issueId: message.issueId });
     return;
   }
