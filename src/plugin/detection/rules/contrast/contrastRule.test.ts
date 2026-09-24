@@ -13,6 +13,8 @@ function baseSnapshot(overrides: Partial<NodeSnapshot> = {}): NodeSnapshot {
     nodeId: "1:1",
     nodeName: "Body copy",
     nodeType: "TEXT",
+    screenId: "screen-1",
+    screenName: "Screen",
     foreground: BLACK,
     foregroundAlpha: 1,
     background: WHITE,
@@ -76,9 +78,7 @@ describe("contrastRule", () => {
   });
 
   it("uses the relaxed 3.0 threshold for large text, so a mid-range ratio passes", () => {
-    const finding = contrastRule.evaluate(
-      baseSnapshot({ foreground: MID_GRAY, fontSizePx: 24 })
-    );
+    const finding = contrastRule.evaluate(baseSnapshot({ foreground: MID_GRAY, fontSizePx: 24 }));
     expect(finding).toBeNull();
   });
 
@@ -90,9 +90,7 @@ describe("contrastRule", () => {
   });
 
   it("produces no finding when the snapshot carries any indeterminate reason", () => {
-    const finding = contrastRule.evaluate(
-      baseSnapshot({ indeterminateReasons: ["fill-mixed"] })
-    );
+    const finding = contrastRule.evaluate(baseSnapshot({ indeterminateReasons: ["fill-mixed"] }));
     expect(finding).toBeNull();
   });
 

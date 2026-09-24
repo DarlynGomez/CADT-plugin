@@ -12,6 +12,8 @@ function textSnapshot(nodeId: string, overrides: Partial<NodeSnapshot> = {}): No
     nodeId,
     nodeName: "Body copy",
     nodeType: "TEXT",
+    screenId: "screen-1",
+    screenName: "Screen",
     foreground: BLACK,
     foregroundAlpha: 1,
     background: WHITE,

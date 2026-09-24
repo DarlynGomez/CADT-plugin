@@ -37,6 +37,8 @@ describe("snapshotTextNode", () => {
       nodeId: "1:1",
       nodeName: "Body copy",
       nodeType: "TEXT",
+      screenId: "1:1",
+      screenName: "Body copy",
       foreground: { r: 0, g: 0, b: 0 },
       foregroundAlpha: 1,
       background: { r: 1, g: 1, b: 1 },
@@ -63,6 +65,16 @@ describe("snapshotTextNode", () => {
 
     expect(snapshot.background).toEqual({ r: 0.9, g: 0.9, b: 0.9 });
     expect(snapshot.backgroundSource).toEqual({ kind: "node", nodeId: "2:2", nodeName: "Card" });
+  });
+
+  it("resolves the screen from the frame ancestor, not the node itself", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const page = { type: "PAGE", backgrounds: [] };
+    const frame = { type: "FRAME", id: "2:2", name: "Card", fills: [], parent: page };
+    const snapshot = snapshotTextNode(textNode({ parent: frame }));
+
+    expect(snapshot.screenId).toBe("2:2");
+    expect(snapshot.screenName).toBe("Card");
   });
 
   it("nulls fontStyleName when the font name is mixed, even if the numeric weight resolved", async () => {
@@ -105,9 +117,7 @@ describe("snapshotTextNode", () => {
 
   it("nulls the bold determination and records the reason when the font weight and name are both mixed", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(
-      textNode({ fontWeight: FIGMA_MIXED, fontName: FIGMA_MIXED })
-    );
+    const snapshot = snapshotTextNode(textNode({ fontWeight: FIGMA_MIXED, fontName: FIGMA_MIXED }));
 
     expect(snapshot.isBold).toBeNull();
     expect(snapshot.indeterminateReasons).toContain("font-name-mixed");

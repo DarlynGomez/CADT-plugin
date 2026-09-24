@@ -1,34 +1,11 @@
 import { buildRootSignature } from "../issues/rootSignature";
 import { deriveRootState } from "./rootState";
+import {
+  DECISIONS_ELIGIBLE_STATES,
+  pickRepresentativeInstance,
+  TO_REVIEW_ELIGIBLE_STATES
+} from "./representativeInstance";
 import type { GroupableFinding, Root } from "./groupingTypes";
-
-/**
- * Spec section 3.5: the instance among the root's own that the designer most recently
- * selected themselves, if any of them appear in designerSelectionOrder; otherwise the
- * first instance in document order. designerSelectionOrder is node ids, most recent
- * first, and must contain only selections the designer made: a plugin-set selection is
- * never eligible, the same rule that keeps it out of re-encounter (section 5.2).
- */
-function pickRepresentative(
-  instances: readonly GroupableFinding[],
-  designerSelectionOrder: readonly string[]
-): GroupableFinding {
-  let best: GroupableFinding | null = null;
-  let bestRank = Infinity;
-  for (const instance of instances) {
-    const rank = designerSelectionOrder.indexOf(instance.nodeId);
-    if (rank !== -1 && rank < bestRank) {
-      best = instance;
-      bestRank = rank;
-    }
-  }
-  return (
-    best ??
-    instances.reduce((earliest, instance) =>
-      instance.documentOrder < earliest.documentOrder ? instance : earliest
-    )
-  );
-}
 
 function distinctBackgroundBindings(instances: readonly GroupableFinding[]): string[] {
   return [
@@ -68,9 +45,18 @@ export function deriveRoots(
 
   const roots: Root[] = [];
   for (const [signature, instances] of bySignature) {
-    const representative = pickRepresentative(instances, designerSelectionOrder);
     const { displayState, breakdown } = deriveRootState(
       instances.map((instance) => instance.state)
+    );
+    // A root is only ever shown in one view at a time, so its one representative always
+    // matches whichever view that is: Decisions once every instance is decided, To review
+    // otherwise
+    const eligibleStates =
+      displayState === "decided" ? DECISIONS_ELIGIBLE_STATES : TO_REVIEW_ELIGIBLE_STATES;
+    const representative = pickRepresentativeInstance(
+      instances,
+      eligibleStates,
+      designerSelectionOrder
     );
 
     roots.push({

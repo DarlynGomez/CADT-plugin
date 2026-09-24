@@ -56,6 +56,7 @@ export function computeHeadline(roots: readonly Root[]): Headline {
     }
   }
 
-  const screenCount = new Set(openInstances.map((instance) => instance.screenName)).size;
+  // Counted by id, not name: two different screens can share a name in a real file
+  const screenCount = new Set(openInstances.map((instance) => instance.screenId)).size;
   return { kind: "unconcentrated", totalOpenCount, screenCount };
 }

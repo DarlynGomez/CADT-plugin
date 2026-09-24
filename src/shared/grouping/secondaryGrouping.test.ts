@@ -8,6 +8,7 @@ function finding(overrides: Partial<GroupableFinding> = {}): GroupableFinding {
     issueId: "contrast:1:1",
     nodeId: "1:1",
     nodeName: "Text",
+    screenId: "screen-1",
     screenName: "Product Detail Screen",
     state: "open",
     severity: "high",
@@ -23,15 +24,23 @@ function finding(overrides: Partial<GroupableFinding> = {}): GroupableFinding {
 }
 
 describe("groupByScreen", () => {
-  it("buckets findings by screen name", () => {
+  it("buckets findings by screen id", () => {
     const groups = groupByScreen([
-      finding({ issueId: "a", screenName: "Checkout" }),
-      finding({ issueId: "b", screenName: "Checkout" }),
-      finding({ issueId: "c", screenName: "Product Detail Screen" })
+      finding({ issueId: "a", screenId: "screen-checkout", screenName: "Checkout" }),
+      finding({ issueId: "b", screenId: "screen-checkout", screenName: "Checkout" }),
+      finding({ issueId: "c", screenId: "screen-1", screenName: "Product Detail Screen" })
     ]);
     expect(groups).toHaveLength(2);
-    expect(groups.find((g) => g.key === "Checkout")?.instances).toHaveLength(2);
-    expect(groups.find((g) => g.key === "Product Detail Screen")?.instances).toHaveLength(1);
+    expect(groups.find((g) => g.key === "screen-checkout")?.instances).toHaveLength(2);
+    expect(groups.find((g) => g.key === "screen-1")?.instances).toHaveLength(1);
+  });
+
+  it("keeps two same-named screens separate, since names are not unique", () => {
+    const groups = groupByScreen([
+      finding({ issueId: "a", screenId: "screen-1", screenName: "Desktop" }),
+      finding({ issueId: "b", screenId: "screen-2", screenName: "Desktop" })
+    ]);
+    expect(groups).toHaveLength(2);
   });
 });
 

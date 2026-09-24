@@ -12,7 +12,8 @@ export interface RGBColor {
  * Which layer in the ancestor chain supplied a resolved background: a real node, named
  * so evidence can point back to it, or the page itself, the walk's final fallback
  */
-export type BackgroundSource = { kind: "node"; nodeId: string; nodeName: string } | { kind: "page" };
+export type BackgroundSource =
+  { kind: "node"; nodeId: string; nodeName: string } | { kind: "page" };
 
 /**
  * A node reduced to what detection rules need. Produced only by the snapshot adapter
@@ -24,6 +25,13 @@ export interface NodeSnapshot {
   nodeId: string;
   nodeName: string;
   nodeType: string;
+  /**
+   * Screen identity, MARKERS_SPEC.md section 5.1, never null since resolveScreen always
+   * finds an answer, lives on the snapshot rather than contrast's evidence since every
+   * future rule needs it the same way the grouping panel's "across N screens" line does
+   */
+  screenId: string;
+  screenName: string;
   foreground: RGBColor | null;
   foregroundAlpha: number | null;
   background: RGBColor | null;
@@ -86,5 +94,8 @@ export interface Issue {
  */
 export interface IssueSummary extends Issue {
   nodeName: string;
+  /** Undefined only when the node itself could not be found, the same case evidence handles */
+  screenId?: string;
+  screenName?: string;
   evidence?: unknown;
 }

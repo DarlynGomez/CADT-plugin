@@ -14,6 +14,7 @@ function findingIn(
     issueId: `contrast:1:${nextNodeId}`,
     nodeId: `1:${nextNodeId}`,
     nodeName: "Text",
+    screenId: "screen-1",
     screenName: "Product Detail Screen",
     state,
     severity: "high",
@@ -50,10 +51,11 @@ function rootOf(
 function openInstances(
   binding: string | null,
   count: number,
+  screenId = "screen-1",
   screenName = "Product Detail Screen"
 ): GroupableFinding[] {
   return Array.from({ length: count }, () =>
-    findingIn("open", { foregroundBinding: binding, screenName })
+    findingIn("open", { foregroundBinding: binding, screenId, screenName })
   );
 }
 
@@ -73,7 +75,7 @@ describe("computeHeadline", () => {
   });
 
   it("uses the hex as the binding label when the foreground is unbound", () => {
-    const roots = [rootOf(openInstances(null, 10, "Product Detail Screen"))];
+    const roots = [rootOf(openInstances(null, 10))];
     const headline = computeHeadline(roots);
     expect(headline.kind).toBe("concentrated");
     if (headline.kind === "concentrated") {
@@ -83,10 +85,21 @@ describe("computeHeadline", () => {
 
   it("falls back to a screen count when the top three bindings still fall short of 80 percent", () => {
     const roots = [
-      rootOf(openInstances("a/one", 10, "Screen A")),
-      rootOf(openInstances("b/two", 10, "Screen B")),
-      rootOf(openInstances("c/three", 10, "Screen C")),
-      rootOf(openInstances("d/four", 10, "Screen D"))
+      rootOf(openInstances("a/one", 10, "screen-a", "Screen A")),
+      rootOf(openInstances("b/two", 10, "screen-b", "Screen B")),
+      rootOf(openInstances("c/three", 10, "screen-c", "Screen C")),
+      rootOf(openInstances("d/four", 10, "screen-d", "Screen D"))
+    ];
+    const headline = computeHeadline(roots);
+    expect(headline).toEqual({ kind: "unconcentrated", totalOpenCount: 40, screenCount: 4 });
+  });
+
+  it("counts two screens that happen to share a name as two, by id", () => {
+    const roots = [
+      rootOf(openInstances("a/one", 10, "screen-a", "Desktop")),
+      rootOf(openInstances("b/two", 10, "screen-b", "Desktop")),
+      rootOf(openInstances("c/three", 10, "screen-c", "Desktop")),
+      rootOf(openInstances("d/four", 10, "screen-d", "Desktop"))
     ];
     const headline = computeHeadline(roots);
     expect(headline).toEqual({ kind: "unconcentrated", totalOpenCount: 40, screenCount: 4 });

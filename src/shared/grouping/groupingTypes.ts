@@ -3,14 +3,17 @@ import type { IssueState, Severity } from "../issues/issueTypes";
 /**
  * The plain-data shape grouping needs from one instance: enough of Issue and the
  * contrast evidence to build a signature, derive state, and pick a representative.
- * Deliberately not wired to the real Issue and ContrastEvidence shapes yet: phase 21
- * assembles this from them once the snapshot adapter carries a foreground binding and a
- * screen name, neither of which it produces today. See docs/GROUPING_SPEC.md section 3.
+ * Not wired to the real Issue and ContrastEvidence shapes yet: phase 21 assembles this
+ * once a foreground binding is attached to an issue, which nothing produces today; screen
+ * identity, unlike the binding, is already produced by the snapshot adapter as of 19b
  */
 export interface GroupableFinding {
   issueId: string;
   nodeId: string;
   nodeName: string;
+  /** Identity for counting and grouping, since screen names are not unique, MARKERS_SPEC.md 5.1 */
+  screenId: string;
+  /** Display only, never counting or grouping: two screens can share a name */
   screenName: string;
   state: IssueState;
   severity: Severity;

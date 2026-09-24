@@ -14,6 +14,9 @@ const RESOLVED_OPEN_ISSUE = {
   ruleId: "contrast",
   nodeId: "1:1",
   nodeName: "Body copy",
+  // TEXT_NODE has no parent in this fixture, so it is its own screen, section 5.1
+  screenId: "1:1",
+  screenName: "Body copy",
   ...PERSISTED_OPEN
 };
 const TEXT_NODE = {
@@ -39,7 +42,9 @@ describe("isIssueMessage", () => {
   );
 
   it("requires both issueId and reason for ISSUE_ACKNOWLEDGE", () => {
-    expect(isIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID, reason: "x" })).toBe(true);
+    expect(isIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID, reason: "x" })).toBe(
+      true
+    );
     expect(isIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID })).toBe(false);
   });
 

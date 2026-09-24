@@ -11,13 +11,19 @@ async function enrichForDisplay(issue: Issue): Promise<IssueSummary> {
 
   const rule = RULES.find((registered) => registered.id === issue.ruleId);
   const finding = rule ? rule.evaluate(snapshot) : null;
-  return { ...issue, nodeName: snapshot.nodeName, evidence: finding?.evidence };
+  return {
+    ...issue,
+    nodeName: snapshot.nodeName,
+    screenId: snapshot.screenId,
+    screenName: snapshot.screenName,
+    evidence: finding?.evidence
+  };
 }
 
 /**
- * Build the panel's view of the record. Node name and evidence, the measured ratio
- * against the required one for contrast, are recomputed live rather than trusted from
- * a stale persisted value, since section 5.5 stores neither.
+ * Build the panel's view of the record: node name, screen identity, and evidence, the
+ * measured ratio against the required one for contrast, recomputed live rather than
+ * trusted from a stale persisted value, since section 5.5 stores none of them
  */
 export async function buildDisplayList(record: IssueRecordMap): Promise<IssueSummary[]> {
   return Promise.all(Object.values(record).map(enrichForDisplay));

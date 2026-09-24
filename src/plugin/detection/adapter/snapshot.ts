@@ -4,10 +4,11 @@ import { BOLD_MIN_FONT_WEIGHT } from "../rules/contrast/thresholds";
 import { resolveColors } from "../colorResolution";
 import { buildAncestorChain } from "./ancestorChain";
 import { extractNodeLayer } from "./paintExtraction";
+import { resolveScreen } from "./resolveScreen";
 
 /**
- * The module that assembles a NodeSnapshot. This, ancestorChain.ts, and
- * paintExtraction.ts are the only files that read Figma node properties; nothing
+ * The module that assembles a NodeSnapshot. This, ancestorChain.ts, paintExtraction.ts,
+ * and resolveScreen.ts are the only files that read Figma node properties; nothing
  * downstream of a snapshot touches a Figma type. See CLAUDE.md rule 8 and
  * docs/ENGINEERING_STANDARDS.md section 7.2.
  */
@@ -30,10 +31,14 @@ export function snapshotTextNode(node: TextNode): NodeSnapshot {
     reasons.add(reason);
   }
 
+  const screen = resolveScreen(node);
+
   return {
     nodeId: node.id,
     nodeName: node.name,
     nodeType: node.type,
+    screenId: screen.screenId,
+    screenName: screen.screenName,
     foreground: colorResult.foreground,
     foregroundAlpha: colorResult.foregroundAlpha,
     background: colorResult.background,

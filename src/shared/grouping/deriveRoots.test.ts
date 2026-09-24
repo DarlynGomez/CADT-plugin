@@ -8,6 +8,7 @@ function finding(overrides: Partial<GroupableFinding> = {}): GroupableFinding {
     issueId: "contrast:1:1",
     nodeId: "1:1",
     nodeName: "Item description subtext",
+    screenId: "screen-1",
     screenName: "Product Detail Screen",
     state: "open",
     severity: "high",
@@ -100,5 +101,23 @@ describe("deriveRoots", () => {
     const roots = deriveRoots([finding({ foregroundBinding: null, foregroundHex: "#888888" })]);
     expect(roots[0].foregroundBinding).toBeNull();
     expect(roots[0].signature).toContain("unbound");
+  });
+
+  it("never picks an acknowledged instance as representative while the root is in To review, even first in document order", () => {
+    const roots = deriveRoots([
+      finding({ issueId: "contrast:1:1", nodeId: "1:1", state: "acknowledged", documentOrder: 0 }),
+      finding({ issueId: "contrast:1:2", nodeId: "1:2", state: "open", documentOrder: 1 })
+    ]);
+    expect(roots[0].displayState).toBe("open");
+    expect(roots[0].representativeIssueId).toBe("contrast:1:2");
+  });
+
+  it("picks among acknowledged and resolved instances once a root has moved to Decisions", () => {
+    const roots = deriveRoots([
+      finding({ issueId: "contrast:1:1", nodeId: "1:1", state: "resolved", documentOrder: 0 }),
+      finding({ issueId: "contrast:1:2", nodeId: "1:2", state: "acknowledged", documentOrder: 1 })
+    ]);
+    expect(roots[0].displayState).toBe("decided");
+    expect(roots[0].representativeIssueId).toBe("contrast:1:1");
   });
 });
