@@ -1,4 +1,5 @@
-import { handleAdjustMessage, isAdjustMessage } from "./lifecycle/adjustProtocol";
+import { handleAdjustMessage } from "./lifecycle/adjustProtocol";
+import { isAdjustMessage } from "./lifecycle/isAdjustMessage";
 import {
   registerAdjustCloseRestore,
   registerAdjustSelectionRestore

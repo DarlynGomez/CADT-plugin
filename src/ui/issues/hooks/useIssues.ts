@@ -102,9 +102,12 @@ export function useIssues() {
     []
   );
 
-  const reopenRoot = useCallback((issueIds: string[]) => {
-    sendMessage({ type: "ROOT_REOPEN", issueIds });
-  }, []);
+  const reopenRoot = useCallback(
+    (issueIds: readonly string[], signature: string, clearDecision: boolean) => {
+      sendMessage({ type: "ROOT_REOPEN", issueIds: [...issueIds], signature, clearDecision });
+    },
+    []
+  );
 
   const restoreDeferredRoot = useCallback((issueIds: string[]) => {
     sendMessage({ type: "ROOT_RESTORE_DEFERRED", issueIds });

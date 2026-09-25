@@ -30,7 +30,7 @@ interface LiveWatchBodyProps {
   onToggleImportant: (root: Root) => void;
   onApplyDecisionOffer: (root: Root, decision: RootDecision) => void;
   onRestoreDeferred: (root: Root) => void;
-  onReopen: (issueIds: string[]) => void;
+  onReopen: (issueIds: readonly string[], signature: string, clearDecision: boolean) => void;
 }
 
 /** The Live Watch tab's body: error, filter bar, and whichever list is active */
@@ -61,6 +61,8 @@ export function LiveWatchBody(props: LiveWatchBodyProps) {
           sections={props.filteredSections}
           issuesById={props.issuesById}
           decisions={props.decisions}
+          ignoredRoots={props.decisionRoots.filter((root) => root.stateBreakdown.ignored)}
+          onRestoreIgnored={props.onReopen}
           canAdjust={props.canAdjust}
           selectedInstances={props.selectedInstances}
           onToggleInstanceSelected={props.onToggleInstanceSelected}

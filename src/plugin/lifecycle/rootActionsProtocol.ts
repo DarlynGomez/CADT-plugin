@@ -1,11 +1,6 @@
 import type { PluginToUiMessage } from "../../shared/messageTypes";
 import type { RootMessage } from "../../shared/rootMessageTypes";
-import {
-  loadDecisions,
-  recordDecision,
-  saveDecisions,
-  type DecisionRecordMap
-} from "../accountability/decisionStore";
+import { loadDecisions } from "../accountability/decisionStore";
 import {
   deferRoot,
   ignoreRoot,
@@ -17,6 +12,7 @@ import {
 } from "../accountability/groupActions";
 import { loadIssues, saveIssues, type IssueRecordMap } from "../accountability/issueStore";
 import { buildIssuesUpdatedMessage } from "./issueDisplay";
+import { clearRootDecision, recordRootDecision } from "./rootDecisionEffects";
 
 type Reply = (message: PluginToUiMessage) => void;
 
@@ -33,9 +29,14 @@ export function isRootMessage(value: unknown): value is RootMessage {
     case "ROOT_DEFER":
     case "ROOT_MARK_IMPORTANT":
     case "ROOT_UNMARK_IMPORTANT":
-    case "ROOT_REOPEN":
     case "ROOT_RESTORE_DEFERRED":
       return hasIssueIds();
+    case "ROOT_REOPEN":
+      return (
+        hasIssueIds() &&
+        typeof message.signature === "string" &&
+        typeof message.clearDecision === "boolean"
+      );
     case "ROOT_IGNORE":
       return (
         hasIssueIds() &&
@@ -73,38 +74,6 @@ function computeGroupResult(
   }
 }
 
-/**
- * GROUPING_SPEC.md 3.4: a root's ignore action also records a decision. Severity comes
- * from the just-updated record rather than a live re-evaluation: ignoreIssue
- * already set severityAtIgnore on every instance that succeeded, and every
- * instance in a root shares one severity by construction of the signature, so any one
- * of them stands for the root.
- */
-function recordRootDecision(
-  message: Extract<RootMessage, { type: "ROOT_IGNORE" }>,
-  updatedRecord: IssueRecordMap,
-  decisions: DecisionRecordMap,
-  at: string
-): void {
-  const severityAtDecision = message.issueIds
-    .map((id) => updatedRecord[id]?.severityAtIgnore)
-    .find((severity) => severity !== undefined);
-  if (!severityAtDecision) {
-    return;
-  }
-
-  const updatedDecisions = recordDecision(decisions, {
-    signature: message.signature,
-    reason: message.reason,
-    recordedAt: at,
-    severityAtDecision
-  });
-  const saveResult = saveDecisions(updatedDecisions);
-  if (!saveResult.saved) {
-    console.error("ROOT_IGNORE: decision could not be saved", saveResult.error);
-  }
-}
-
 /** Handles every group-action message, per GROUPING_SPEC.md sections 3.3 and 3.4 */
 export async function handleRootMessage(message: RootMessage, reply: Reply): Promise<void> {
   const record = await loadIssues();
@@ -127,6 +96,10 @@ export async function handleRootMessage(message: RootMessage, reply: Reply): Pro
 
   if (message.type === "ROOT_IGNORE") {
     recordRootDecision(message, result.record, loadDecisions(), at);
+  }
+
+  if (message.type === "ROOT_REOPEN" && message.clearDecision) {
+    clearRootDecision(message.signature);
   }
 
   reply(await buildIssuesUpdatedMessage(result.record));

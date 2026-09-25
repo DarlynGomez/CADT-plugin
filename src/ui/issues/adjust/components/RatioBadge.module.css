@@ -1,10 +1,16 @@
 .badge {
-  display: block;
-  margin-top: auto;
-  padding-top: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-pill);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-background);
   color: var(--color-ink);
-  font-size: var(--font-size-helper);
-  line-height: var(--font-line-height-helper);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
 .level {

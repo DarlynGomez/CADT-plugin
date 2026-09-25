@@ -67,7 +67,7 @@ interface DecisionsViewProps {
   roots: readonly Root[];
   decisions: Readonly<Record<string, RootDecision>>;
   issuesById: ReadonlyMap<string, IssueSummary>;
-  onReopen: (issueIds: string[]) => void;
+  onReopen: (issueIds: readonly string[], signature: string, clearDecision: boolean) => void;
 }
 
 /** GROUPING_SPEC.md 6.5: the accountability layer's output, name, specimen, reason, date, Reopen */
@@ -84,7 +84,13 @@ export function DecisionsView({ roots, decisions, issuesById, onReopen }: Decisi
           root={root}
           decision={decisions[root.signature]}
           representativeIssue={issuesById.get(root.representativeIssueId)}
-          onReopen={() => onReopen(root.instances.map((i) => i.issueId))}
+          onReopen={() =>
+            onReopen(
+              root.instances.map((i) => i.issueId),
+              root.signature,
+              true
+            )
+          }
         />
       ))}
     </ul>

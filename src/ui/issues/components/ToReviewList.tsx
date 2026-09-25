@@ -2,6 +2,7 @@ import { matchRootDecision } from "../../../shared/grouping/decisionMatch";
 import type { Root, RootDecision } from "../../../shared/grouping/groupingTypes";
 import type { RootSection } from "../../../shared/grouping/sectionRoots";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
+import { IgnoredTray } from "./IgnoredTray";
 import { RootCard } from "./RootCard";
 import styles from "./ToReviewList.module.css";
 
@@ -11,6 +12,12 @@ interface ToReviewListProps {
   sections: readonly RootSection[];
   issuesById: ReadonlyMap<string, IssueSummary>;
   decisions: Readonly<Record<string, RootDecision>>;
+  ignoredRoots: readonly Root[];
+  onRestoreIgnored: (
+    issueIds: readonly string[],
+    signature: string,
+    clearDecision: boolean
+  ) => void;
   canAdjust: boolean;
   selectedInstances: Readonly<Record<string, ReadonlySet<string>>>;
   onToggleInstanceSelected: (signature: string, issueId: string) => void;
@@ -30,7 +37,16 @@ export function ToReviewList(props: ToReviewListProps) {
   const { sections, issuesById, decisions } = props;
 
   if (sections.length === 0) {
-    return <p className={styles.empty}>Nothing to review. Nice work.</p>;
+    return (
+      <div className={styles.sections}>
+        <p className={styles.empty}>Nothing to review. Nice work.</p>
+        <IgnoredTray
+          roots={props.ignoredRoots}
+          decisions={decisions}
+          onRestore={props.onRestoreIgnored}
+        />
+      </div>
+    );
   }
 
   return (
@@ -77,6 +93,11 @@ export function ToReviewList(props: ToReviewListProps) {
           </ul>
         </section>
       ))}
+      <IgnoredTray
+        roots={props.ignoredRoots}
+        decisions={decisions}
+        onRestore={props.onRestoreIgnored}
+      />
     </div>
   );
 }

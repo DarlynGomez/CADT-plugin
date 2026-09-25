@@ -22,6 +22,14 @@ export const TOKEN_VALUES = {
   "--color-severity-medium-bg": "#FFFBEB",
   "--color-severity-medium-text": "#92400E",
   "--color-severity-low-bg": "#F4F4F5",
+  // The wheel's AA/AAA pass pill only, Adjust's colour wheel. A pass is a fact the
+  // wheel has already computed, not a designer decision like state or severity, so it
+  // is not bound by ADR-029's "supplementary signal" reasoning; the checkmark and the
+  // letters are the real signal, this tint just matches the mockup's pass affordance.
+  "--color-success-bg": "#ECFDF5",
+  "--color-success-border": "#A7F3D0",
+  "--color-success-text": "#047857",
+  "--color-success-icon": "#059669",
   "--font-headline": "Georgia, serif",
   "--font-body": "-apple-system, BlinkMacSystemFont, " + '"Segoe UI", sans-serif',
   "--font-size-question": "26px",

@@ -67,24 +67,18 @@ export function OptionsList({
         />
       )}
       <div className={styles.wheelCard}>
-        {wheelColor ? (
-          <OptionTile
-            label="Choose your own"
-            reason="Chosen on the wheel"
-            sampleText={sampleText}
-            color={wheelColor}
-            hex={rgbToHex(wheelColor)}
-            achievedRatio={contrastRatio(wheelColor, background)}
-            requiredRatio={requiredRatio}
-            focused={focused === "c"}
-            onFocus={onOpenWheel}
-            onActivate={onOpenWheel}
-          />
-        ) : (
-          <button type="button" className={styles.placeholderTile} onClick={onOpenWheel}>
-            Choose your own
-          </button>
-        )}
+        <OptionTile
+          label="Compliant Color Wheel"
+          reason={`Evaluates background parent "${backgroundAncestorName}" (${rgbToHex(background)}) to guarantee accessible AA or AAA compliance on the color wheel.`}
+          sampleText={sampleText}
+          color={wheelColor ?? optionA}
+          hex={rgbToHex(wheelColor ?? optionA)}
+          achievedRatio={wheelColor ? contrastRatio(wheelColor, background) : null}
+          requiredRatio={requiredRatio}
+          focused={focused === "c"}
+          onFocus={onOpenWheel}
+          onActivate={onOpenWheel}
+        />
         {focused === "c" && (
           <div className={styles.wheelExpanded}>
             <WheelView

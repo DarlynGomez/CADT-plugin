@@ -35,7 +35,7 @@ const NODES: Record<string, ReturnType<typeof textNode>> = {
 };
 
 describe("isRootMessage", () => {
-  it.each(["ROOT_DEFER", "ROOT_MARK_IMPORTANT", "ROOT_UNMARK_IMPORTANT", "ROOT_REOPEN"])(
+  it.each(["ROOT_DEFER", "ROOT_MARK_IMPORTANT", "ROOT_UNMARK_IMPORTANT"])(
     "requires an array of string issueIds for %s",
     (type) => {
       expect(isRootMessage({ type, issueIds: ["a", "b"] })).toBe(true);
@@ -45,6 +45,18 @@ describe("isRootMessage", () => {
       expect(isRootMessage({ type, issueIds: "a" })).toBe(false);
     }
   );
+
+  it("requires issueIds, a signature, and clearDecision for ROOT_REOPEN", () => {
+    const base = {
+      type: "ROOT_REOPEN",
+      issueIds: ["a"],
+      signature: SIGNATURE,
+      clearDecision: true
+    };
+    expect(isRootMessage(base)).toBe(true);
+    expect(isRootMessage({ ...base, signature: undefined })).toBe(false);
+    expect(isRootMessage({ ...base, clearDecision: undefined })).toBe(false);
+  });
 
   it("requires issueIds, a non-empty-typed reason field, signature, and fromDecisionOffer for ROOT_IGNORE", () => {
     const base = {
@@ -198,10 +210,74 @@ describe("handleRootMessage", () => {
         : ""
     );
     const reply = vi.fn();
-    await handleRootMessage({ type: "ROOT_REOPEN", issueIds: ["contrast:1:1"] }, reply);
+    await handleRootMessage(
+      {
+        type: "ROOT_REOPEN",
+        issueIds: ["contrast:1:1"],
+        signature: SIGNATURE,
+        clearDecision: true
+      },
+      reply
+    );
 
     const persisted = JSON.parse(setPluginData.mock.calls[0][1]);
     expect(persisted["contrast:1:1"].state).toBe("open");
+  });
+
+  function stubDecidedIssueAndDecision() {
+    getPluginData.mockImplementation((key: string) => {
+      if (key === "cadt.issues.v1") {
+        return JSON.stringify({ "contrast:1:1": { ...OPEN_A, state: "ignored" } });
+      }
+      if (key === "cadt.decisions.v1") {
+        return JSON.stringify({
+          [SIGNATURE]: {
+            reason: "Old reason",
+            recordedAt: "2026-01-01",
+            severityAtDecision: "high"
+          }
+        });
+      }
+      return "";
+    });
+  }
+
+  it("clears the root's recorded decision on a full reopen, per ADR-032", async () => {
+    stubDecidedIssueAndDecision();
+    const reply = vi.fn();
+    await handleRootMessage(
+      {
+        type: "ROOT_REOPEN",
+        issueIds: ["contrast:1:1"],
+        signature: SIGNATURE,
+        clearDecision: true
+      },
+      reply
+    );
+
+    const decisionCall = setPluginData.mock.calls.find((call) => call[0] === "cadt.decisions.v1");
+    if (!decisionCall) {
+      throw new Error("expected a write to cadt.decisions.v1");
+    }
+    const persistedDecisions = JSON.parse(decisionCall[1]);
+    expect(persistedDecisions[SIGNATURE]).toBeUndefined();
+  });
+
+  it("leaves the decision alone on a partial reopen, clearDecision false", async () => {
+    stubDecidedIssueAndDecision();
+    const reply = vi.fn();
+    await handleRootMessage(
+      {
+        type: "ROOT_REOPEN",
+        issueIds: ["contrast:1:1"],
+        signature: SIGNATURE,
+        clearDecision: false
+      },
+      reply
+    );
+
+    const decisionCall = setPluginData.mock.calls.find((call) => call[0] === "cadt.decisions.v1");
+    expect(decisionCall).toBeUndefined();
   });
 
   it("fails without saving when every targeted issue no longer exists", async () => {

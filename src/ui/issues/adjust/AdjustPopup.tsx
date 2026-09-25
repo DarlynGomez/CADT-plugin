@@ -62,10 +62,12 @@ export function AdjustPopup({
     onClose
   });
 
+  const headline = `Adjust contrast for “${issue.nodeName}”`;
+
   if (!evidence || !background || !current || !optionA) {
     return (
       <div className={styles.popup}>
-        <AdjustHeader title="Adjust contrast" subtitle={issue.nodeName} onClose={onClose} />
+        <AdjustHeader title={headline} onClose={onClose} />
         <p className={styles.diagnostic}>
           This issue&rsquo;s contrast evidence could not be read, so there is nothing to adjust
           here. Close this and reopen it; if it keeps happening, the finding itself is stale and a
@@ -81,7 +83,7 @@ export function AdjustPopup({
 
   return (
     <div className={styles.popup} onKeyDown={session.handleKeyDown}>
-      <AdjustHeader title="Adjust contrast" subtitle={issue.nodeName} onClose={onClose} />
+      <AdjustHeader title={headline} onClose={onClose} />
       {options?.binding && <BindingNotice binding={options.binding} />}
       <AdjustBody
         aiAssistanceLevel={aiAssistanceLevel}

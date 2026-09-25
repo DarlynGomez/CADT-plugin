@@ -1,0 +1,56 @@
+.ancestor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-background);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+}
+
+.ancestorLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ancestorSwatch {
+  flex-shrink: 0;
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+}
+
+.ancestorText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ancestorLabel {
+  color: var(--color-muted);
+}
+
+.ancestorName {
+  color: var(--color-ink);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ancestorHex {
+  flex-shrink: 0;
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
+}

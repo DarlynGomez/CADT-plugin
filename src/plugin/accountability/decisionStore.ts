@@ -86,3 +86,21 @@ export function recordDecision(
 ): DecisionRecordMap {
   return { ...record, [decision.signature]: decision };
 }
+
+/**
+ * ADR-032: a full root reopen clears its decision, so the offer to reapply it does not
+ * immediately reappear on the very root the designer just restored. A no-op when the
+ * signature has no recorded decision.
+ */
+export function removeDecision(record: DecisionRecordMap, signature: string): DecisionRecordMap {
+  if (!(signature in record)) {
+    return record;
+  }
+  const rest: DecisionRecordMap = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (key !== signature) {
+      rest[key] = value;
+    }
+  }
+  return rest;
+}

@@ -1,45 +1,105 @@
 .wheelView {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-}
-
-.ancestor {
-  margin: 0;
-  padding: var(--space-2);
-  border-radius: var(--radius-button);
+  padding: var(--space-3);
+  border-radius: var(--radius-tile);
+  border: var(--size-hairline) solid var(--color-line);
   background: var(--color-card);
-  color: var(--color-muted);
-  font-family: var(--font-body);
-  font-size: var(--font-size-helper);
 }
 
-.ancestor strong {
+.cardTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
   font-weight: var(--font-weight-medium);
 }
 
-.readout {
+.grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  grid-template-areas:
+    "canvas ratio"
+    "canvas swatch"
+    "canvas lightness";
+  align-items: start;
+}
+
+.ratioRow {
+  grid-area: ratio;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-button);
-  background: var(--color-card);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-background);
+}
+
+.ratioText {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.ratioLabel {
+  color: var(--color-muted);
+  font-size: var(--font-size-severity-label);
+}
+
+.ratioValue {
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.passPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-success-border);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-size: var(--font-size-severity-label);
+  font-weight: var(--font-weight-medium);
+}
+
+.passPill svg {
+  color: var(--color-success-icon);
+}
+
+.swatchRow {
+  grid-area: swatch;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .swatch {
-  width: var(--space-3);
-  height: var(--space-3);
   flex-shrink: 0;
+  width: var(--space-4);
+  height: var(--space-4);
   border-radius: var(--radius-button);
   border: var(--size-hairline) solid var(--color-line);
 }
 
-.hex {
+.hexFieldWrap {
   flex: 1;
-  color: var(--color-ink);
-  font-family: var(--font-body);
-  font-size: var(--font-size-button);
-  font-weight: var(--font-weight-medium);
+  min-width: 0;
 }

@@ -8,7 +8,8 @@ export interface OptionTileProps {
   sampleText: string;
   color: RGBColor;
   hex: string;
-  achievedRatio: number;
+  /** Null before a colour has actually been chosen, the wheel option on first open */
+  achievedRatio: number | null;
   requiredRatio: number;
   focused: boolean;
   onFocus: () => void;
@@ -60,18 +61,19 @@ export function OptionTile({
       <span className={styles.body}>
         <span className={styles.labelRow}>
           <span className={styles.label}>{label}</span>
-          <RatioBadge achievedRatio={achievedRatio} requiredRatio={requiredRatio} />
+          {achievedRatio !== null && (
+            <RatioBadge achievedRatio={achievedRatio} requiredRatio={requiredRatio} />
+          )}
         </span>
         <span className={styles.reason}>{reason}</span>
-        <span className={styles.hex}>{hex}</span>
       </span>
       {focused && (
-        <svg className={styles.check} viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <svg className={styles.check} viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
           <path
             d="M3.5 8.5 6.5 11.5 12.5 4.5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

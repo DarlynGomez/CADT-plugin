@@ -110,8 +110,11 @@ export function ColorWheel({
 
   useWheelPaint(canvasRef, lightness, background, requiredRatio);
 
+  // A fragment, not a wrapping div: WheelView.tsx places the canvas, the lightness
+  // control, and its own ratio and hex elements into one CSS grid together, so the
+  // slider can sit under the hex field rather than under the wheel. See its module CSS.
   return (
-    <div className={styles.wheel}>
+    <>
       <canvas
         ref={canvasRef}
         className={styles.canvas}
@@ -123,8 +126,11 @@ export function ColorWheel({
         onPointerMove={(event) => event.buttons === 1 && handlePointer(event)}
         onKeyDown={handleKeyDown}
       />
-      <label className={styles.lightnessLabel}>
-        Depth / Tone
+      <label className={styles.lightnessLabel} aria-label="Depth / Tone">
+        <span className={styles.lightnessTopRow} aria-hidden="true">
+          <span>Depth / Tone</span>
+          <span className={styles.lightnessValue}>{Math.round(lightness * 100)}%</span>
+        </span>
         <input
           className={styles.lightnessSlider}
           type="range"
@@ -138,6 +144,6 @@ export function ColorWheel({
       <p className={styles.liveRegion} aria-live="polite">
         {announcement}
       </p>
-    </div>
+    </>
   );
 }

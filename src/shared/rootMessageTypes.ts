@@ -30,10 +30,21 @@ export interface RootIgnoreMessage {
   fromDecisionOffer: boolean;
 }
 
-/** Section 6.5's Decisions-view Reopen control: only ignored instances return to open */
+/**
+ * Section 6.5's Decisions-view Reopen control, and the Ignored tray's Restore: only
+ * ignored instances return to open. `clearDecision` is true exactly when this reopen
+ * leaves no ignored instance of `signature` behind, a full-root restore; the recorded
+ * decision is cleared then, since leaving it would immediately re-offer itself to the
+ * very root the designer just brought back, not the "new matching instance" case
+ * ADR-022 built the offer for. A partial restore, some instances checked in the
+ * Ignored tray's disclosure but not others, leaves the decision alone: it still
+ * describes the instances still ignored. See ADR-032.
+ */
 export interface RootReopenMessage {
   type: "ROOT_REOPEN";
   issueIds: string[];
+  signature: string;
+  clearDecision: boolean;
 }
 
 /** The deferred card's restore control: only deferred instances return to open */

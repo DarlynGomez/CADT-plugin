@@ -71,8 +71,7 @@ describe("useIssues", () => {
   it.each([
     ["deferRoot", "ROOT_DEFER"],
     ["markRootImportant", "ROOT_MARK_IMPORTANT"],
-    ["unmarkRootImportant", "ROOT_UNMARK_IMPORTANT"],
-    ["reopenRoot", "ROOT_REOPEN"]
+    ["unmarkRootImportant", "ROOT_UNMARK_IMPORTANT"]
   ] as const)("%s sends a %s message with the issue ids", (action, type) => {
     const postMessage = vi.spyOn(window.parent, "postMessage");
     const { result } = renderHook(() => useIssues());
@@ -83,6 +82,28 @@ describe("useIssues", () => {
 
     expect(postMessage).toHaveBeenCalledWith(
       { pluginMessage: { type, issueIds: [ISSUE.id] } },
+      "*"
+    );
+    postMessage.mockRestore();
+  });
+
+  it("sends the signature and clearDecision with a root reopen action, per ADR-032", () => {
+    const postMessage = vi.spyOn(window.parent, "postMessage");
+    const { result } = renderHook(() => useIssues());
+
+    act(() => {
+      result.current.reopenRoot([ISSUE.id], "sig-1", true);
+    });
+
+    expect(postMessage).toHaveBeenCalledWith(
+      {
+        pluginMessage: {
+          type: "ROOT_REOPEN",
+          issueIds: [ISSUE.id],
+          signature: "sig-1",
+          clearDecision: true
+        }
+      },
       "*"
     );
     postMessage.mockRestore();

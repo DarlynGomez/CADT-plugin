@@ -21,24 +21,3 @@
   border-radius: 0 0 var(--radius-tile) var(--radius-tile);
   background: var(--color-card);
 }
-
-.placeholderTile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: var(--size-target-min);
-  padding: var(--space-2);
-  border: var(--size-hairline) dashed var(--color-line);
-  border-radius: var(--radius-tile);
-  background: transparent;
-  color: var(--color-ink);
-  font: inherit;
-  font-size: var(--font-size-option-label);
-  cursor: pointer;
-}
-
-.placeholderTile:focus-visible {
-  outline: var(--size-focus-ring) solid var(--color-focus-ring);
-  outline-offset: var(--size-focus-offset);
-}

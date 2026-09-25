@@ -158,7 +158,7 @@ describe("AdjustPopup", () => {
     );
 
     expect(screen.getByText("Keep your colour")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /choose your own/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /compliant color wheel/i })).toBeInTheDocument();
   });
 
   it("shows a close button and the node name in the header", () => {
@@ -172,7 +172,7 @@ describe("AdjustPopup", () => {
       />
     );
 
-    expect(screen.getByText("Body copy")).toBeInTheDocument();
+    expect(screen.getByText(/Body copy/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 
@@ -268,7 +268,7 @@ describe("AdjustPopup", () => {
 
     const keepTile = screen.getByText("Keep your colour").closest("button");
     const fileTile = screen.getByText("From your file").closest("button");
-    const wheelTile = screen.getByRole("button", { name: /choose your own/i });
+    const wheelTile = screen.getByRole("button", { name: /compliant color wheel/i });
     expect(keepTile).not.toBeNull();
     expect(fileTile).not.toBeNull();
 
@@ -335,7 +335,7 @@ describe("AdjustPopup", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /choose your own/i }));
+    fireEvent.click(screen.getByRole("button", { name: /compliant color wheel/i }));
     expect(screen.getByRole("slider", { name: /colour wheel/i })).toBeInTheDocument();
 
     fireEvent.keyDown(screen.getByRole("slider", { name: /colour wheel/i }), { key: "Escape" });

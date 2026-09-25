@@ -39,18 +39,18 @@ afterEach(() => {
 
 describe("isAdjustMessage", () => {
   it("accepts ADJUST_CLEAR_PREVIEW with no other fields", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     expect(isAdjustMessage({ type: "ADJUST_CLEAR_PREVIEW" })).toBe(true);
   });
 
   it("requires a string issueId for ADJUST_OPTIONS_REQUEST", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     expect(isAdjustMessage({ type: "ADJUST_OPTIONS_REQUEST", issueId: ISSUE_ID })).toBe(true);
     expect(isAdjustMessage({ type: "ADJUST_OPTIONS_REQUEST" })).toBe(false);
   });
 
   it("requires issueId, issueIds, and a colour for ADJUST_PREVIEW", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     expect(
       isAdjustMessage({
         type: "ADJUST_PREVIEW",
@@ -66,7 +66,7 @@ describe("isAdjustMessage", () => {
   });
 
   it("requires issueId, issueIds, a colour, option, and both session flags for ADJUST_APPLY", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     const full = {
       type: "ADJUST_APPLY",
       issueId: ISSUE_ID,
@@ -82,7 +82,7 @@ describe("isAdjustMessage", () => {
   });
 
   it("requires issueId, issueIds, and both session flags for ADJUST_ABANDONED", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     expect(
       isAdjustMessage({
         type: "ADJUST_ABANDONED",
@@ -96,7 +96,7 @@ describe("isAdjustMessage", () => {
   });
 
   it("rejects an unrecognized type and non-objects", async () => {
-    const { isAdjustMessage } = await import("./adjustProtocol");
+    const { isAdjustMessage } = await import("./isAdjustMessage");
     expect(isAdjustMessage({ type: "ISSUE_DEFER" })).toBe(false);
     expect(isAdjustMessage(null)).toBe(false);
   });
@@ -151,7 +151,11 @@ describe("handleAdjustMessage", () => {
     await handleAdjustMessage({ type: "ADJUST_OPTIONS_REQUEST", issueId: ISSUE_ID }, reply);
 
     expect(reply).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "ADJUST_OPTIONS_READY", issueId: ISSUE_ID })
+      expect.objectContaining({
+        type: "ADJUST_OPTIONS_READY",
+        issueId: ISSUE_ID,
+        variableScope: null
+      })
     );
   });
 

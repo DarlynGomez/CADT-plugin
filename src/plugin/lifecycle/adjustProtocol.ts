@@ -6,49 +6,11 @@ import { collectFilePalette } from "../adjust/adapter/filePalette";
 import { restorePreview, beginPreview } from "../adjust/adapter/previewState";
 import { applyAdjustment } from "../adjust/adapter/applyAdjustment";
 import { captureAdjustLogState } from "../adjust/adapter/adjustLogCapture";
+import { resolveVariableScope } from "../adjust/adapter/variableScope";
+import { handleApplyVariable, handleVariableConsequenceRequest } from "./adjustVariableProtocol";
 import { scanAndSync } from "./scanAndSync";
 
 type Reply = (message: AdjustReplyMessage) => void;
-
-export function isAdjustMessage(value: unknown): value is AdjustMessage {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const message = value as Record<string, unknown>;
-  const hasColor = () =>
-    typeof message.color === "object" &&
-    message.color !== null &&
-    typeof (message.color as Record<string, unknown>).r === "number";
-  const hasSessionFlags = () =>
-    typeof message.wheelOpened === "boolean" && typeof message.hexRejected === "boolean";
-  const hasIssueIds = () =>
-    Array.isArray(message.issueIds) &&
-    message.issueIds.length > 0 &&
-    message.issueIds.every((id) => typeof id === "string");
-
-  switch (message.type) {
-    case "ADJUST_CLEAR_PREVIEW":
-      return true;
-    case "ADJUST_OPTIONS_REQUEST":
-      return typeof message.issueId === "string";
-    case "ADJUST_PREVIEW":
-      return typeof message.issueId === "string" && hasIssueIds() && hasColor();
-    case "ADJUST_APPLY":
-      return (
-        typeof message.issueId === "string" &&
-        hasIssueIds() &&
-        hasColor() &&
-        hasSessionFlags() &&
-        (message.optionChosen === "a" ||
-          message.optionChosen === "b" ||
-          message.optionChosen === "c")
-      );
-    case "ADJUST_ABANDONED":
-      return typeof message.issueId === "string" && hasIssueIds() && hasSessionFlags();
-    default:
-      return false;
-  }
-}
 
 function failed(issueId: string, message: string): AdjustReplyMessage {
   return { type: "ADJUST_ACTION_FAILED", issueId, message };
@@ -83,8 +45,27 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
       reply(failed(message.issueId, "That node no longer exists in this file."));
       return;
     }
-    const [palette, binding] = await Promise.all([collectFilePalette(), detectFillBinding(node)]);
-    reply({ type: "ADJUST_OPTIONS_READY", issueId: message.issueId, palette, binding });
+    const [palette, binding, variableScope] = await Promise.all([
+      collectFilePalette(),
+      detectFillBinding(node),
+      resolveVariableScope(node)
+    ]);
+    reply({ type: "ADJUST_OPTIONS_READY", issueId: message.issueId, palette, binding, variableScope });
+    return;
+  }
+
+  if (message.type === "ADJUST_VARIABLE_CONSEQUENCE_REQUEST") {
+    await handleVariableConsequenceRequest(message, reply);
+    return;
+  }
+
+  if (message.type === "ADJUST_APPLY_VARIABLE") {
+    const representative = await resolveTextNode(message.issueId);
+    if (!representative) {
+      reply(failed(message.issueId, "That node no longer exists in this file."));
+      return;
+    }
+    await handleApplyVariable(message, representative, reply);
     return;
   }
 

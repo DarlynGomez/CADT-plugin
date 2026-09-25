@@ -1,7 +1,10 @@
 import type { NamedColor } from "../../../../shared/colour/paletteMatch";
 import type { RGBColor } from "../../../../shared/issues/issueTypes";
 import { OptionsList, type FocusedOption } from "./OptionsList";
+import styles from "./AdjustBody.module.css";
 import { WheelView } from "./WheelView";
+
+const COUNT_WORD: Record<number, string> = { 2: "two", 3: "three" };
 
 interface AdjustBodyProps {
   /** ADJUST_SPEC.md section 2: "Flag and explain" opens straight into the wheel, no options */
@@ -49,20 +52,27 @@ export function AdjustBody({
     );
   }
 
+  const count = optionB ? 3 : 2;
+
   return (
-    <OptionsList
-      sampleText={sampleText}
-      background={background}
-      backgroundAncestorName={backgroundAncestorName}
-      requiredRatio={requiredRatio}
-      optionA={optionA}
-      optionB={optionB}
-      wheelColor={wheelColor}
-      focused={focused}
-      onFocusOption={onFocusOption}
-      onOpenWheel={onOpenWheel}
-      onColorChange={onColorChange}
-      onHexRejected={onHexRejected}
-    />
+    <div className={styles.body}>
+      <p className={styles.intro}>
+        Select one of {COUNT_WORD[count]} intentional contrast adjustments:
+      </p>
+      <OptionsList
+        sampleText={sampleText}
+        background={background}
+        backgroundAncestorName={backgroundAncestorName}
+        requiredRatio={requiredRatio}
+        optionA={optionA}
+        optionB={optionB}
+        wheelColor={wheelColor}
+        focused={focused}
+        onFocusOption={onFocusOption}
+        onOpenWheel={onOpenWheel}
+        onColorChange={onColorChange}
+        onHexRejected={onHexRejected}
+      />
+    </div>
   );
 }
