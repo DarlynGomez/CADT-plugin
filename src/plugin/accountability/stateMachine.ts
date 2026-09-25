@@ -32,8 +32,8 @@ export function createIssue(
 
 const DEFERRABLE_FROM: ReadonlySet<IssueState> = new Set(["open", "important"]);
 const FLAGGABLE_FROM: ReadonlySet<IssueState> = new Set(["open", "deferred"]);
-const ACKNOWLEDGABLE_FROM: ReadonlySet<IssueState> = new Set(["open", "deferred", "important"]);
-const REOPENABLE_FROM: ReadonlySet<IssueState> = new Set(["deferred", "important", "acknowledged"]);
+const IGNORABLE_FROM: ReadonlySet<IssueState> = new Set(["open", "deferred", "important"]);
+const REOPENABLE_FROM: ReadonlySet<IssueState> = new Set(["deferred", "important", "ignored"]);
 
 /** open or important to deferred: put off, not dismissed */
 export function deferIssue(issue: Issue): TransitionOutcome {
@@ -52,27 +52,27 @@ export function flagImportant(issue: Issue): TransitionOutcome {
 }
 
 /**
- * open, deferred, or important to acknowledged. Requires a non-empty reason, enforced
+ * open, deferred, or important to ignored. Requires a non-empty reason, enforced
  * here and not only in the UI, so a malformed message cannot bypass the invariant.
  */
-export function acknowledgeIssue(issue: Issue, reason: string, at: string): TransitionOutcome {
-  if (!ACKNOWLEDGABLE_FROM.has(issue.state)) {
-    return rejected(`Cannot acknowledge an issue in state '${issue.state}'`);
+export function ignoreIssue(issue: Issue, reason: string, at: string): TransitionOutcome {
+  if (!IGNORABLE_FROM.has(issue.state)) {
+    return rejected(`Cannot ignore an issue in state '${issue.state}'`);
   }
   if (reason.trim().length === 0) {
-    return rejected("Acknowledgment requires a non-empty reason");
+    return rejected("A reason is required to ignore an issue");
   }
   return accepted({
     ...issue,
-    state: "acknowledged",
-    acknowledgedReason: reason,
-    acknowledgedAt: at,
-    severityAtAcknowledgment: issue.severityAtLastDetection,
-    changedSinceAcknowledgment: false
+    state: "ignored",
+    ignoredReason: reason,
+    ignoredAt: at,
+    severityAtIgnore: issue.severityAtLastDetection,
+    changedSinceIgnore: false
   });
 }
 
-/** deferred, important, or acknowledged back to open, only by an explicit designer action */
+/** deferred, important, or ignored back to open, only by an explicit designer action */
 export function reopenIssue(issue: Issue): TransitionOutcome {
   if (!REOPENABLE_FROM.has(issue.state)) {
     return rejected(`Cannot reopen an issue in state '${issue.state}'`);
@@ -91,10 +91,10 @@ export function recordResurface(issue: Issue): Issue {
  * finding genuinely stopped, and reopening from resolved keeps the same record rather
  * than creating a new one, so its history survives. See spec section 5.1.
  *
- * Acknowledged is the one state a fresh finding can override, and only one way: a
- * worse severity band than the one acknowledged reopens the issue once, marked
- * changedSinceAcknowledgment. Same or better severity leaves the acknowledgment
- * standing. This is ADR-014, flagged there as a judgment call, not settled.
+ * Ignored is the one state a fresh finding can override, and only one way: a
+ * worse severity band than the one it was ignored at reopens the issue once, marked
+ * changedSinceIgnore. Same or better severity leaves it ignored. This is ADR-014,
+ * flagged there as a judgment call, not settled.
  */
 export function reconcileDetection(
   issue: Issue,
@@ -114,14 +114,14 @@ export function reconcileDetection(
     };
   }
 
-  if (issue.state === "acknowledged") {
-    const worsened = issue.severityAtAcknowledgment
-      ? isSeverityWorse(latestSeverity, issue.severityAtAcknowledgment)
+  if (issue.state === "ignored") {
+    const worsened = issue.severityAtIgnore
+      ? isSeverityWorse(latestSeverity, issue.severityAtIgnore)
       : false;
     return {
       ...issue,
-      state: worsened ? "open" : "acknowledged",
-      changedSinceAcknowledgment: worsened ? true : issue.changedSinceAcknowledgment,
+      state: worsened ? "open" : "ignored",
+      changedSinceIgnore: worsened ? true : issue.changedSinceIgnore,
       severityAtLastDetection: latestSeverity,
       lastDetectedAt: detectedAt
     };

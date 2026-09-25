@@ -21,3 +21,43 @@
   outline: var(--size-focus-ring) solid var(--color-focus-ring);
   outline-offset: var(--size-focus-offset);
 }
+
+.ancestor {
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-card);
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-helper);
+}
+
+.ancestor strong {
+  color: var(--color-ink);
+  font-weight: var(--font-weight-medium);
+}
+
+.readout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-card);
+}
+
+.swatch {
+  width: var(--space-3);
+  height: var(--space-3);
+  flex-shrink: 0;
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+}
+
+.hex {
+  flex: 1;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-medium);
+}

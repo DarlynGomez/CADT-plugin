@@ -9,7 +9,7 @@ export interface DerivedRootState {
 /**
  * Spec section 3.2's precedence over one root's instance states: any important wins
  * outright, then any open, then any deferred; a root whose instances are every one
- * acknowledged or resolved has left the working set and moved to the Decisions view.
+ * ignored or resolved has left the working set and moved to the Decisions view.
  * The breakdown always reflects every instance's real state, even when the displayed
  * state was decided by only one of them, so a mixed root can say "98 open, 3 deferred"
  * rather than hiding the mix.

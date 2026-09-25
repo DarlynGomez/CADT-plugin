@@ -27,7 +27,12 @@ const ANNOUNCE_THROTTLE_MS = 500;
  * a faded cell does not refuse it: it snaps to the nearest passing lightness on that
  * hue and says so, via keepHue, the same search Option A uses
  */
-export function ColorWheel({ background, requiredRatio, initialColor, onColorChange }: ColorWheelProps) {
+export function ColorWheel({
+  background,
+  requiredRatio,
+  initialColor,
+  onColorChange
+}: ColorWheelProps) {
   const initial = rgbToHsl(initialColor);
   const [hue, setHue] = useState(initial.h);
   const [saturation, setSaturation] = useState(initial.s);
@@ -119,7 +124,7 @@ export function ColorWheel({ background, requiredRatio, initialColor, onColorCha
         onKeyDown={handleKeyDown}
       />
       <label className={styles.lightnessLabel}>
-        Lightness
+        Depth / Tone
         <input
           className={styles.lightnessSlider}
           type="range"

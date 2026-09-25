@@ -1,0 +1,32 @@
+.empty {
+  padding: var(--space-3);
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-helper);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3);
+}
+
+.sectionLabel {
+  margin: 0 0 var(--space-2);
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

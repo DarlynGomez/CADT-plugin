@@ -22,11 +22,11 @@ describe("isIssue", () => {
     expect(
       isIssue({
         ...VALID,
-        state: "acknowledged",
-        acknowledgedReason: "Client insisted",
-        acknowledgedAt: "2026-09-08T00:00:00.000Z",
-        severityAtAcknowledgment: "medium",
-        changedSinceAcknowledgment: false
+        state: "ignored",
+        ignoredReason: "Client insisted",
+        ignoredAt: "2026-09-08T00:00:00.000Z",
+        severityAtIgnore: "medium",
+        changedSinceIgnore: false
       })
     ).toBe(true);
   });
@@ -50,12 +50,12 @@ describe("isIssue", () => {
     expect(isIssue({ ...VALID, encounterCount: "3" })).toBe(false);
   });
 
-  it("rejects an invalid severityAtAcknowledgment", () => {
-    expect(isIssue({ ...VALID, severityAtAcknowledgment: "critical" })).toBe(false);
+  it("rejects an invalid severityAtIgnore", () => {
+    expect(isIssue({ ...VALID, severityAtIgnore: "critical" })).toBe(false);
   });
 
-  it("rejects a non-boolean changedSinceAcknowledgment", () => {
-    expect(isIssue({ ...VALID, changedSinceAcknowledgment: "yes" })).toBe(false);
+  it("rejects a non-boolean changedSinceIgnore", () => {
+    expect(isIssue({ ...VALID, changedSinceIgnore: "yes" })).toBe(false);
   });
 
   it("rejects null and non-objects", () => {

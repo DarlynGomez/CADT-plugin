@@ -32,6 +32,8 @@ export interface NodeSnapshot {
    */
   screenId: string;
   screenName: string;
+  /** GROUPING_SPEC.md 3.1's signature field: a variable or style name, or null when unbound */
+  foregroundBinding: string | null;
   foreground: RGBColor | null;
   foregroundAlpha: number | null;
   background: RGBColor | null;
@@ -59,7 +61,7 @@ export interface Finding<TEvidence = unknown> {
 }
 
 /** The five states from spec section 5. Four are designer-controlled, one is a consequence. */
-export type IssueState = "open" | "deferred" | "acknowledged" | "important" | "resolved";
+export type IssueState = "open" | "deferred" | "ignored" | "important" | "resolved";
 
 /**
  * The persisted record for one rule applied to one node, keyed by id in issueStore.ts
@@ -78,11 +80,11 @@ export interface Issue {
   severityAtLastDetection: Severity;
   encounterCount: number;
   lastDetectedAt: string;
-  acknowledgedReason?: string;
-  acknowledgedAt?: string;
-  severityAtAcknowledgment?: Severity;
-  /** Set when a worse-than-acknowledged finding reopened this issue. See ADR-014. */
-  changedSinceAcknowledgment?: boolean;
+  ignoredReason?: string;
+  ignoredAt?: string;
+  severityAtIgnore?: Severity;
+  /** Set when a worse-than-ignored finding reopened this issue. See ADR-014. */
+  changedSinceIgnore?: boolean;
 }
 
 /**

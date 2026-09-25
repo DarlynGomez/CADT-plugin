@@ -11,6 +11,17 @@ export const TOKEN_VALUES = {
   // 5.60:1 against --color-background (#FAFAF8), above the 4.5:1 floor. See
   // DESIGN_SYSTEM.md section 2.
   "--color-warning": "#A8471F",
+  // Status and severity colour, added on direct request after reviewing the panel in
+  // grayscale: the status dot and severity tag now carry colour as a supplementary
+  // signal, never the only one. The dot has a text equivalent via aria-label, and the
+  // severity tag keeps its word ("High Severity"), so nothing reads by colour alone.
+  // --color-warning doubles as both the important-status dot and the high-severity
+  // tag's text, on a pale tint background for the tag only.
+  "--color-status-open": "#10B981",
+  "--color-severity-high-bg": "#FDF2F0",
+  "--color-severity-medium-bg": "#FFFBEB",
+  "--color-severity-medium-text": "#92400E",
+  "--color-severity-low-bg": "#F4F4F5",
   "--font-headline": "Georgia, serif",
   "--font-body": "-apple-system, BlinkMacSystemFont, " + '"Segoe UI", sans-serif',
   "--font-size-question": "26px",

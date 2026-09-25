@@ -1,0 +1,63 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+  list-style: none;
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: var(--space-3);
+  height: var(--space-3);
+  accent-color: var(--color-ink);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.name {
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-helper);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+}
+
+.locate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: var(--size-target-min);
+  min-width: var(--size-target-min);
+  border-radius: var(--radius-button);
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.locate:hover {
+  color: var(--color-ink);
+}
+
+.locate:focus-visible,
+.checkbox:focus-visible {
+  outline: var(--size-focus-ring) solid var(--color-focus-ring);
+  outline-offset: var(--size-focus-offset);
+}

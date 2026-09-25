@@ -46,10 +46,10 @@ export interface ConsentScreen {
 // Consent stays outside questions so skipping can never manufacture research consent
 export const consentScreen: ConsentScreen = {
   heading: "Can we log how you use CADT?",
-  body: "CADT is part of a research study at RIT. Logging records which issues you defer, fix, or acknowledge. It does not record your design content. You can use CADT fully with logging turned off.",
+  body: "CADT is part of a research study at RIT. Logging records which issues you defer, fix, or ignore. It does not record your design content. You can use CADT fully with logging turned off.",
   detailsLabel: "What gets logged",
   details:
-    "CADT records when you defer, fix, or acknowledge an issue. It does not record your design content.",
+    "CADT records when you defer, fix, or ignore an issue. It does not record your design content.",
   allowLabel: "Allow logging",
   declineLabel: "Continue without logging"
 };

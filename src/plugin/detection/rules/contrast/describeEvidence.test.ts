@@ -9,6 +9,7 @@ function evidence(overrides: Partial<ContrastEvidence> = {}): ContrastEvidence {
     requiredRatio: 4.5,
     foregroundHex: "#898989",
     foregroundAlpha: 1,
+    foregroundBinding: null,
     backgroundHex: "#FFFFFF",
     backgroundAlpha: 1,
     backgroundSource: { kind: "node", nodeId: "1:2", nodeName: "Card" },

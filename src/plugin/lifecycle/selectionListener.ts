@@ -10,9 +10,8 @@ import {
   consumePluginSetSelectionMarker,
   recordDesignerSelection
 } from "../accountability/adapter/canvasSelection";
-import type { PluginToUiMessage } from "../../shared/messageTypes";
 import { loadIssues, saveIssues, type IssueRecordMap } from "../accountability/issueStore";
-import { buildDisplayList } from "./issueDisplay";
+import { buildIssuesUpdatedMessage } from "./issueDisplay";
 
 let reEncounterState: ReEncounterState = { waitingForSelectionToLeave: new Set() };
 
@@ -100,11 +99,7 @@ export async function handleSelectionChange(isPluginOriginated: boolean = false)
     return;
   }
 
-  const message: PluginToUiMessage = {
-    type: "ISSUES_UPDATED",
-    issues: await buildDisplayList(updated)
-  };
-  figma.ui.postMessage(message);
+  figma.ui.postMessage(await buildIssuesUpdatedMessage(updated));
 }
 
 export function registerSelectionChangeListener(): void {

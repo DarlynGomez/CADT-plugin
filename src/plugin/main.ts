@@ -1,11 +1,15 @@
-import { isCalibrationProfile } from "../shared/calibrationSchema";
 import { handleAdjustMessage, isAdjustMessage } from "./lifecycle/adjustProtocol";
-import { registerAdjustCloseRestore, registerAdjustSelectionRestore } from "./lifecycle/adjustLifecycle";
+import {
+  registerAdjustCloseRestore,
+  registerAdjustSelectionRestore
+} from "./lifecycle/adjustLifecycle";
+import { handleCalibrationMessage, isCalibrationMessage } from "./lifecycle/calibrationProtocol";
 // TEMPORARY, see exportIssuesDebug.ts for the removal checklist.
 import { exportIssuesToConsole } from "./lifecycle/exportIssuesDebug";
 import { handleIssueMessage, isIssueMessage } from "./lifecycle/issuesProtocol";
+import { handleRootMessage, isRootMessage } from "./lifecycle/rootActionsProtocol";
+import { handleSelectionMessage, isSelectionMessage } from "./lifecycle/selectionProtocol";
 import { startDetectionLifecycle } from "./lifecycle/startup";
-import { resolveCalibration, saveCalibration } from "./storage/calibrationStore";
 import { resetCalibration, type CalibrationResetResult } from "./storage/resetCalibration";
 
 const RESET_COMMAND = "reset-calibration";
@@ -24,70 +28,23 @@ async function handleUiMessage(rawMessage: unknown): Promise<void> {
 
   const message = rawMessage as Record<string, unknown>;
 
-  if (message.type === "CALIBRATION_LOAD") {
-    try {
-      const resolution = await resolveCalibration();
-      figma.ui.postMessage({
-        type: "CALIBRATION_LOADED",
-        profile: resolution?.profile ?? null,
-        resolvedScope: resolution?.scope ?? null
-      });
-    } catch (error) {
-      console.error("Calibration load failed, falling back to first run calibration", error);
-      figma.ui.postMessage({ type: "CALIBRATION_LOADED", profile: null, resolvedScope: null });
-    }
-    return;
-  }
-
-  if (message.type === "CALIBRATION_SAVE") {
-    if (!isCalibrationProfile(message.profile)) {
-      console.error("Rejected a CALIBRATION_SAVE with an invalid profile", message.profile);
-      figma.ui.postMessage({
-        type: "CALIBRATION_SAVE_FAILED",
-        message: "The setup could not be saved: the answers were not in a valid shape."
-      });
-      return;
-    }
-
-    const saveResult = await saveCalibration(message.profile);
-    if (!saveResult.fileSaved && !saveResult.userSaved) {
-      const detail =
-        [saveResult.fileError, saveResult.userError].filter(Boolean).join("; ") ||
-        "unknown storage error";
-      console.error("Calibration save failed on every surface", saveResult);
-      figma.ui.postMessage({
-        type: "CALIBRATION_SAVE_FAILED",
-        message: `The setup could not be saved: ${detail}`
-      });
-      return;
-    }
-
-    if (!saveResult.fileSaved || !saveResult.userSaved) {
-      console.warn("Calibration saved to only one surface", saveResult);
-    }
-    figma.ui.postMessage({ type: "CALIBRATION_SAVED" });
-
-    try {
-      // Re-resolve so the UI hands off to the returning-user surface with the
-      // sandbox's scope decision rather than one guessed above the storage layer.
-      const resolution = await resolveCalibration();
-      if (resolution) {
-        figma.ui.postMessage({
-          type: "CALIBRATION_LOADED",
-          profile: resolution.profile,
-          resolvedScope: resolution.scope
-        });
-      }
-    } catch (error) {
-      // The write already succeeded, so the UI keeps the profile it authored. A
-      // failed re-resolve only costs the returning-user screen its scope label.
-      console.error("Calibration re-resolve after save failed", error);
-    }
+  if (isCalibrationMessage(message)) {
+    await handleCalibrationMessage(message, (reply) => figma.ui.postMessage(reply));
     return;
   }
 
   if (isIssueMessage(message)) {
     await handleIssueMessage(message, (reply) => figma.ui.postMessage(reply));
+    return;
+  }
+
+  if (isRootMessage(message)) {
+    await handleRootMessage(message, (reply) => figma.ui.postMessage(reply));
+    return;
+  }
+
+  if (isSelectionMessage(message)) {
+    await handleSelectionMessage(message);
     return;
   }
 

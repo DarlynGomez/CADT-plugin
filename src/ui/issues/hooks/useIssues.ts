@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import type { RootDecision } from "../../../shared/grouping/groupingTypes";
 import { isIssue } from "../../../shared/issues/issueSchema";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import type { IssuesPluginMessage, UiToPluginMessage } from "../../../shared/messageTypes";
@@ -17,7 +18,15 @@ function isIssuesMessage(value: unknown): value is IssuesPluginMessage {
   }
   const message = value as Record<string, unknown>;
   if (message.type === "ISSUES_UPDATED") {
-    return Array.isArray(message.issues) && message.issues.every(isIssueSummary);
+    return (
+      Array.isArray(message.issues) &&
+      message.issues.every(isIssueSummary) &&
+      typeof message.decisions === "object" &&
+      message.decisions !== null
+    );
+  }
+  if (message.type === "ROOT_ACTION_FAILED") {
+    return Array.isArray(message.issueIds) && typeof message.message === "string";
   }
   return (
     message.type === "ISSUE_ACTION_FAILED" &&
@@ -31,13 +40,14 @@ function sendMessage(message: UiToPluginMessage) {
 }
 
 export interface ActionError {
-  issueId: string;
+  issueIds: readonly string[];
   message: string;
 }
 
-/** Subscribes to the sandbox's issue list and exposes the six designer actions */
+/** Subscribes to the sandbox's issue and decision records, and exposes every designer action */
 export function useIssues() {
   const [issues, setIssues] = useState<readonly IssueSummary[]>([]);
+  const [decisions, setDecisions] = useState<Readonly<Record<string, RootDecision>>>({});
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState<ActionError | null>(null);
 
@@ -49,10 +59,13 @@ export function useIssues() {
       }
       if (message.type === "ISSUES_UPDATED") {
         setIssues(message.issues);
+        setDecisions(message.decisions);
         setActionError(null);
         setLoading(false);
-      } else {
-        setActionError({ issueId: message.issueId, message: message.message });
+      } else if (message.type === "ISSUE_ACTION_FAILED") {
+        setActionError({ issueIds: [message.issueId], message: message.message });
+      } else if (message.type === "ROOT_ACTION_FAILED") {
+        setActionError({ issueIds: message.issueIds, message: message.message });
       }
     }
 
@@ -66,34 +79,53 @@ export function useIssues() {
     };
   }, []);
 
-  const deferIssue = useCallback((issueId: string) => {
-    sendMessage({ type: "ISSUE_DEFER", issueId });
-  }, []);
-
-  const flagImportant = useCallback((issueId: string) => {
-    sendMessage({ type: "ISSUE_FLAG_IMPORTANT", issueId });
-  }, []);
-
-  const reopenIssue = useCallback((issueId: string) => {
-    sendMessage({ type: "ISSUE_REOPEN", issueId });
-  }, []);
-
-  const acknowledgeIssue = useCallback((issueId: string, reason: string) => {
-    sendMessage({ type: "ISSUE_ACKNOWLEDGE", issueId, reason });
-  }, []);
-
   const focusIssue = useCallback((issueId: string) => {
     sendMessage({ type: "ISSUE_FOCUS", issueId });
   }, []);
 
+  const deferRoot = useCallback((issueIds: string[]) => {
+    sendMessage({ type: "ROOT_DEFER", issueIds });
+  }, []);
+
+  const markRootImportant = useCallback((issueIds: string[]) => {
+    sendMessage({ type: "ROOT_MARK_IMPORTANT", issueIds });
+  }, []);
+
+  const unmarkRootImportant = useCallback((issueIds: string[]) => {
+    sendMessage({ type: "ROOT_UNMARK_IMPORTANT", issueIds });
+  }, []);
+
+  const ignoreRoot = useCallback(
+    (issueIds: string[], reason: string, signature: string, fromDecisionOffer: boolean) => {
+      sendMessage({ type: "ROOT_IGNORE", issueIds, reason, signature, fromDecisionOffer });
+    },
+    []
+  );
+
+  const reopenRoot = useCallback((issueIds: string[]) => {
+    sendMessage({ type: "ROOT_REOPEN", issueIds });
+  }, []);
+
+  const showOnCanvas = useCallback((nodeIds: string[]) => {
+    sendMessage({ type: "SHOW_ON_CANVAS", nodeIds });
+  }, []);
+
+  const restoreSelection = useCallback(() => {
+    sendMessage({ type: "RESTORE_SELECTION" });
+  }, []);
+
   return {
     issues,
+    decisions,
     loading,
     actionError,
-    deferIssue,
-    flagImportant,
-    reopenIssue,
-    acknowledgeIssue,
-    focusIssue
+    focusIssue,
+    deferRoot,
+    markRootImportant,
+    unmarkRootImportant,
+    ignoreRoot,
+    reopenRoot,
+    showOnCanvas,
+    restoreSelection
   };
 }

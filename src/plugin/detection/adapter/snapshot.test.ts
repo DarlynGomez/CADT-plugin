@@ -31,7 +31,7 @@ function textNode(overrides: Record<string, unknown> = {}) {
 describe("snapshotTextNode", () => {
   it("assembles a full snapshot with no indeterminate reasons for a resolvable node", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode());
+    const snapshot = await snapshotTextNode(textNode());
 
     expect(snapshot).toEqual({
       nodeId: "1:1",
@@ -39,6 +39,7 @@ describe("snapshotTextNode", () => {
       nodeType: "TEXT",
       screenId: "1:1",
       screenName: "Body copy",
+      foregroundBinding: null,
       foreground: { r: 0, g: 0, b: 0 },
       foregroundAlpha: 1,
       background: { r: 1, g: 1, b: 1 },
@@ -61,7 +62,7 @@ describe("snapshotTextNode", () => {
       fills: [{ type: "SOLID", color: { r: 0.9, g: 0.9, b: 0.9 } }],
       parent: page
     };
-    const snapshot = snapshotTextNode(textNode({ parent: card }));
+    const snapshot = await snapshotTextNode(textNode({ parent: card }));
 
     expect(snapshot.background).toEqual({ r: 0.9, g: 0.9, b: 0.9 });
     expect(snapshot.backgroundSource).toEqual({ kind: "node", nodeId: "2:2", nodeName: "Card" });
@@ -71,21 +72,45 @@ describe("snapshotTextNode", () => {
     const { snapshotTextNode } = await import("./snapshot");
     const page = { type: "PAGE", backgrounds: [] };
     const frame = { type: "FRAME", id: "2:2", name: "Card", fills: [], parent: page };
-    const snapshot = snapshotTextNode(textNode({ parent: frame }));
+    const snapshot = await snapshotTextNode(textNode({ parent: frame }));
 
     expect(snapshot.screenId).toBe("2:2");
     expect(snapshot.screenName).toBe("Card");
   });
 
+  it("resolves the foreground binding from a bound variable", async () => {
+    const getVariableByIdAsync = vi.fn(async () => ({ name: "sage/muted" }));
+    vi.stubGlobal("figma", {
+      mixed: FIGMA_MIXED,
+      variables: { getVariableByIdAsync }
+    });
+
+    const { snapshotTextNode } = await import("./snapshot");
+    const snapshot = await snapshotTextNode(
+      textNode({
+        fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 }, boundVariables: { color: { id: "VariableID:1" } } }]
+      })
+    );
+
+    expect(snapshot.foregroundBinding).toBe("sage/muted");
+    expect(getVariableByIdAsync).toHaveBeenCalledWith("VariableID:1");
+  });
+
+  it("leaves the foreground binding null for an unbound fill", async () => {
+    const { snapshotTextNode } = await import("./snapshot");
+    const snapshot = await snapshotTextNode(textNode());
+    expect(snapshot.foregroundBinding).toBeNull();
+  });
+
   it("nulls fontStyleName when the font name is mixed, even if the numeric weight resolved", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fontName: FIGMA_MIXED }));
+    const snapshot = await snapshotTextNode(textNode({ fontName: FIGMA_MIXED }));
     expect(snapshot.fontStyleName).toBeNull();
   });
 
   it("prefers the numeric fontWeight over the style name when it resolves", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(
+    const snapshot = await snapshotTextNode(
       textNode({ fontWeight: 700, fontName: { family: "Inter", style: "Regular" } })
     );
     expect(snapshot.isBold).toBe(true);
@@ -93,7 +118,7 @@ describe("snapshotTextNode", () => {
 
   it("reads a non-bold numeric fontWeight even against a misleading style name", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(
+    const snapshot = await snapshotTextNode(
       textNode({ fontWeight: 400, fontName: { family: "Inter", style: "Bold" } })
     );
     expect(snapshot.isBold).toBe(false);
@@ -101,7 +126,7 @@ describe("snapshotTextNode", () => {
 
   it("falls back to the style name heuristic when fontWeight is mixed", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(
+    const snapshot = await snapshotTextNode(
       textNode({ fontWeight: FIGMA_MIXED, fontName: { family: "Inter", style: "Bold" } })
     );
     expect(snapshot.isBold).toBe(true);
@@ -109,7 +134,7 @@ describe("snapshotTextNode", () => {
 
   it("nulls the font size and records the reason when it is mixed", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fontSize: FIGMA_MIXED }));
+    const snapshot = await snapshotTextNode(textNode({ fontSize: FIGMA_MIXED }));
 
     expect(snapshot.fontSizePx).toBeNull();
     expect(snapshot.indeterminateReasons).toContain("font-size-mixed");
@@ -117,7 +142,9 @@ describe("snapshotTextNode", () => {
 
   it("nulls the bold determination and records the reason when the font weight and name are both mixed", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fontWeight: FIGMA_MIXED, fontName: FIGMA_MIXED }));
+    const snapshot = await snapshotTextNode(
+      textNode({ fontWeight: FIGMA_MIXED, fontName: FIGMA_MIXED })
+    );
 
     expect(snapshot.isBold).toBeNull();
     expect(snapshot.indeterminateReasons).toContain("font-name-mixed");
@@ -125,7 +152,7 @@ describe("snapshotTextNode", () => {
 
   it("propagates color resolution reasons and blanks both colors", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fills: FIGMA_MIXED }));
+    const snapshot = await snapshotTextNode(textNode({ fills: FIGMA_MIXED }));
 
     expect(snapshot.foreground).toBeNull();
     expect(snapshot.background).toBeNull();
@@ -134,7 +161,7 @@ describe("snapshotTextNode", () => {
 
   it("can carry multiple independent indeterminate reasons at once", async () => {
     const { snapshotTextNode } = await import("./snapshot");
-    const snapshot = snapshotTextNode(textNode({ fontSize: FIGMA_MIXED, fills: FIGMA_MIXED }));
+    const snapshot = await snapshotTextNode(textNode({ fontSize: FIGMA_MIXED, fills: FIGMA_MIXED }));
 
     expect(snapshot.indeterminateReasons).toEqual(
       expect.arrayContaining(["font-size-mixed", "fill-mixed"])

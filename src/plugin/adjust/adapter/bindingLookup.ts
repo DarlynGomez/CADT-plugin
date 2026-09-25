@@ -6,7 +6,8 @@ export interface FillBinding {
   usageCount: number;
 }
 
-function firstSolidFill(node: TextNode): SolidPaint | null {
+/** Also used by detection/adapter/resolveBinding.ts, the signature's cheaper cousin of this lookup */
+export function firstSolidFill(node: TextNode): SolidPaint | null {
   const fills = node.fills;
   if (fills === figma.mixed) {
     return null;

@@ -1,8 +1,7 @@
 import { reconcileScanResults } from "../accountability/reconcileFindings";
 import { runDetection } from "../detection/engine";
-import type { PluginToUiMessage } from "../../shared/messageTypes";
 import { loadRawIssues, saveIssues } from "../accountability/issueStore";
-import { buildDisplayList } from "./issueDisplay";
+import { buildIssuesUpdatedMessage } from "./issueDisplay";
 import { logFindings } from "./logFindings";
 import { resolveTextNodeSnapshot } from "./resolveSnapshot";
 
@@ -29,6 +28,5 @@ export async function scanAndSync(nodeIds: ReadonlySet<string>, label: string): 
     return;
   }
 
-  const message: PluginToUiMessage = { type: "ISSUES_UPDATED", issues: await buildDisplayList(updated) };
-  figma.ui.postMessage(message);
+  figma.ui.postMessage(await buildIssuesUpdatedMessage(updated));
 }

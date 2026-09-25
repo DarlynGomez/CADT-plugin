@@ -1,0 +1,29 @@
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: color-mix(in srgb, var(--color-ink) 40%, transparent);
+}
+
+.sheet {
+  max-height: 90%;
+  overflow-y: auto;
+  border-top: var(--size-hairline) solid var(--color-ink);
+  border-radius: var(--radius-tile) var(--radius-tile) 0 0;
+  background: var(--color-background);
+  animation: slide-up var(--motion-base) var(--ease-entrance);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(var(--space-5));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

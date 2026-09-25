@@ -1,6 +1,8 @@
 import type { IssueRecordMap } from "../accountability/issueStore";
+import { loadDecisions } from "../accountability/decisionStore";
 import { RULES } from "../detection/rules/registry";
 import type { Issue, IssueSummary } from "../../shared/issues/issueTypes";
+import type { IssuesUpdatedMessage } from "../../shared/messageTypes";
 import { resolveTextNodeSnapshot } from "./resolveSnapshot";
 
 async function enrichForDisplay(issue: Issue): Promise<IssueSummary> {
@@ -27,4 +29,19 @@ async function enrichForDisplay(issue: Issue): Promise<IssueSummary> {
  */
 export async function buildDisplayList(record: IssueRecordMap): Promise<IssueSummary[]> {
   return Promise.all(Object.values(record).map(enrichForDisplay));
+}
+
+/**
+ * The one place ISSUES_UPDATED is assembled, so every caller sends the same shape:
+ * the full issue list alongside the full decision record. loadDecisions is
+ * synchronous, so bundling it here costs nothing extra over building the list alone
+ */
+export async function buildIssuesUpdatedMessage(
+  record: IssueRecordMap
+): Promise<IssuesUpdatedMessage> {
+  return {
+    type: "ISSUES_UPDATED",
+    issues: await buildDisplayList(record),
+    decisions: loadDecisions()
+  };
 }

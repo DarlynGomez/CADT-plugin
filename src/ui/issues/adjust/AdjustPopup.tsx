@@ -3,13 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { keepHue } from "../../../shared/colour/keepHue";
 import { parseHex } from "../../../shared/colour/hexInput";
 import { paletteMatch } from "../../../shared/colour/paletteMatch";
+import {
+  backgroundSourceName,
+  readContrastEvidence
+} from "../../../shared/issues/contrastEvidenceView";
 import type { IssueSummary, RGBColor } from "../../../shared/issues/issueTypes";
-import { readContrastEvidence } from "./adjustEvidence";
 import styles from "./AdjustPopup.module.css";
 import { AdjustActions } from "./components/AdjustActions";
+import { AdjustBody } from "./components/AdjustBody";
 import { BindingNotice } from "./components/BindingNotice";
-import { TilesView, type FocusedOption } from "./components/TilesView";
-import { WheelView } from "./components/WheelView";
+import type { FocusedOption } from "./components/TilesView";
 import { useAdjustMessages } from "./useAdjustMessages";
 
 interface AdjustPopupProps {
@@ -19,12 +22,13 @@ interface AdjustPopupProps {
   onClose: () => void;
 }
 
-/** Three tiles, or at the "explain" level the wheel directly. Gating happens in IssueActions */
+/** Three tiles, or at the "explain" level the wheel directly. Gating happens in the caller */
 export function AdjustPopup({ issue, aiAssistanceLevel, onClose }: AdjustPopupProps) {
   const evidence = readContrastEvidence(issue.ruleId, issue.evidence);
   const background = evidence ? parseHex(evidence.backgroundHex) : null;
   const current = evidence ? parseHex(evidence.foregroundHex) : null;
-  const optionA = evidence && background && current ? keepHue(current, background, evidence.requiredRatio) : null;
+  const optionA =
+    evidence && background && current ? keepHue(current, background, evidence.requiredRatio) : null;
 
   const { options, applied, preview, clearPreview, apply, abandon } = useAdjustMessages(issue.id);
   const [view, setView] = useState<"tiles" | "wheel">(aiAssistanceLevel === 2 ? "wheel" : "tiles");
@@ -60,7 +64,9 @@ export function AdjustPopup({ issue, aiAssistanceLevel, onClose }: AdjustPopupPr
     return null;
   }
 
-  const optionB = options ? paletteMatch(current, options.palette, background, evidence.requiredRatio) : null;
+  const optionB = options
+    ? paletteMatch(current, options.palette, background, evidence.requiredRatio)
+    : null;
 
   function openWheel() {
     setWheelOpened(true);
@@ -112,35 +118,32 @@ export function AdjustPopup({ issue, aiAssistanceLevel, onClose }: AdjustPopupPr
 
   return (
     <div className={styles.popup} onKeyDown={handleKeyDown}>
+      <h2 className={styles.title}>Adjust contrast for &ldquo;{issue.nodeName}&rdquo;</h2>
       {options?.binding && <BindingNotice binding={options.binding} />}
+      <AdjustBody
+        view={view}
+        sampleText={issue.nodeName}
+        background={background}
+        backgroundAncestorName={backgroundSourceName(evidence)}
+        requiredRatio={evidence.requiredRatio}
+        optionA={optionA}
+        optionB={optionB}
+        wheelColor={wheelColor}
+        focused={focused}
+        onFocusOption={focusOption}
+        onOpenWheel={openWheel}
+        thirdTileRef={thirdTileRef}
+        initialWheelColor={wheelColor ?? current}
+        onColorChange={selectWheelColor}
+        onHexRejected={() => setHexRejected(true)}
+        onBack={backToTiles}
+      />
 
-      {view === "tiles" ? (
-        <div className={styles.tiles}>
-          <TilesView
-            sampleText={issue.nodeName}
-            background={background}
-            requiredRatio={evidence.requiredRatio}
-            optionA={optionA}
-            optionB={optionB}
-            wheelColor={wheelColor}
-            focused={focused}
-            onFocusOption={focusOption}
-            onOpenWheel={openWheel}
-            thirdTileRef={thirdTileRef}
-          />
-        </div>
-      ) : (
-        <WheelView
-          background={background}
-          requiredRatio={evidence.requiredRatio}
-          initialColor={wheelColor ?? current}
-          onColorChange={selectWheelColor}
-          onHexRejected={() => setHexRejected(true)}
-          onBack={backToTiles}
-        />
-      )}
-
-      <AdjustActions canApply={Boolean(activeColor)} onCancel={handleCancel} onApply={handleApply} />
+      <AdjustActions
+        canApply={Boolean(activeColor)}
+        onCancel={handleCancel}
+        onApply={handleApply}
+      />
     </div>
   );
 }

@@ -24,7 +24,8 @@ const TEXT_NODE = {
   name: "Body copy",
   type: "TEXT",
   fontSize: 16,
-  fontName: { family: "Inter", style: "Regular" }
+  fontName: { family: "Inter", style: "Regular" },
+  fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }]
 };
 
 describe("isIssueMessage", () => {
@@ -41,11 +42,9 @@ describe("isIssueMessage", () => {
     }
   );
 
-  it("requires both issueId and reason for ISSUE_ACKNOWLEDGE", () => {
-    expect(isIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID, reason: "x" })).toBe(
-      true
-    );
-    expect(isIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID })).toBe(false);
+  it("requires both issueId and reason for ISSUE_IGNORE", () => {
+    expect(isIssueMessage({ type: "ISSUE_IGNORE", issueId: ISSUE_ID, reason: "x" })).toBe(true);
+    expect(isIssueMessage({ type: "ISSUE_IGNORE", issueId: ISSUE_ID })).toBe(false);
   });
 
   it("rejects an unrecognized type and non-objects", () => {
@@ -97,7 +96,11 @@ describe("handleIssueMessage", () => {
     const reply = vi.fn();
     await handleIssueMessage({ type: "ISSUES_SUBSCRIBE" }, reply);
 
-    expect(reply).toHaveBeenCalledWith({ type: "ISSUES_UPDATED", issues: [RESOLVED_OPEN_ISSUE] });
+    expect(reply).toHaveBeenCalledWith({
+      type: "ISSUES_UPDATED",
+      issues: [RESOLVED_OPEN_ISSUE],
+      decisions: {}
+    });
   });
 
   it("defers an open issue and persists only section 5.5's fields", async () => {
@@ -110,7 +113,8 @@ describe("handleIssueMessage", () => {
     );
     expect(reply).toHaveBeenCalledWith({
       type: "ISSUES_UPDATED",
-      issues: [{ ...RESOLVED_OPEN_ISSUE, state: "deferred" }]
+      issues: [{ ...RESOLVED_OPEN_ISSUE, state: "deferred" }],
+      decisions: {}
     });
   });
 
@@ -142,14 +146,14 @@ describe("handleIssueMessage", () => {
     expect(setPluginData).not.toHaveBeenCalled();
   });
 
-  it("rejects acknowledgment with an empty reason, enforced here too, not only in the UI", async () => {
+  it("rejects an ignore action with an empty reason, enforced here too, not only in the UI", async () => {
     const reply = vi.fn();
-    await handleIssueMessage({ type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID, reason: "  " }, reply);
+    await handleIssueMessage({ type: "ISSUE_IGNORE", issueId: ISSUE_ID, reason: "  " }, reply);
 
     expect(reply).toHaveBeenCalledWith({
       type: "ISSUE_ACTION_FAILED",
       issueId: ISSUE_ID,
-      message: "Acknowledgment requires a non-empty reason"
+      message: "A reason is required to ignore an issue"
     });
     expect(setPluginData).not.toHaveBeenCalled();
   });

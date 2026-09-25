@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import type { Issue, IssueState } from "../../shared/issues/issueTypes";
 import {
-  acknowledgeIssue,
   createIssue,
   deferIssue,
   flagImportant,
+  ignoreIssue,
   reconcileDetection,
   recordResurface,
   reopenIssue
@@ -48,7 +48,7 @@ describe("deferIssue", () => {
     expect(result).toEqual({ ok: true, issue: issueIn(state, { state: "deferred" }) });
   });
 
-  it.each<IssueState>(["deferred", "acknowledged", "resolved"])("rejects from %s", (state) => {
+  it.each<IssueState>(["deferred", "ignored", "resolved"])("rejects from %s", (state) => {
     expect(deferIssue(issueIn(state)).ok).toBe(false);
   });
 });
@@ -59,41 +59,41 @@ describe("flagImportant", () => {
     expect(result).toEqual({ ok: true, issue: issueIn(state, { state: "important" }) });
   });
 
-  it.each<IssueState>(["important", "acknowledged", "resolved"])("rejects from %s", (state) => {
+  it.each<IssueState>(["important", "ignored", "resolved"])("rejects from %s", (state) => {
     expect(flagImportant(issueIn(state)).ok).toBe(false);
   });
 });
 
-describe("acknowledgeIssue", () => {
+describe("ignoreIssue", () => {
   it.each<IssueState>(["open", "deferred", "important"])(
-    "accepts from %s and stores the reason, timestamp, and severity at acknowledgment",
+    "accepts from %s and stores the reason, timestamp, and severity at ignore",
     (state) => {
-      const result = acknowledgeIssue(issueIn(state), "Client insisted on the brand color", LATER);
+      const result = ignoreIssue(issueIn(state), "Client insisted on the brand color", LATER);
       expect(result).toEqual({
         ok: true,
         issue: issueIn(state, {
-          state: "acknowledged",
-          acknowledgedReason: "Client insisted on the brand color",
-          acknowledgedAt: LATER,
-          severityAtAcknowledgment: "medium",
-          changedSinceAcknowledgment: false
+          state: "ignored",
+          ignoredReason: "Client insisted on the brand color",
+          ignoredAt: LATER,
+          severityAtIgnore: "medium",
+          changedSinceIgnore: false
         })
       });
     }
   );
 
-  it.each<IssueState>(["acknowledged", "resolved"])("rejects from %s", (state) => {
-    expect(acknowledgeIssue(issueIn(state), "reason", LATER).ok).toBe(false);
+  it.each<IssueState>(["ignored", "resolved"])("rejects from %s", (state) => {
+    expect(ignoreIssue(issueIn(state), "reason", LATER).ok).toBe(false);
   });
 
   it("rejects an empty reason, so the invariant cannot be bypassed by a malformed message", () => {
-    const result = acknowledgeIssue(issueIn("open"), "   ", LATER);
-    expect(result).toEqual({ ok: false, reason: "Acknowledgment requires a non-empty reason" });
+    const result = ignoreIssue(issueIn("open"), "   ", LATER);
+    expect(result).toEqual({ ok: false, reason: "A reason is required to ignore an issue" });
   });
 });
 
 describe("reopenIssue", () => {
-  it.each<IssueState>(["deferred", "important", "acknowledged"])("accepts from %s", (state) => {
+  it.each<IssueState>(["deferred", "important", "ignored"])("accepts from %s", (state) => {
     const result = reopenIssue(issueIn(state));
     expect(result).toEqual({ ok: true, issue: issueIn(state, { state: "open" }) });
   });
@@ -141,27 +141,27 @@ describe("reconcileDetection", () => {
     });
   });
 
-  it("leaves an acknowledged issue standing when the new severity is the same band", () => {
-    const issue = issueIn("acknowledged", {
-      severityAtAcknowledgment: "medium",
-      changedSinceAcknowledgment: false
+  it("leaves an ignored issue standing when the new severity is the same band", () => {
+    const issue = issueIn("ignored", {
+      severityAtIgnore: "medium",
+      changedSinceIgnore: false
     });
     const result = reconcileDetection(issue, "medium", LATER);
-    expect(result.state).toBe("acknowledged");
-    expect(result.changedSinceAcknowledgment).toBe(false);
+    expect(result.state).toBe("ignored");
+    expect(result.changedSinceIgnore).toBe(false);
   });
 
-  it("leaves an acknowledged issue standing when the new severity is better", () => {
-    const issue = issueIn("acknowledged", { severityAtAcknowledgment: "high" });
+  it("leaves an ignored issue standing when the new severity is better", () => {
+    const issue = issueIn("ignored", { severityAtIgnore: "high" });
     const result = reconcileDetection(issue, "low", LATER);
-    expect(result.state).toBe("acknowledged");
+    expect(result.state).toBe("ignored");
   });
 
-  it("reopens an acknowledged issue once, marked changed, when the new severity is worse", () => {
-    const issue = issueIn("acknowledged", { severityAtAcknowledgment: "low" });
+  it("reopens an ignored issue once, marked changed, when the new severity is worse", () => {
+    const issue = issueIn("ignored", { severityAtIgnore: "low" });
     const result = reconcileDetection(issue, "high", LATER);
     expect(result.state).toBe("open");
-    expect(result.changedSinceAcknowledgment).toBe(true);
+    expect(result.changedSinceIgnore).toBe(true);
     expect(result.severityAtLastDetection).toBe("high");
   });
 });

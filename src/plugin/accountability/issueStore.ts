@@ -38,10 +38,10 @@ function toPersistedFields(issue: Issue): PersistedIssueFields {
     severityAtLastDetection: issue.severityAtLastDetection,
     encounterCount: issue.encounterCount,
     lastDetectedAt: issue.lastDetectedAt,
-    acknowledgedReason: issue.acknowledgedReason,
-    acknowledgedAt: issue.acknowledgedAt,
-    severityAtAcknowledgment: issue.severityAtAcknowledgment,
-    changedSinceAcknowledgment: issue.changedSinceAcknowledgment
+    ignoredReason: issue.ignoredReason,
+    ignoredAt: issue.ignoredAt,
+    severityAtIgnore: issue.severityAtIgnore,
+    changedSinceIgnore: issue.changedSinceIgnore
   };
 }
 

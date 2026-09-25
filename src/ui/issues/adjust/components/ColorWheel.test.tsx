@@ -15,7 +15,12 @@ describe("ColorWheel", () => {
   it("is a focusable slider announcing the colour and ratio", () => {
     const onColorChange = vi.fn();
     render(
-      <ColorWheel background={WHITE} requiredRatio={4.5} initialColor={RED} onColorChange={onColorChange} />
+      <ColorWheel
+        background={WHITE}
+        requiredRatio={4.5}
+        initialColor={RED}
+        onColorChange={onColorChange}
+      />
     );
 
     const wheel = screen.getByRole("slider", { name: /colour wheel/i });
@@ -25,7 +30,12 @@ describe("ColorWheel", () => {
   it("moves hue on ArrowRight and updates the announcement", () => {
     const onColorChange = vi.fn();
     render(
-      <ColorWheel background={WHITE} requiredRatio={4.5} initialColor={RED} onColorChange={onColorChange} />
+      <ColorWheel
+        background={WHITE}
+        requiredRatio={4.5}
+        initialColor={RED}
+        onColorChange={onColorChange}
+      />
     );
 
     const wheel = screen.getByRole("slider", { name: /colour wheel/i });
@@ -40,7 +50,12 @@ describe("ColorWheel", () => {
   it("moves saturation on ArrowUp and ArrowDown", () => {
     const onColorChange = vi.fn();
     render(
-      <ColorWheel background={WHITE} requiredRatio={4.5} initialColor={RED} onColorChange={onColorChange} />
+      <ColorWheel
+        background={WHITE}
+        requiredRatio={4.5}
+        initialColor={RED}
+        onColorChange={onColorChange}
+      />
     );
 
     const wheel = screen.getByRole("slider", { name: /colour wheel/i });
@@ -53,7 +68,12 @@ describe("ColorWheel", () => {
   it("ignores a key it does not handle, without announcing anything new", () => {
     const onColorChange = vi.fn();
     render(
-      <ColorWheel background={WHITE} requiredRatio={4.5} initialColor={RED} onColorChange={onColorChange} />
+      <ColorWheel
+        background={WHITE}
+        requiredRatio={4.5}
+        initialColor={RED}
+        onColorChange={onColorChange}
+      />
     );
 
     const wheel = screen.getByRole("slider", { name: /colour wheel/i });
@@ -64,9 +84,14 @@ describe("ColorWheel", () => {
   it("has a lightness range input at least as tall as the minimum target", () => {
     const onColorChange = vi.fn();
     render(
-      <ColorWheel background={WHITE} requiredRatio={4.5} initialColor={RED} onColorChange={onColorChange} />
+      <ColorWheel
+        background={WHITE}
+        requiredRatio={4.5}
+        initialColor={RED}
+        onColorChange={onColorChange}
+      />
     );
 
-    expect(screen.getByRole("slider", { name: "Lightness" })).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: "Depth / Tone" })).toBeInTheDocument();
   });
 });

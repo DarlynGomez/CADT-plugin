@@ -11,5 +11,5 @@ export async function resolveTextNodeSnapshot(nodeId: string): Promise<NodeSnaps
   if (!node || node.type !== "TEXT") {
     return null;
   }
-  return snapshotTextNode(node);
+  return await snapshotTextNode(node);
 }

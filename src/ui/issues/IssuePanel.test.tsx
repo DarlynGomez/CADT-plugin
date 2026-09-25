@@ -1,106 +1,170 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Issue, IssueState } from "../../shared/issues/issueTypes";
+import type { IssueSummary } from "../../shared/issues/issueTypes";
 import { IssuePanel } from "./IssuePanel";
-
-function issue(id: string, state: IssueState, nodeName: string): Issue & { nodeName: string } {
-  return {
-    id,
-    ruleId: "contrast",
-    nodeId: id,
-    nodeName,
-    state,
-    severityAtLastDetection: "medium",
-    encounterCount: 0,
-    lastDetectedAt: "2026-09-08T00:00:00.000Z"
-  };
-}
 
 function emit(message: unknown) {
   window.dispatchEvent(new MessageEvent("message", { data: { pluginMessage: message } }));
 }
 
+function openIssue(overrides: Partial<IssueSummary> = {}): IssueSummary {
+  return {
+    id: "contrast:1:1",
+    ruleId: "contrast",
+    nodeId: "1:1",
+    nodeName: "Body copy",
+    screenId: "screen-1",
+    screenName: "Product Detail Screen",
+    state: "open",
+    severityAtLastDetection: "high",
+    encounterCount: 0,
+    lastDetectedAt: "2026-09-08T00:00:00.000Z",
+    evidence: {
+      measuredRatio: 2.17,
+      requiredRatio: 4.5,
+      foregroundHex: "#9CB5B1",
+      backgroundHex: "#FFFFFF",
+      foregroundBinding: "sage/muted"
+    },
+    ...overrides
+  };
+}
+
+function secondInstanceOfSameRoot(): IssueSummary {
+  return openIssue({
+    id: "contrast:1:2",
+    nodeId: "1:2",
+    nodeName: "Footer copy"
+  });
+}
+
+function postedMessages(posted: unknown[]) {
+  return posted.filter(
+    (message): message is { type: string; [key: string]: unknown } =>
+      typeof message === "object" && message !== null && "type" in message
+  );
+}
+
 describe("IssuePanel", () => {
-  afterEach(() => {
-    cleanup();
+  let posted: unknown[] = [];
+
+  beforeEach(() => {
+    posted = [];
+    vi.spyOn(window.parent, "postMessage").mockImplementation((message) => {
+      posted.push((message as { pluginMessage: unknown }).pluginMessage);
+    });
   });
 
-  it("is a labelled landmark with list semantics", async () => {
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it("is a labelled landmark showing the computed headline and the View All count", async () => {
     render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
-      emit({ type: "ISSUES_UPDATED", issues: [issue("a", "open", "Body copy")] });
+      emit({ type: "ISSUES_UPDATED", issues: [openIssue()], decisions: {} });
     });
 
     expect(screen.getByRole("main", { name: "Accessibility issues" })).toBeInTheDocument();
-    expect(screen.getByRole("list")).toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.getByText("1 colour causes 1 of 1 issues.")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "View All (1)" })).toBeInTheDocument();
+    expect(screen.getByText("sage/muted on #FFFFFF")).toBeInTheDocument();
   });
 
-  it("groups important above open above deferred, regardless of arrival order", async () => {
+  it("shows the Ignored filter count and its reason once a root is fully ignored", async () => {
     render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({
         type: "ISSUES_UPDATED",
-        issues: [
-          issue("d", "deferred", "Deferred one"),
-          issue("o", "open", "Open one"),
-          issue("i", "important", "Important one")
-        ]
+        issues: [openIssue({ state: "ignored", ignoredReason: "Brand colour" })],
+        decisions: {}
       });
     });
 
-    const headings = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
-    expect(headings).toEqual(["Important one", "Open one", "Deferred one"]);
+    expect(screen.getByRole("option", { name: "Ignored (1)" })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Filter issues" }), {
+      target: { value: "ignored" }
+    });
+    expect(screen.getByText(/Reason not recorded/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reopen" })).toBeInTheDocument();
   });
 
-  it("keeps acknowledged and resolved out of the main list but reachable", async () => {
+  it("shows the selection banner on Focus layers and restores on the Restore button", async () => {
     render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
       emit({
         type: "ISSUES_UPDATED",
-        issues: [
-          issue("o", "open", "Open one"),
-          issue("a", "acknowledged", "Acknowledged one"),
-          issue("r", "resolved", "Resolved one")
-        ]
+        issues: [openIssue(), secondInstanceOfSameRoot()],
+        decisions: {}
       });
     });
 
-    expect(screen.queryByText("Acknowledged one")).not.toBeInTheDocument();
-    expect(screen.queryByText("Resolved one")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Related grouped issues"));
+    fireEvent.click(screen.getByRole("button", { name: "Focus 2 layers" }));
+    expect(postedMessages(posted).some((m) => m.type === "SHOW_ON_CANVAS")).toBe(true);
+    expect(screen.getByText("Showing 2 layers on canvas")).toBeInTheDocument();
 
-    const toggle = screen.getByRole("button", { name: /acknowledged and resolved \(2\)/i });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-
-    fireEvent.click(toggle);
-
-    expect(screen.getByText("Acknowledged one")).toBeInTheDocument();
-    expect(screen.getByText("Resolved one")).toBeInTheDocument();
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Restore selection" }));
+    expect(postedMessages(posted).some((m) => m.type === "RESTORE_SELECTION")).toBe(true);
+    expect(screen.queryByText("Showing 2 layers on canvas")).not.toBeInTheDocument();
   });
 
-  it("shows a plain status message when there are no open issues", async () => {
+  it("restores the selection on Escape when no sheet is open", async () => {
     render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
-      emit({ type: "ISSUES_UPDATED", issues: [] });
+      emit({
+        type: "ISSUES_UPDATED",
+        issues: [openIssue(), secondInstanceOfSameRoot()],
+        decisions: {}
+      });
     });
 
-    expect(screen.getByText("No open issues. Nice work.")).toBeInTheDocument();
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Related grouped issues"));
+    fireEvent.click(screen.getByRole("button", { name: "Focus 2 layers" }));
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(postedMessages(posted).some((m) => m.type === "RESTORE_SELECTION")).toBe(true);
+    expect(screen.queryByText("Showing 2 layers on canvas")).not.toBeInTheDocument();
   });
 
-  it("surfaces an action failure as an alert without losing the current list", async () => {
+  it("disables Ignore issue until the reason field has text, then sends it with the ignore action", async () => {
     render(<IssuePanel aiAssistanceLevel={1} />);
     await act(async () => {
-      emit({ type: "ISSUES_UPDATED", issues: [issue("o", "open", "Open one")] });
-    });
-    await act(async () => {
-      emit({ type: "ISSUE_ACTION_FAILED", issueId: "o", message: "Cannot defer an issue in state 'resolved'" });
+      emit({ type: "ISSUES_UPDATED", issues: [openIssue()], decisions: {} });
     });
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Cannot defer an issue in state 'resolved'");
-    expect(screen.getByText("Open one")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ignore" }));
+    const recordButton = screen.getByRole("button", { name: "Ignore issue" });
+    expect(recordButton).toBeDisabled();
+
+    fireEvent.change(screen.getByPlaceholderText("Type your reason"), {
+      target: { value: "Brand colour required by guidelines" }
+    });
+    expect(recordButton).toBeEnabled();
+
+    fireEvent.click(recordButton);
+    const ignore = postedMessages(posted).find((m) => m.type === "ROOT_IGNORE");
+    expect(ignore?.reason).toBe("Brand colour required by guidelines");
+    expect(ignore?.fromDecisionOffer).toBe(false);
+  });
+
+  it("surfaces a root action failure as an alert without losing the current list", async () => {
+    render(<IssuePanel aiAssistanceLevel={1} />);
+    await act(async () => {
+      emit({ type: "ISSUES_UPDATED", issues: [openIssue()], decisions: {} });
+    });
+    await act(async () => {
+      emit({
+        type: "ROOT_ACTION_FAILED",
+        issueIds: ["contrast:1:1"],
+        message: "That root is not eligible."
+      });
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("That root is not eligible.");
+    expect(screen.getByText("sage/muted on #FFFFFF")).toBeInTheDocument();
   });
 });

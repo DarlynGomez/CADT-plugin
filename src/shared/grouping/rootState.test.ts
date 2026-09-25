@@ -4,22 +4,22 @@ import { deriveRootState } from "./rootState";
 
 describe("deriveRootState", () => {
   it("shows important when any instance is important, regardless of the rest", () => {
-    const { displayState } = deriveRootState(["open", "deferred", "important", "acknowledged"]);
+    const { displayState } = deriveRootState(["open", "deferred", "important", "ignored"]);
     expect(displayState).toBe("important");
   });
 
   it("shows open when any instance is open and none is important", () => {
-    const { displayState } = deriveRootState(["deferred", "open", "acknowledged"]);
+    const { displayState } = deriveRootState(["deferred", "open", "ignored"]);
     expect(displayState).toBe("open");
   });
 
   it("shows deferred when any instance is deferred and none is open or important", () => {
-    const { displayState } = deriveRootState(["deferred", "acknowledged", "resolved"]);
+    const { displayState } = deriveRootState(["deferred", "ignored", "resolved"]);
     expect(displayState).toBe("deferred");
   });
 
-  it("moves to decided when every instance is acknowledged or resolved", () => {
-    const { displayState } = deriveRootState(["acknowledged", "resolved", "acknowledged"]);
+  it("moves to decided when every instance is ignored or resolved", () => {
+    const { displayState } = deriveRootState(["ignored", "resolved", "ignored"]);
     expect(displayState).toBe("decided");
   });
 

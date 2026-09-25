@@ -77,12 +77,12 @@ describe("reconcileScanResults", () => {
     });
   });
 
-  it("does not let an acknowledged issue reappear when the recurring finding is no worse", () => {
+  it("does not let an ignored issue reappear when the recurring finding is no worse", () => {
     const existing = issue("1:1", {
-      state: "acknowledged",
-      severityAtAcknowledgment: "high",
-      acknowledgedReason: "Client insisted",
-      acknowledgedAt: NOW
+      state: "ignored",
+      severityAtIgnore: "high",
+      ignoredReason: "Client insisted",
+      ignoredAt: NOW
     });
     const result = reconcileScanResults(
       { "contrast:1:1": existing },
@@ -91,11 +91,11 @@ describe("reconcileScanResults", () => {
       LATER
     );
 
-    expect(result["contrast:1:1"].state).toBe("acknowledged");
+    expect(result["contrast:1:1"].state).toBe("ignored");
   });
 
-  it("reopens an acknowledged issue once when the recurring finding is worse", () => {
-    const existing = issue("1:1", { state: "acknowledged", severityAtAcknowledgment: "low" });
+  it("reopens an ignored issue once when the recurring finding is worse", () => {
+    const existing = issue("1:1", { state: "ignored", severityAtIgnore: "low" });
     const result = reconcileScanResults(
       { "contrast:1:1": existing },
       new Set(["1:1"]),
@@ -103,7 +103,7 @@ describe("reconcileScanResults", () => {
       LATER
     );
 
-    expect(result["contrast:1:1"]).toMatchObject({ state: "open", changedSinceAcknowledgment: true });
+    expect(result["contrast:1:1"]).toMatchObject({ state: "open", changedSinceIgnore: true });
   });
 
   it("leaves a node outside the scanned set completely untouched", () => {

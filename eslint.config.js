@@ -68,8 +68,12 @@ export default tseslint.config(
     // rather than a widening of the issueStore.ts single-file exception, since more
     // than one module lives there: canvasSelection.ts is the only place that writes
     // figma.currentPage.selection, and reEncounter.ts and stateMachine.ts stay pure,
-    // still covered by this same restriction, exactly as intended since phase 12. Each
-    // is a deliverable of its phase.
+    // still covered by this same restriction, exactly as intended since phase 12. Phase
+    // 21 adds decisionStore.ts as a second single-file exception alongside
+    // issueStore.ts, the same storage-surface reasoning: it is the only module that
+    // reads and writes cadt.decisions.v1, while groupActions.ts, which composes
+    // stateMachine.ts's transitions across a root's instances, stays pure and covered.
+    // Each is a deliverable of its phase.
     files: ["src/plugin/**/*.{ts,tsx}"],
     ignores: [
       "src/plugin/detection/adapter/**/*.{ts,tsx}",
@@ -78,6 +82,7 @@ export default tseslint.config(
       "src/plugin/storage/**/*.{ts,tsx}",
       "src/plugin/lifecycle/**/*.{ts,tsx}",
       "src/plugin/accountability/issueStore.ts",
+      "src/plugin/accountability/decisionStore.ts",
       "src/plugin/main.ts"
     ],
     rules: {

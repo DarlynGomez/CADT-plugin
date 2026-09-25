@@ -1,57 +1,17 @@
 .panel {
+  position: relative;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
   color: var(--color-ink);
   background: var(--color-background);
   font-family: var(--font-body);
 }
 
-.heading {
-  margin: 0 0 var(--space-4);
-  font-family: var(--font-headline);
-  font-size: var(--font-size-question);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--font-line-height-question);
-}
-
 .status {
   margin: 0;
+  padding: var(--space-5);
   font-size: var(--font-size-helper);
   line-height: var(--font-line-height-helper);
-}
-
-.error {
-  margin: 0 0 var(--space-3);
-  color: var(--color-ink);
-  font-size: var(--font-size-helper);
-  font-weight: var(--font-weight-medium);
-}
-
-.list {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-}
-
-.secondary {
-  margin-top: var(--space-4);
-}
-
-.secondaryToggle {
-  min-height: var(--size-target-min);
-  padding: var(--space-1) var(--space-2);
-  border: none;
-  background: transparent;
-  color: var(--color-ink);
-  font: inherit;
-  font-size: var(--font-size-helper);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-}
-
-.secondaryToggle:focus-visible {
-  outline: var(--size-focus-ring) solid var(--color-focus-ring);
-  outline-offset: var(--size-focus-offset);
 }

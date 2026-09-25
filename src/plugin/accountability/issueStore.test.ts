@@ -147,32 +147,32 @@ describe("saveIssues", () => {
     expect(result).toEqual({ saved: true });
   });
 
-  it("includes the acknowledgment fields only when present", () => {
-    const acknowledged: Issue = {
+  it("includes the ignore fields only when present", () => {
+    const ignored: Issue = {
       ...ALIVE,
-      state: "acknowledged",
-      acknowledgedReason: "Client insisted on the brand color",
-      acknowledgedAt: "2026-09-09T00:00:00.000Z",
-      severityAtAcknowledgment: "high",
-      changedSinceAcknowledgment: false
+      state: "ignored",
+      ignoredReason: "Client insisted on the brand color",
+      ignoredAt: "2026-09-09T00:00:00.000Z",
+      severityAtIgnore: "high",
+      changedSinceIgnore: false
     };
 
-    saveIssues({ [acknowledged.id]: acknowledged });
+    saveIssues({ [ignored.id]: ignored });
     const written = JSON.parse(setPluginData.mock.calls[0][1]);
 
-    expect(written[acknowledged.id]).toEqual({
-      state: "acknowledged",
+    expect(written[ignored.id]).toEqual({
+      state: "ignored",
       severityAtLastDetection: "high",
       encounterCount: 2,
       lastDetectedAt: "2026-09-08T00:00:00.000Z",
-      acknowledgedReason: "Client insisted on the brand color",
-      acknowledgedAt: "2026-09-09T00:00:00.000Z",
-      severityAtAcknowledgment: "high",
-      changedSinceAcknowledgment: false
+      ignoredReason: "Client insisted on the brand color",
+      ignoredAt: "2026-09-09T00:00:00.000Z",
+      severityAtIgnore: "high",
+      changedSinceIgnore: false
     });
-    expect(written[acknowledged.id]).not.toHaveProperty("id");
-    expect(written[acknowledged.id]).not.toHaveProperty("ruleId");
-    expect(written[acknowledged.id]).not.toHaveProperty("nodeId");
+    expect(written[ignored.id]).not.toHaveProperty("id");
+    expect(written[ignored.id]).not.toHaveProperty("ruleId");
+    expect(written[ignored.id]).not.toHaveProperty("nodeId");
   });
 
   it("reports the failure reason rather than throwing when the write is rejected", () => {

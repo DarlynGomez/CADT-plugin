@@ -17,6 +17,8 @@ export interface ContrastEvidence {
   requiredRatio: number;
   foregroundHex: string;
   foregroundAlpha: number;
+  /** GROUPING_SPEC.md 3.1's signature field. Null when unbound */
+  foregroundBinding: string | null;
   backgroundHex: string;
   backgroundAlpha: number;
   backgroundSource: BackgroundSource;
@@ -69,6 +71,7 @@ export const contrastRule = {
         requiredRatio,
         foregroundHex: rgbToHex(snapshot.foreground),
         foregroundAlpha: snapshot.foregroundAlpha,
+        foregroundBinding: snapshot.foregroundBinding,
         backgroundHex: rgbToHex(snapshot.background),
         backgroundAlpha: snapshot.backgroundAlpha,
         backgroundSource: snapshot.backgroundSource,

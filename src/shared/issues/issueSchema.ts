@@ -3,7 +3,7 @@ import type { Issue, IssueState } from "./issueTypes";
 const VALID_STATES: ReadonlySet<string> = new Set([
   "open",
   "deferred",
-  "acknowledged",
+  "ignored",
   "important",
   "resolved"
 ]);
@@ -27,23 +27,19 @@ function hasValidPersistedFields(issue: Record<string, unknown>): boolean {
   if (!hasRequiredFields) {
     return false;
   }
-  if (issue.acknowledgedReason !== undefined && typeof issue.acknowledgedReason !== "string") {
+  if (issue.ignoredReason !== undefined && typeof issue.ignoredReason !== "string") {
     return false;
   }
-  if (issue.acknowledgedAt !== undefined && typeof issue.acknowledgedAt !== "string") {
-    return false;
-  }
-  if (
-    issue.severityAtAcknowledgment !== undefined &&
-    (typeof issue.severityAtAcknowledgment !== "string" ||
-      !VALID_SEVERITIES.has(issue.severityAtAcknowledgment))
-  ) {
+  if (issue.ignoredAt !== undefined && typeof issue.ignoredAt !== "string") {
     return false;
   }
   if (
-    issue.changedSinceAcknowledgment !== undefined &&
-    typeof issue.changedSinceAcknowledgment !== "boolean"
+    issue.severityAtIgnore !== undefined &&
+    (typeof issue.severityAtIgnore !== "string" || !VALID_SEVERITIES.has(issue.severityAtIgnore))
   ) {
+    return false;
+  }
+  if (issue.changedSinceIgnore !== undefined && typeof issue.changedSinceIgnore !== "boolean") {
     return false;
   }
   return true;

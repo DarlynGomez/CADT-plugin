@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Proves the loop end to end, per spec section 9: detect, defer, reselect, resurface
- * with the count incremented by exactly one, acknowledge with a reason, confirm it
+ * with the count incremented by exactly one, ignore with a reason, confirm it
  * never returns. Every layer here is the real module; only the Figma API itself is
  * mocked, and its plugin data is a real in-memory store shared across every call, not
  * a canned return value, so a bug in how one step reads what a previous step wrote
@@ -66,7 +66,7 @@ describe("the accountability loop end to end", () => {
     vi.restoreAllMocks();
   });
 
-  it("detects, defers, resurfaces exactly once per return, and stays acknowledged forever after", async () => {
+  it("detects, defers, resurfaces exactly once per return, and stays ignored forever after", async () => {
     const { scanAndSync } = await import("./scanAndSync");
     const { handleIssueMessage } = await import("./issuesProtocol");
     const { handleSelectionChange } = await import("./selectionListener");
@@ -101,20 +101,20 @@ describe("the accountability loop end to end", () => {
     await handleSelectionChange();
     expect((await loadIssues())[ISSUE_ID].encounterCount).toBe(1);
 
-    // 4. Acknowledge with a reason.
+    // 4. Ignore with a reason.
     await handleIssueMessage(
-      { type: "ISSUE_ACKNOWLEDGE", issueId: ISSUE_ID, reason: "Client approved the muted footer" },
+      { type: "ISSUE_IGNORE", issueId: ISSUE_ID, reason: "Client approved the muted footer" },
       reply
     );
-    const acknowledged = (await loadIssues())[ISSUE_ID];
-    expect(acknowledged.state).toBe("acknowledged");
-    expect(acknowledged.acknowledgedReason).toBe("Client approved the muted footer");
+    const ignored = (await loadIssues())[ISSUE_ID];
+    expect(ignored.state).toBe("ignored");
+    expect(ignored.ignoredReason).toBe("Client approved the muted footer");
 
     // 5. Confirm it never returns. The same failure is detected again...
     await scanAndSync(new Set([TEXT_NODE.id]), "rescan");
-    expect((await loadIssues())[ISSUE_ID].state).toBe("acknowledged");
+    expect((await loadIssues())[ISSUE_ID].state).toBe("ignored");
 
-    // ...and selection leaving and returning again does not resurface it: acknowledged
+    // ...and selection leaving and returning again does not resurface it: ignored
     // issues are excluded from re-encounter matching entirely, by design (never
     // resurfaces, per spec section 5's state table).
     selection = [];
@@ -122,7 +122,7 @@ describe("the accountability loop end to end", () => {
     selection = [TEXT_NODE];
     await handleSelectionChange();
     const final = (await loadIssues())[ISSUE_ID];
-    expect(final.state).toBe("acknowledged");
+    expect(final.state).toBe("ignored");
     expect(final.encounterCount).toBe(1);
   });
 });

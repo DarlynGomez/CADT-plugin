@@ -1,6 +1,9 @@
 import type { AdjustMessage, AdjustReplyMessage } from "./adjustMessageTypes";
 import type { CalibrationProfile } from "./calibrationSchema";
+import type { RootDecision } from "./grouping/groupingTypes";
 import type { IssueSummary } from "./issues/issueTypes";
+import type { RootActionFailedMessage, RootMessage } from "./rootMessageTypes";
+import type { SelectionMessage } from "./selectionMessageTypes";
 
 /** Requests that the sandbox persist a completed calibration profile */
 export interface CalibrationSaveMessage {
@@ -42,8 +45,8 @@ export interface IssueDeferMessage {
 }
 
 /** Documents a final decision. Reason is required and enforced again in the state machine. */
-export interface IssueAcknowledgeMessage {
-  type: "ISSUE_ACKNOWLEDGE";
+export interface IssueIgnoreMessage {
+  type: "ISSUE_IGNORE";
   issueId: string;
   reason: string;
 }
@@ -70,15 +73,22 @@ export interface IssueFocusMessage {
 export type IssueMessage =
   | IssuesSubscribeMessage
   | IssueDeferMessage
-  | IssueAcknowledgeMessage
+  | IssueIgnoreMessage
   | IssueFlagImportantMessage
   | IssueReopenMessage
   | IssueFocusMessage;
 
-/** The full current issue list. Always the complete list, never a delta. See ADR-012. */
+/**
+ * The full current issue list, and the full current decision record. Always complete,
+ * never a delta, see ADR-012; decisions ride along on the same message rather than a
+ * second round trip, since the panel needs both to derive roots and offer a matching
+ * decision, and both are already small, whole-file records with no reconciliation logic
+ * to get wrong.
+ */
 export interface IssuesUpdatedMessage {
   type: "ISSUES_UPDATED";
   issues: readonly IssueSummary[];
+  decisions: Readonly<Record<string, RootDecision>>;
 }
 
 /** An issue action was rejected; message explains why for display, not just logging */
@@ -89,13 +99,16 @@ export interface IssueActionFailedMessage {
 }
 
 /** Every outbound message the accountability panel receives */
-export type IssuesPluginMessage = IssuesUpdatedMessage | IssueActionFailedMessage;
+export type IssuesPluginMessage =
+  IssuesUpdatedMessage | IssueActionFailedMessage | RootActionFailedMessage;
 
 /** Messages sent from the UI iframe to the plugin sandbox. */
 export type UiToPluginMessage =
   | CalibrationLoadMessage
   | CalibrationSaveMessage
   | IssueMessage
+  | RootMessage
+  | SelectionMessage
   | AdjustMessage;
 
 /** Messages sent from the plugin sandbox to the UI iframe. */
@@ -105,6 +118,7 @@ export type PluginToUiMessage =
   | CalibrationSavedMessage
   | IssuesUpdatedMessage
   | IssueActionFailedMessage
+  | RootActionFailedMessage
   | AdjustReplyMessage;
 
 /** Every message permitted across the plugin boundary. */

@@ -4,15 +4,19 @@ import { BOLD_MIN_FONT_WEIGHT } from "../rules/contrast/thresholds";
 import { resolveColors } from "../colorResolution";
 import { buildAncestorChain } from "./ancestorChain";
 import { extractNodeLayer } from "./paintExtraction";
+import { resolveForegroundBinding } from "./resolveBinding";
 import { resolveScreen } from "./resolveScreen";
 
 /**
  * The module that assembles a NodeSnapshot. This, ancestorChain.ts, paintExtraction.ts,
- * and resolveScreen.ts are the only files that read Figma node properties; nothing
- * downstream of a snapshot touches a Figma type. See CLAUDE.md rule 8 and
- * docs/ENGINEERING_STANDARDS.md section 7.2.
+ * resolveScreen.ts, and resolveBinding.ts are the only files that read Figma node
+ * properties; nothing downstream of a snapshot touches a Figma type. See CLAUDE.md rule
+ * 8 and docs/ENGINEERING_STANDARDS.md section 7.2.
+ *
+ * Async only because resolveForegroundBinding is: a variable or style lookup needs an
+ * await, unlike every other field here, which reads synchronously off the node itself
  */
-export function snapshotTextNode(node: TextNode): NodeSnapshot {
+export async function snapshotTextNode(node: TextNode): Promise<NodeSnapshot> {
   const reasons = new Set<string>();
 
   const fontSize = node.fontSize;
@@ -32,6 +36,7 @@ export function snapshotTextNode(node: TextNode): NodeSnapshot {
   }
 
   const screen = resolveScreen(node);
+  const foregroundBinding = await resolveForegroundBinding(node);
 
   return {
     nodeId: node.id,
@@ -39,6 +44,7 @@ export function snapshotTextNode(node: TextNode): NodeSnapshot {
     nodeType: node.type,
     screenId: screen.screenId,
     screenName: screen.screenName,
+    foregroundBinding,
     foreground: colorResult.foreground,
     foregroundAlpha: colorResult.foregroundAlpha,
     background: colorResult.background,

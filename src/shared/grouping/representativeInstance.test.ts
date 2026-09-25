@@ -46,16 +46,16 @@ describe("pickRepresentativeInstance", () => {
 
   it("excludes ineligible instances from both the selection check and the document-order fallback", () => {
     const pool = [
-      finding({ issueId: "acked", nodeId: "1:1", state: "acknowledged", documentOrder: 0 }),
+      finding({ issueId: "acked", nodeId: "1:1", state: "ignored", documentOrder: 0 }),
       finding({ issueId: "open", nodeId: "1:2", state: "open", documentOrder: 1 })
     ];
-    // The designer's most recent selection was the acknowledged one, but it is not
+    // The designer's most recent selection was the ignored one, but it is not
     // eligible for To review, so the eligible instance wins regardless of selection
     const result = pickRepresentativeInstance(pool, TO_REVIEW_ELIGIBLE_STATES, ["1:1"]);
     expect(result.issueId).toBe("open");
   });
 
-  it("narrows to acknowledged and resolved for the Decisions eligible set", () => {
+  it("narrows to ignored and resolved for the Decisions eligible set", () => {
     const pool = [
       finding({ issueId: "open", nodeId: "1:1", state: "open", documentOrder: 0 }),
       finding({ issueId: "resolved", nodeId: "1:2", state: "resolved", documentOrder: 1 })

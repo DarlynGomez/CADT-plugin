@@ -1,0 +1,18 @@
+.dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+}
+
+.open {
+  background: var(--color-status-open);
+}
+
+.important {
+  background: var(--color-warning);
+}
+
+.deferred {
+  background: var(--color-muted);
+}

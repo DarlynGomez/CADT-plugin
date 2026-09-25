@@ -9,10 +9,7 @@ export const TO_REVIEW_ELIGIBLE_STATES: ReadonlySet<IssueState> = new Set([
 ]);
 
 /** Spec section 3.5: the Decisions view's specimen */
-export const DECISIONS_ELIGIBLE_STATES: ReadonlySet<IssueState> = new Set([
-  "acknowledged",
-  "resolved"
-]);
+export const DECISIONS_ELIGIBLE_STATES: ReadonlySet<IssueState> = new Set(["ignored", "resolved"]);
 
 /**
  * Spec section 3.5, one picker for every caller: the eligible instance the designer

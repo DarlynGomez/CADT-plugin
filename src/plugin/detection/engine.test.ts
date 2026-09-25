@@ -14,6 +14,7 @@ function textSnapshot(nodeId: string, overrides: Partial<NodeSnapshot> = {}): No
     nodeType: "TEXT",
     screenId: "screen-1",
     screenName: "Screen",
+    foregroundBinding: null,
     foreground: BLACK,
     foregroundAlpha: 1,
     background: WHITE,

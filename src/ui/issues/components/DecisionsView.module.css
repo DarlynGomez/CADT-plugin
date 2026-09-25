@@ -1,0 +1,101 @@
+.empty {
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-helper);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-tile);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-card);
+  list-style: none;
+}
+
+.rowHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.nameGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-muted);
+}
+
+.name {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-issue-title);
+  font-weight: var(--font-weight-medium);
+}
+
+.ratioChip {
+  flex-shrink: 0;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-button);
+  background: var(--color-background);
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+}
+
+.date {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+}
+
+.reason,
+.fixed {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-helper);
+  line-height: var(--font-line-height-helper);
+}
+
+.reopenButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  min-height: var(--size-target-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-button);
+  border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-medium);
+}
+
+.reopenButton:focus-visible {
+  outline: var(--size-focus-ring) solid var(--color-focus-ring);
+  outline-offset: var(--size-focus-offset);
+}

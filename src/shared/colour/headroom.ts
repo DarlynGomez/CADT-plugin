@@ -4,7 +4,7 @@
  *
  * A result at exactly the threshold passes only until something nudges it back under,
  * for example the font size dropping enough to lose the large-text allowance, at which
- * point ADR-014 reopens the issue as changed since acknowledgment. This margin exists so
+ * point ADR-014 reopens the issue as changed since it was ignored. This margin exists so
  * a generated fix does not immediately re-trigger that path
  */
 export const CONTRAST_ADJUST_HEADROOM = 0.15;

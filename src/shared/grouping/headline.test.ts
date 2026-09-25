@@ -106,7 +106,7 @@ describe("computeHeadline", () => {
   });
 
   it("reports nothing open, with the count of roots that moved to the Decisions view", () => {
-    const decided = rootOf([findingIn("acknowledged"), findingIn("resolved")], "decided");
+    const decided = rootOf([findingIn("ignored"), findingIn("resolved")], "decided");
     const alsoDecided = rootOf([findingIn("resolved")], "decided");
     const headline = computeHeadline([decided, alsoDecided]);
     expect(headline).toEqual({ kind: "nothingOpen", decidedRootCount: 2 });

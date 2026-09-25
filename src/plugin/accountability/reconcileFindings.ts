@@ -11,9 +11,9 @@ import { createIssue, reconcileDetection } from "./stateMachine";
  * than deleting its record, per section 5.1. A node outside the scanned set is left
  * completely untouched: no signal this pass, no verdict this pass.
  *
- * Acknowledged issues are handled by reconcileDetection itself (ADR-014): a same or
- * better severity leaves the acknowledgment standing, so a finding for an already
- * acknowledged issue does not reappear in the active list just because it recurred.
+ * Ignored issues are handled by reconcileDetection itself (ADR-014): a same or
+ * better severity leaves the ignore standing, so a finding for an already
+ * ignored issue does not reappear in the active list just because it recurred.
  */
 export function reconcileScanResults(
   record: IssueRecordMap,

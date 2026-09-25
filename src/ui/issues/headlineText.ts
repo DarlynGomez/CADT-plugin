@@ -1,0 +1,26 @@
+import type { Headline } from "../../shared/grouping/headline";
+
+function plural(count: number, word: string): string {
+  return count === 1 ? word : `${word}s`;
+}
+
+/** GROUPING_SPEC.md section 4: the three headline shapes, rendered to the exact copy */
+export function formatHeadline(headline: Headline): string {
+  if (headline.kind === "nothingOpen") {
+    return `Nothing open. ${headline.decidedRootCount} ${plural(headline.decidedRootCount, "decision")} recorded.`;
+  }
+
+  if (headline.kind === "unconcentrated") {
+    return `${headline.totalOpenCount} ${plural(headline.totalOpenCount, "issue")} across ${headline.screenCount} ${plural(headline.screenCount, "screen")}.`;
+  }
+
+  const coveredCount = headline.bindings.reduce((sum, entry) => sum + entry.openCount, 0);
+  const colourCount = headline.bindings.length;
+  const verb = colourCount === 1 ? "causes" : "cause";
+  return `${colourCount} ${plural(colourCount, "colour")} ${verb} ${coveredCount} of ${headline.totalOpenCount} issues.`;
+}
+
+/** GROUPING_SPEC.md 6.1: the Live Watch tab's count pill, open findings only */
+export function openCountFromHeadline(headline: Headline): number {
+  return headline.kind === "nothingOpen" ? 0 : headline.totalOpenCount;
+}

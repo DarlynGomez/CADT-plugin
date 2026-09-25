@@ -165,7 +165,24 @@ describe("sandbox to UI message envelope", () => {
 
     await ui.onmessage?.({ type: "ISSUES_SUBSCRIBE" });
 
-    expect(uiPostMessage).toHaveBeenCalledWith({ type: "ISSUES_UPDATED", issues: [] });
+    expect(uiPostMessage).toHaveBeenCalledWith({
+      type: "ISSUES_UPDATED",
+      issues: [],
+      decisions: {}
+    });
+  });
+
+  it("routes a root message to the root actions protocol handler with a bare reply", async () => {
+    stubFigma("open");
+    await import("./main");
+
+    await ui.onmessage?.({ type: "ROOT_DEFER", issueIds: [] });
+
+    expect(uiPostMessage).toHaveBeenCalledWith({
+      type: "ISSUES_UPDATED",
+      issues: [],
+      decisions: {}
+    });
   });
 
   it("acknowledges a save with a bare CALIBRATION_SAVED payload", async () => {

@@ -1,0 +1,27 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-4);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  border: var(--size-hairline) solid transparent;
+  font-family: var(--font-body);
+  font-size: var(--font-size-severity-label);
+  font-weight: var(--font-weight-regular);
+  white-space: nowrap;
+}
+
+.high {
+  background: var(--color-severity-high-bg);
+  color: var(--color-warning);
+}
+
+.medium {
+  background: var(--color-severity-medium-bg);
+  color: var(--color-severity-medium-text);
+}
+
+.low {
+  background: var(--color-severity-low-bg);
+  color: var(--color-muted);
+}

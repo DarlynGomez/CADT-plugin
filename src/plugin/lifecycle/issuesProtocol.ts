@@ -3,12 +3,12 @@ import { selectResolvedNodesAndZoom } from "../accountability/adapter/canvasSele
 import type { Issue } from "../../shared/issues/issueTypes";
 import type { IssueMessage, PluginToUiMessage } from "../../shared/messageTypes";
 import { loadIssues, saveIssues, type IssueRecordMap } from "../accountability/issueStore";
-import { buildDisplayList } from "./issueDisplay";
+import { buildIssuesUpdatedMessage } from "./issueDisplay";
 import { markIssueDeferred } from "./selectionListener";
 import {
-  acknowledgeIssue,
   deferIssue,
   flagImportant,
+  ignoreIssue,
   reopenIssue,
   type TransitionOutcome
 } from "../accountability/stateMachine";
@@ -30,7 +30,7 @@ export function isIssueMessage(value: unknown): value is IssueMessage {
     case "ISSUE_REOPEN":
     case "ISSUE_FOCUS":
       return typeof message.issueId === "string";
-    case "ISSUE_ACKNOWLEDGE":
+    case "ISSUE_IGNORE":
       return typeof message.issueId === "string" && typeof message.reason === "string";
     default:
       return false;
@@ -43,7 +43,7 @@ function actionFailed(issueId: string, message: string): PluginToUiMessage {
 
 async function replyWithFullList(reply: Reply): Promise<void> {
   const record = await loadIssues();
-  reply({ type: "ISSUES_UPDATED", issues: await buildDisplayList(record) });
+  reply(await buildIssuesUpdatedMessage(record));
 }
 
 /**
@@ -74,7 +74,7 @@ async function applyTransition(
   }
 
   onSaved?.();
-  reply({ type: "ISSUES_UPDATED", issues: await buildDisplayList(updated) });
+  reply(await buildIssuesUpdatedMessage(updated));
 }
 
 function transitionFor(
@@ -133,10 +133,10 @@ export async function handleIssueMessage(message: IssueMessage, reply: Reply): P
         transitionFor(record, message.issueId, reopenIssue)
       );
       return;
-    case "ISSUE_ACKNOWLEDGE":
+    case "ISSUE_IGNORE":
       await applyTransition(message.issueId, reply, (record) =>
         transitionFor(record, message.issueId, (issue) =>
-          acknowledgeIssue(issue, message.reason, new Date().toISOString())
+          ignoreIssue(issue, message.reason, new Date().toISOString())
         )
       );
       return;

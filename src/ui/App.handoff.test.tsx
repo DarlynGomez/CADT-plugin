@@ -29,7 +29,7 @@ function fakeSandbox(handlers: {
     }
     // The issue panel subscribes as soon as it mounts, right after hand-off.
     if (message?.type === "ISSUES_SUBSCRIBE") {
-      setTimeout(() => respond({ type: "ISSUES_UPDATED", issues: [] }), 0);
+      setTimeout(() => respond({ type: "ISSUES_UPDATED", issues: [], decisions: {} }), 0);
     }
   });
 }
