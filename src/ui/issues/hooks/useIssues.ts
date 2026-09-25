@@ -106,6 +106,10 @@ export function useIssues() {
     sendMessage({ type: "ROOT_REOPEN", issueIds });
   }, []);
 
+  const restoreDeferredRoot = useCallback((issueIds: string[]) => {
+    sendMessage({ type: "ROOT_RESTORE_DEFERRED", issueIds });
+  }, []);
+
   const showOnCanvas = useCallback((nodeIds: string[]) => {
     sendMessage({ type: "SHOW_ON_CANVAS", nodeIds });
   }, []);
@@ -125,6 +129,7 @@ export function useIssues() {
     unmarkRootImportant,
     ignoreRoot,
     reopenRoot,
+    restoreDeferredRoot,
     showOnCanvas,
     restoreSelection
   };

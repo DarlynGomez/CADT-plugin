@@ -36,13 +36,20 @@ export interface RootReopenMessage {
   issueIds: string[];
 }
 
+/** The deferred card's restore control: only deferred instances return to open */
+export interface RootRestoreDeferredMessage {
+  type: "ROOT_RESTORE_DEFERRED";
+  issueIds: string[];
+}
+
 /** Every inbound group-action message the accountability panel sends */
 export type RootMessage =
   | RootDeferMessage
   | RootMarkImportantMessage
   | RootUnmarkImportantMessage
   | RootIgnoreMessage
-  | RootReopenMessage;
+  | RootReopenMessage
+  | RootRestoreDeferredMessage;
 
 /** A group action was rejected; message explains why for display, not just logging */
 export interface RootActionFailedMessage {

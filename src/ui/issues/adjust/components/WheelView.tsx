@@ -14,15 +14,14 @@ interface WheelViewProps {
   requiredRatio: number;
   initialColor: RGBColor;
   onColorChange: (color: RGBColor | null) => void;
-  onBack: () => void;
   onHexRejected: () => void;
 }
 
 /**
- * The wheel, expanded over the tiles inside the same panel, with a back control.
- * Amendment, ADJUST_SPEC.md section 3C: chrome restyled to the mockup, a live ratio
- * readout and a background-ancestor callout around the wheel; the wheel's own fade
- * rendering and snap-on-click behaviour, ColorWheel.tsx, are untouched.
+ * The wheel, expanded inline under the third option card (or shown alone at the
+ * "Flag and explain" calibration level). ADJUST_SPEC.md section 3C: chrome restyled to
+ * the mockup, a live ratio readout and a background-ancestor callout around the wheel;
+ * the wheel's own fade rendering and snap-on-click behaviour, ColorWheel.tsx, untouched.
  */
 export function WheelView({
   background,
@@ -30,7 +29,6 @@ export function WheelView({
   requiredRatio,
   initialColor,
   onColorChange,
-  onBack,
   onHexRejected
 }: WheelViewProps) {
   const [currentColor, setCurrentColor] = useState(initialColor);
@@ -44,10 +42,6 @@ export function WheelView({
 
   return (
     <div className={styles.wheelView}>
-      <button type="button" className={styles.back} onClick={onBack}>
-        Back
-      </button>
-
       <p className={styles.ancestor}>
         Inspecting background ancestor: <strong>{backgroundAncestorName}</strong>
       </p>

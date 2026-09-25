@@ -12,6 +12,8 @@ interface RootSheetHostProps {
    *  is still open. */
   roots: readonly Root[];
   issuesById: ReadonlyMap<string, IssueSummary>;
+  /** Keyed by root signature, GROUPING_SPEC.md section 8's Adjust scope */
+  selectedInstances: Readonly<Record<string, ReadonlySet<string>>>;
   aiAssistanceLevel: number | null;
   onCloseAdjust: () => void;
   onCancelIgnore: () => void;
@@ -27,6 +29,7 @@ export function RootSheetHost({
   sheet,
   roots,
   issuesById,
+  selectedInstances,
   aiAssistanceLevel,
   onCloseAdjust,
   onCancelIgnore,
@@ -48,7 +51,9 @@ export function RootSheetHost({
     return (
       <SheetOverlay>
         <AdjustPopup
-          issue={representativeIssue}
+          root={root}
+          representativeIssue={representativeIssue}
+          selectedInstanceIds={selectedInstances[root.signature] ?? new Set()}
           aiAssistanceLevel={aiAssistanceLevel ?? 1}
           onClose={onCloseAdjust}
         />

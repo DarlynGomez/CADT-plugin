@@ -49,19 +49,28 @@ describe("isAdjustMessage", () => {
     expect(isAdjustMessage({ type: "ADJUST_OPTIONS_REQUEST" })).toBe(false);
   });
 
-  it("requires issueId and a colour for ADJUST_PREVIEW", async () => {
+  it("requires issueId, issueIds, and a colour for ADJUST_PREVIEW", async () => {
     const { isAdjustMessage } = await import("./adjustProtocol");
-    expect(isAdjustMessage({ type: "ADJUST_PREVIEW", issueId: ISSUE_ID, color: { r: 0, g: 0, b: 0 } })).toBe(
-      true
-    );
+    expect(
+      isAdjustMessage({
+        type: "ADJUST_PREVIEW",
+        issueId: ISSUE_ID,
+        issueIds: [ISSUE_ID],
+        color: { r: 0, g: 0, b: 0 }
+      })
+    ).toBe(true);
+    expect(
+      isAdjustMessage({ type: "ADJUST_PREVIEW", issueId: ISSUE_ID, color: { r: 0, g: 0, b: 0 } })
+    ).toBe(false);
     expect(isAdjustMessage({ type: "ADJUST_PREVIEW", issueId: ISSUE_ID })).toBe(false);
   });
 
-  it("requires issueId, a colour, option, and both session flags for ADJUST_APPLY", async () => {
+  it("requires issueId, issueIds, a colour, option, and both session flags for ADJUST_APPLY", async () => {
     const { isAdjustMessage } = await import("./adjustProtocol");
     const full = {
       type: "ADJUST_APPLY",
       issueId: ISSUE_ID,
+      issueIds: [ISSUE_ID],
       color: { r: 0, g: 0, b: 0 },
       optionChosen: "a",
       wheelOpened: false,
@@ -72,10 +81,16 @@ describe("isAdjustMessage", () => {
     expect(isAdjustMessage({ ...full, wheelOpened: undefined })).toBe(false);
   });
 
-  it("requires issueId and both session flags for ADJUST_ABANDONED", async () => {
+  it("requires issueId, issueIds, and both session flags for ADJUST_ABANDONED", async () => {
     const { isAdjustMessage } = await import("./adjustProtocol");
     expect(
-      isAdjustMessage({ type: "ADJUST_ABANDONED", issueId: ISSUE_ID, wheelOpened: true, hexRejected: false })
+      isAdjustMessage({
+        type: "ADJUST_ABANDONED",
+        issueId: ISSUE_ID,
+        issueIds: [ISSUE_ID],
+        wheelOpened: true,
+        hexRejected: false
+      })
     ).toBe(true);
     expect(isAdjustMessage({ type: "ADJUST_ABANDONED", issueId: ISSUE_ID })).toBe(false);
   });
@@ -90,7 +105,9 @@ describe("isAdjustMessage", () => {
 describe("handleAdjustMessage", () => {
   function stubFigma(node: ReturnType<typeof textNode>, loggingConsent: boolean | null = null) {
     const commitUndo = vi.fn();
-    const getNodeByIdAsync = vi.fn().mockImplementation(async (id: string) => (id === node.id ? node : null));
+    const getNodeByIdAsync = vi
+      .fn()
+      .mockImplementation(async (id: string) => (id === node.id ? node : null));
     const pluginData: Record<string, string> = {};
     if (loggingConsent !== null) {
       pluginData["cadt.calibration.profile"] = JSON.stringify(profileWithConsent(loggingConsent));
@@ -112,12 +129,18 @@ describe("handleAdjustMessage", () => {
       currentPage: {
         findAll: (predicate: (candidate: unknown) => boolean) => [node].filter(predicate),
         findAllWithCriteria: () => [node]
-      }
+      },
+      ui: { postMessage: vi.fn() }
     });
     return { commitUndo, getNodeByIdAsync, pluginData };
   }
 
-  const APPLY_ARGS = { optionChosen: "a" as const, wheelOpened: false, hexRejected: false };
+  const APPLY_ARGS = {
+    issueIds: [ISSUE_ID],
+    optionChosen: "a" as const,
+    wheelOpened: false,
+    hexRejected: false
+  };
 
   it("replies with the file palette and binding for ADJUST_OPTIONS_REQUEST", async () => {
     const node = textNode();
@@ -139,7 +162,12 @@ describe("handleAdjustMessage", () => {
     const reply = vi.fn();
 
     await handleAdjustMessage(
-      { type: "ADJUST_PREVIEW", issueId: ISSUE_ID, color: { r: 0, g: 0, b: 0.2 } },
+      {
+        type: "ADJUST_PREVIEW",
+        issueId: ISSUE_ID,
+        issueIds: [ISSUE_ID],
+        color: { r: 0, g: 0, b: 0.2 }
+      },
       reply
     );
 
@@ -154,7 +182,12 @@ describe("handleAdjustMessage", () => {
     const reply = vi.fn();
 
     await handleAdjustMessage(
-      { type: "ADJUST_PREVIEW", issueId: ISSUE_ID, color: { r: 0, g: 0, b: 0.2 } },
+      {
+        type: "ADJUST_PREVIEW",
+        issueId: ISSUE_ID,
+        issueIds: [ISSUE_ID],
+        color: { r: 0, g: 0, b: 0.2 }
+      },
       reply
     );
     await handleAdjustMessage({ type: "ADJUST_CLEAR_PREVIEW" }, reply);
@@ -206,7 +239,12 @@ describe("handleAdjustMessage", () => {
     const reply = vi.fn();
 
     await handleAdjustMessage(
-      { type: "ADJUST_PREVIEW", issueId: "contrast:gone", color: { r: 0, g: 0, b: 0 } },
+      {
+        type: "ADJUST_PREVIEW",
+        issueId: "contrast:gone",
+        issueIds: ["contrast:gone"],
+        color: { r: 0, g: 0, b: 0 }
+      },
       reply
     );
 
@@ -271,7 +309,13 @@ describe("handleAdjustMessage", () => {
       const { handleAdjustMessage } = await import("./adjustProtocol");
 
       await handleAdjustMessage(
-        { type: "ADJUST_ABANDONED", issueId: ISSUE_ID, wheelOpened: true, hexRejected: true },
+        {
+          type: "ADJUST_ABANDONED",
+          issueId: ISSUE_ID,
+          issueIds: [ISSUE_ID],
+          wheelOpened: true,
+          hexRejected: true
+        },
         vi.fn()
       );
 
@@ -294,7 +338,13 @@ describe("handleAdjustMessage", () => {
       const reply = vi.fn();
 
       await handleAdjustMessage(
-        { type: "ADJUST_ABANDONED", issueId: ISSUE_ID, wheelOpened: false, hexRejected: false },
+        {
+          type: "ADJUST_ABANDONED",
+          issueId: ISSUE_ID,
+          issueIds: [ISSUE_ID],
+          wheelOpened: false,
+          hexRejected: false
+        },
         reply
       );
 

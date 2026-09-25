@@ -6,13 +6,25 @@ import styles from "./InstanceRow.module.css";
 
 interface InstanceRowProps {
   instance: GroupableFinding;
+  isCurrent: boolean;
   selected: boolean;
   onToggleSelected: () => void;
   onLocate: () => void;
 }
 
-/** GROUPING_SPEC.md 6.4: layer name, screen, ratio, a checkbox, and a locate control */
-export function InstanceRow({ instance, selected, onToggleSelected, onLocate }: InstanceRowProps) {
+/**
+ * GROUPING_SPEC.md 6.4: layer name, screen, ratio, a checkbox, and a locate control.
+ * The representative instance, section 3.5, is the one a single-instance Adjust
+ * targets; it sorts first in the list and reads "(Current)" so the designer can see
+ * which one that is without opening Adjust to find out.
+ */
+export function InstanceRow({
+  instance,
+  isCurrent,
+  selected,
+  onToggleSelected,
+  onLocate
+}: InstanceRowProps) {
   const checkboxId = useId();
 
   return (
@@ -25,7 +37,10 @@ export function InstanceRow({ instance, selected, onToggleSelected, onLocate }: 
         onChange={onToggleSelected}
       />
       <label htmlFor={checkboxId} className={styles.label}>
-        <span className={styles.name}>{instance.nodeName}</span>
+        <span className={styles.name}>
+          {instance.nodeName}
+          {isCurrent && <span className={styles.currentTag}> (Current)</span>}
+        </span>
         <span className={styles.meta}>
           {instance.screenName}, {instance.measuredRatio.toFixed(2)}:1
         </span>

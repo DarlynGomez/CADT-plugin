@@ -23,11 +23,11 @@ export function Header({ headline, activeMainTab, onMainTabChange }: HeaderProps
 
   return (
     <header className={styles.header}>
-      <div className={styles.topRow}>
+      {/* <div className={styles.topRow}>
         <span className={styles.wordmark}>CADT</span>
         <span className={styles.liveIndicator} aria-hidden="true" />
         <span className={styles.markerSlot} />
-      </div>
+      </div> */}
       <div className={styles.tabRow} role="tablist">
         <button
           type="button"

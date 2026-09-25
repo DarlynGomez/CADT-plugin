@@ -11,6 +11,7 @@ import {
   ignoreRoot,
   markRootImportant,
   reopenRoot,
+  restoreDeferredRoot,
   unmarkRootImportant,
   type GroupTransitionResult
 } from "../accountability/groupActions";
@@ -33,6 +34,7 @@ export function isRootMessage(value: unknown): value is RootMessage {
     case "ROOT_MARK_IMPORTANT":
     case "ROOT_UNMARK_IMPORTANT":
     case "ROOT_REOPEN":
+    case "ROOT_RESTORE_DEFERRED":
       return hasIssueIds();
     case "ROOT_IGNORE":
       return (
@@ -66,6 +68,8 @@ function computeGroupResult(
       return ignoreRoot(record, message.issueIds, message.reason, at);
     case "ROOT_REOPEN":
       return reopenRoot(record, message.issueIds);
+    case "ROOT_RESTORE_DEFERRED":
+      return restoreDeferredRoot(record, message.issueIds);
   }
 }
 

@@ -17,6 +17,8 @@ export interface AdjustLogEntry {
   wheelOpened: boolean;
   hexRejected: boolean;
   abandoned: boolean;
+  /** How many nodes this event covered. GROUPING_SPEC.md section 8: logged once per group apply */
+  instanceCount: number;
   loggedAt: string;
 }
 

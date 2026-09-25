@@ -93,3 +93,12 @@ export function reopenRoot(
   const eligible = issueIds.filter((id) => record[id]?.state === "ignored");
   return applyToEach(record, eligible, reopenIssue);
 }
+
+/** The deferred card's restore control: only deferred instances return to open */
+export function restoreDeferredRoot(
+  record: IssueRecordMap,
+  issueIds: readonly string[]
+): GroupTransitionResult {
+  const eligible = issueIds.filter((id) => record[id]?.state === "deferred");
+  return applyToEach(record, eligible, reopenIssue);
+}

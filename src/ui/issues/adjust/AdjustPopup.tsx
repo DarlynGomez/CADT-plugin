@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-
+import type { Root } from "../../../shared/grouping/groupingTypes";
 import { keepHue } from "../../../shared/colour/keepHue";
 import { parseHex } from "../../../shared/colour/hexInput";
 import { paletteMatch } from "../../../shared/colour/paletteMatch";
@@ -7,142 +6,110 @@ import {
   backgroundSourceName,
   readContrastEvidence
 } from "../../../shared/issues/contrastEvidenceView";
-import type { IssueSummary, RGBColor } from "../../../shared/issues/issueTypes";
+import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import styles from "./AdjustPopup.module.css";
 import { AdjustActions } from "./components/AdjustActions";
 import { AdjustBody } from "./components/AdjustBody";
+import { AdjustHeader } from "./components/AdjustHeader";
 import { BindingNotice } from "./components/BindingNotice";
-import type { FocusedOption } from "./components/TilesView";
+import { ScopeSection } from "./components/ScopeSection";
 import { useAdjustMessages } from "./useAdjustMessages";
+import { useAdjustSession } from "./useAdjustSession";
 
 interface AdjustPopupProps {
-  issue: IssueSummary;
+  root: Root;
+  representativeIssue: IssueSummary;
+  /** Instances checked in this root's "Related grouped issues" list, if any */
+  selectedInstanceIds: ReadonlySet<string>;
   /** The raw 1 to 4 calibration answer for "How much should CADT do on its own?" */
   aiAssistanceLevel: number;
   onClose: () => void;
 }
 
-/** Three tiles, or at the "explain" level the wheel directly. Gating happens in the caller */
-export function AdjustPopup({ issue, aiAssistanceLevel, onClose }: AdjustPopupProps) {
+/**
+ * Three option cards, the third expanding into the wheel inline when chosen, or the
+ * wheel alone at the "Flag and explain" calibration level. Scope is GROUPING_SPEC.md
+ * section 8: whatever the designer checked in the instance list, or just the
+ * representative when nothing is checked; preview and apply always target exactly that
+ * set, never more. Gating on aiAssistanceLevel happens in the caller.
+ */
+export function AdjustPopup({
+  root,
+  representativeIssue: issue,
+  selectedInstanceIds,
+  aiAssistanceLevel,
+  onClose
+}: AdjustPopupProps) {
   const evidence = readContrastEvidence(issue.ruleId, issue.evidence);
   const background = evidence ? parseHex(evidence.backgroundHex) : null;
   const current = evidence ? parseHex(evidence.foregroundHex) : null;
   const optionA =
     evidence && background && current ? keepHue(current, background, evidence.requiredRatio) : null;
 
+  const scopeIds =
+    selectedInstanceIds.size > 0 ? [...selectedInstanceIds] : [root.representativeIssueId];
+
   const { options, applied, preview, clearPreview, apply, abandon } = useAdjustMessages(issue.id);
-  const [view, setView] = useState<"tiles" | "wheel">(aiAssistanceLevel === 2 ? "wheel" : "tiles");
-  const [focused, setFocused] = useState<FocusedOption>(null);
-  const [activeColor, setActiveColor] = useState<RGBColor | null>(null);
-  const [wheelColor, setWheelColor] = useState<RGBColor | null>(null);
-  const [wheelOpened, setWheelOpened] = useState(false);
-  const [hexRejected, setHexRejected] = useState(false);
-  const thirdTileRef = useRef<HTMLButtonElement>(null);
-  const autoFocusedRef = useRef(false);
-
-  useEffect(() => {
-    if (applied) {
-      onClose();
-    }
-  }, [applied, onClose]);
-
-  // Safety net if this popup disappears without an explicit Apply, for example the
-  // issue resolving out from under it; a no-op when nothing is active.
-  useEffect(() => clearPreview, [clearPreview]);
-
-  useEffect(() => {
-    // Level 4 pre-focuses and previews the first suggestion once. A ref guards this,
-    // not focused===null: Escape sets focused back to null, and re-triggering from
-    // that would silently undo it. See spec section 2.
-    if (aiAssistanceLevel === 4 && optionA && !autoFocusedRef.current) {
-      autoFocusedRef.current = true;
-      focusOption("a", optionA);
-    }
-  }, [aiAssistanceLevel, optionA]);
+  const session = useAdjustSession({
+    aiAssistanceLevel,
+    optionA,
+    scopeIds,
+    applied,
+    preview,
+    clearPreview,
+    apply,
+    abandon,
+    onClose
+  });
 
   if (!evidence || !background || !current || !optionA) {
-    return null;
+    return (
+      <div className={styles.popup}>
+        <AdjustHeader title="Adjust contrast" subtitle={issue.nodeName} onClose={onClose} />
+        <p className={styles.diagnostic}>
+          This issue&rsquo;s contrast evidence could not be read, so there is nothing to adjust
+          here. Close this and reopen it; if it keeps happening, the finding itself is stale and a
+          rescan should clear it.
+        </p>
+      </div>
+    );
   }
 
   const optionB = options
     ? paletteMatch(current, options.palette, background, evidence.requiredRatio)
     : null;
 
-  function openWheel() {
-    setWheelOpened(true);
-    setView("wheel");
-  }
-
-  function focusOption(option: FocusedOption, color: RGBColor) {
-    setFocused(option);
-    setActiveColor(color);
-    preview(color);
-  }
-
-  function selectWheelColor(color: RGBColor | null) {
-    setWheelColor(color);
-    setFocused(color ? "c" : focused);
-    setActiveColor(color);
-    if (color) {
-      preview(color);
-    }
-  }
-
-  function handleCancel() {
-    clearPreview();
-    abandon(wheelOpened, hexRejected);
-    onClose();
-  }
-
-  function handleApply() {
-    if (activeColor && focused) {
-      apply(activeColor, focused, wheelOpened, hexRejected);
-    }
-  }
-
-  function backToTiles() {
-    setView("tiles");
-    thirdTileRef.current?.focus();
-  }
-
-  /** Clears the preview; also returns to tiles if the wheel is open */
-  function handleKeyDown(event: React.KeyboardEvent) {
-    if (event.key !== "Escape") return;
-    clearPreview();
-    setFocused(null);
-    setActiveColor(null);
-    if (view === "wheel") {
-      backToTiles();
-    }
-  }
-
   return (
-    <div className={styles.popup} onKeyDown={handleKeyDown}>
-      <h2 className={styles.title}>Adjust contrast for &ldquo;{issue.nodeName}&rdquo;</h2>
+    <div className={styles.popup} onKeyDown={session.handleKeyDown}>
+      <AdjustHeader title="Adjust contrast" subtitle={issue.nodeName} onClose={onClose} />
       {options?.binding && <BindingNotice binding={options.binding} />}
       <AdjustBody
-        view={view}
+        aiAssistanceLevel={aiAssistanceLevel}
         sampleText={issue.nodeName}
         background={background}
         backgroundAncestorName={backgroundSourceName(evidence)}
         requiredRatio={evidence.requiredRatio}
         optionA={optionA}
         optionB={optionB}
-        wheelColor={wheelColor}
-        focused={focused}
-        onFocusOption={focusOption}
-        onOpenWheel={openWheel}
-        thirdTileRef={thirdTileRef}
-        initialWheelColor={wheelColor ?? current}
-        onColorChange={selectWheelColor}
-        onHexRejected={() => setHexRejected(true)}
-        onBack={backToTiles}
+        wheelColor={session.wheelColor}
+        focused={session.focused}
+        onFocusOption={session.focusOption}
+        onOpenWheel={session.openWheel}
+        onColorChange={session.selectWheelColor}
+        onHexRejected={session.onHexRejected}
       />
+      {(root.instances.length > 1 || options?.binding) && (
+        <ScopeSection
+          scopeCount={scopeIds.length}
+          totalInstances={root.instances.length}
+          binding={options?.binding ?? null}
+        />
+      )}
 
       <AdjustActions
-        canApply={Boolean(activeColor)}
-        onCancel={handleCancel}
-        onApply={handleApply}
+        canApply={Boolean(session.activeColor)}
+        onCancel={session.handleCancel}
+        onApply={session.handleApply}
       />
     </div>
   );

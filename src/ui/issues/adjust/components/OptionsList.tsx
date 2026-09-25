@@ -3,13 +3,15 @@ import { contrastRatio } from "../../../../shared/colour/contrastRatio";
 import type { NamedColor } from "../../../../shared/colour/paletteMatch";
 import type { RGBColor } from "../../../../shared/issues/issueTypes";
 import { OptionTile } from "./OptionTile";
-import styles from "./TilesView.module.css";
+import { WheelView } from "./WheelView";
+import styles from "./OptionsList.module.css";
 
 export type FocusedOption = "a" | "b" | "c" | null;
 
-interface TilesViewProps {
+interface OptionsListProps {
   sampleText: string;
   background: RGBColor;
+  backgroundAncestorName: string;
   requiredRatio: number;
   optionA: RGBColor;
   optionB: NamedColor | null;
@@ -17,13 +19,15 @@ interface TilesViewProps {
   focused: FocusedOption;
   onFocusOption: (option: FocusedOption, color: RGBColor) => void;
   onOpenWheel: () => void;
-  thirdTileRef: React.RefObject<HTMLButtonElement | null>;
+  onColorChange: (color: RGBColor | null) => void;
+  onHexRejected: () => void;
 }
 
-/** The three tiles: keep your colour, from your file, and choose your own */
-export function TilesView({
+/** The three option cards; the third expands the wheel inline in place when chosen */
+export function OptionsList({
   sampleText,
   background,
+  backgroundAncestorName,
   requiredRatio,
   optionA,
   optionB,
@@ -31,10 +35,11 @@ export function TilesView({
   focused,
   onFocusOption,
   onOpenWheel,
-  thirdTileRef
-}: TilesViewProps) {
+  onColorChange,
+  onHexRejected
+}: OptionsListProps) {
   return (
-    <>
+    <div className={styles.list}>
       <OptionTile
         label="Keep your colour"
         reason="Same hue and saturation, the least change that passes"
@@ -61,29 +66,38 @@ export function TilesView({
           onActivate={() => onFocusOption("b", optionB.color)}
         />
       )}
-      {wheelColor ? (
-        <OptionTile
-          label="Choose your own"
-          reason="Chosen on the wheel"
-          sampleText={sampleText}
-          color={wheelColor}
-          hex={rgbToHex(wheelColor)}
-          achievedRatio={contrastRatio(wheelColor, background)}
-          requiredRatio={requiredRatio}
-          focused={focused === "c"}
-          onFocus={onOpenWheel}
-          onActivate={onOpenWheel}
-        />
-      ) : (
-        <button
-          ref={thirdTileRef}
-          type="button"
-          className={styles.placeholderTile}
-          onClick={onOpenWheel}
-        >
-          Choose your own
-        </button>
-      )}
-    </>
+      <div className={styles.wheelCard}>
+        {wheelColor ? (
+          <OptionTile
+            label="Choose your own"
+            reason="Chosen on the wheel"
+            sampleText={sampleText}
+            color={wheelColor}
+            hex={rgbToHex(wheelColor)}
+            achievedRatio={contrastRatio(wheelColor, background)}
+            requiredRatio={requiredRatio}
+            focused={focused === "c"}
+            onFocus={onOpenWheel}
+            onActivate={onOpenWheel}
+          />
+        ) : (
+          <button type="button" className={styles.placeholderTile} onClick={onOpenWheel}>
+            Choose your own
+          </button>
+        )}
+        {focused === "c" && (
+          <div className={styles.wheelExpanded}>
+            <WheelView
+              background={background}
+              backgroundAncestorName={backgroundAncestorName}
+              requiredRatio={requiredRatio}
+              initialColor={wheelColor ?? optionA}
+              onColorChange={onColorChange}
+              onHexRejected={onHexRejected}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

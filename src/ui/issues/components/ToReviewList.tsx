@@ -22,6 +22,7 @@ interface ToReviewListProps {
   onDefer: (root: Root) => void;
   onToggleImportant: (root: Root) => void;
   onApplyDecisionOffer: (root: Root, decision: RootDecision) => void;
+  onRestoreDeferred: (root: Root) => void;
 }
 
 /** GROUPING_SPEC.md 6.2's sectioned list: unsectioned for root cause, headed sections otherwise */
@@ -69,6 +70,7 @@ export function ToReviewList(props: ToReviewListProps) {
                     decisionOffer.decision &&
                     props.onApplyDecisionOffer(root, decisionOffer.decision)
                   }
+                  onRestoreDeferred={() => props.onRestoreDeferred(root)}
                 />
               );
             })}

@@ -34,8 +34,7 @@
 .tabRow {
   display: flex;
   gap: var(--space-4);
-  border-top: var(--size-hairline) solid var(--color-line);
-  padding-top: var(--space-2);
+  border-bottom: var(--size-hairline) solid var(--color-line);
 }
 
 .tab {

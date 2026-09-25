@@ -52,9 +52,11 @@ export function useAdjustMessages(issueId: string) {
     return () => window.removeEventListener("message", handleMessage);
   }, [issueId]);
 
+  // issueId correlates replies with this popup; issueIds is the scope actually written,
+  // GROUPING_SPEC.md section 8's "preview scope is apply scope"
   const preview = useCallback(
-    (color: RGBColor) => {
-      sendMessage({ type: "ADJUST_PREVIEW", issueId, color });
+    (color: RGBColor, issueIds: readonly string[]) => {
+      sendMessage({ type: "ADJUST_PREVIEW", issueId, issueIds: [...issueIds], color });
     },
     [issueId]
   );
@@ -64,15 +66,35 @@ export function useAdjustMessages(issueId: string) {
   }, []);
 
   const apply = useCallback(
-    (color: RGBColor, optionChosen: AdjustOptionChoice, wheelOpened: boolean, hexRejected: boolean) => {
-      sendMessage({ type: "ADJUST_APPLY", issueId, color, optionChosen, wheelOpened, hexRejected });
+    (
+      color: RGBColor,
+      issueIds: readonly string[],
+      optionChosen: AdjustOptionChoice,
+      wheelOpened: boolean,
+      hexRejected: boolean
+    ) => {
+      sendMessage({
+        type: "ADJUST_APPLY",
+        issueId,
+        issueIds: [...issueIds],
+        color,
+        optionChosen,
+        wheelOpened,
+        hexRejected
+      });
     },
     [issueId]
   );
 
   const abandon = useCallback(
-    (wheelOpened: boolean, hexRejected: boolean) => {
-      sendMessage({ type: "ADJUST_ABANDONED", issueId, wheelOpened, hexRejected });
+    (issueIds: readonly string[], wheelOpened: boolean, hexRejected: boolean) => {
+      sendMessage({
+        type: "ADJUST_ABANDONED",
+        issueId,
+        issueIds: [...issueIds],
+        wheelOpened,
+        hexRejected
+      });
     },
     [issueId]
   );

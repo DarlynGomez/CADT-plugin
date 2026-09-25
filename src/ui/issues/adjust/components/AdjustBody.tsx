@@ -1,11 +1,11 @@
 import type { NamedColor } from "../../../../shared/colour/paletteMatch";
 import type { RGBColor } from "../../../../shared/issues/issueTypes";
-import styles from "./AdjustBody.module.css";
-import { TilesView, type FocusedOption } from "./TilesView";
+import { OptionsList, type FocusedOption } from "./OptionsList";
 import { WheelView } from "./WheelView";
 
 interface AdjustBodyProps {
-  view: "tiles" | "wheel";
+  /** ADJUST_SPEC.md section 2: "Flag and explain" opens straight into the wheel, no options */
+  aiAssistanceLevel: number;
   sampleText: string;
   background: RGBColor;
   backgroundAncestorName: string;
@@ -16,16 +16,13 @@ interface AdjustBodyProps {
   focused: FocusedOption;
   onFocusOption: (option: FocusedOption, color: RGBColor) => void;
   onOpenWheel: () => void;
-  thirdTileRef: React.RefObject<HTMLButtonElement | null>;
-  initialWheelColor: RGBColor;
   onColorChange: (color: RGBColor | null) => void;
   onHexRejected: () => void;
-  onBack: () => void;
 }
 
-/** The tiles-or-wheel switch, split out of AdjustPopup.tsx to keep it under 150 lines */
+/** The wheel-only entry point, or the three option cards, split out to keep AdjustPopup under 150 lines */
 export function AdjustBody({
-  view,
+  aiAssistanceLevel,
   sampleText,
   background,
   backgroundAncestorName,
@@ -36,40 +33,36 @@ export function AdjustBody({
   focused,
   onFocusOption,
   onOpenWheel,
-  thirdTileRef,
-  initialWheelColor,
   onColorChange,
-  onHexRejected,
-  onBack
+  onHexRejected
 }: AdjustBodyProps) {
-  if (view === "tiles") {
+  if (aiAssistanceLevel === 2) {
     return (
-      <div className={styles.tiles}>
-        <TilesView
-          sampleText={sampleText}
-          background={background}
-          requiredRatio={requiredRatio}
-          optionA={optionA}
-          optionB={optionB}
-          wheelColor={wheelColor}
-          focused={focused}
-          onFocusOption={onFocusOption}
-          onOpenWheel={onOpenWheel}
-          thirdTileRef={thirdTileRef}
-        />
-      </div>
+      <WheelView
+        background={background}
+        backgroundAncestorName={backgroundAncestorName}
+        requiredRatio={requiredRatio}
+        initialColor={wheelColor ?? optionA}
+        onColorChange={onColorChange}
+        onHexRejected={onHexRejected}
+      />
     );
   }
 
   return (
-    <WheelView
+    <OptionsList
+      sampleText={sampleText}
       background={background}
       backgroundAncestorName={backgroundAncestorName}
       requiredRatio={requiredRatio}
-      initialColor={initialWheelColor}
+      optionA={optionA}
+      optionB={optionB}
+      wheelColor={wheelColor}
+      focused={focused}
+      onFocusOption={onFocusOption}
+      onOpenWheel={onOpenWheel}
       onColorChange={onColorChange}
       onHexRejected={onHexRejected}
-      onBack={onBack}
     />
   );
 }

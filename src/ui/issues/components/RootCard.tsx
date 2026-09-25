@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 
 import type { DecisionMatch, Root } from "../../../shared/grouping/groupingTypes";
 import { readContrastEvidence } from "../../../shared/issues/contrastEvidenceView";
@@ -24,13 +24,9 @@ interface RootCardProps {
   onDefer: () => void;
   onToggleImportant: () => void;
   onApplyDecisionOffer: () => void;
+  onRestoreDeferred: () => void;
 }
 
-/**
- * GROUPING_SPEC.md 6.3's root card, top to bottom exactly as the section orders it.
- * The instances disclosure is a native `<details>`, uncontrolled: which is open is
- * display-only state nothing outside this card needs to coordinate with.
- */
 export function RootCard({
   root,
   representativeIssue,
@@ -46,51 +42,67 @@ export function RootCard({
   onIgnore,
   onDefer,
   onToggleImportant,
-  onApplyDecisionOffer
+  onApplyDecisionOffer,
+  onRestoreDeferred
 }: RootCardProps) {
   const representativeEvidence = representativeIssue
     ? readContrastEvidence(representativeIssue.ruleId, representativeIssue.evidence)
     : null;
+  const isDeferred = root.displayState === "deferred";
 
   return (
-    <li className={styles.card}>
-      <RootCardSummary
-        root={root}
-        representativeEvidence={representativeEvidence}
-        recordedReason={recordedReason}
-      />
-
-      <RootActionsArea
-        root={root}
-        canAdjust={canAdjust}
-        decisionOffer={decisionOffer}
-        onAdjust={onAdjust}
-        onIgnore={onIgnore}
-        onDefer={onDefer}
-        onToggleImportant={onToggleImportant}
-        onApplyDecisionOffer={onApplyDecisionOffer}
-      />
-
-      {root.instances.length > 1 && (
-        <details className={styles.instancesDisclosure}>
-          <summary className={styles.summary}>
-            <span className={styles.summaryLeft}>
-              <ChevronRight className={styles.chevronClosed} size={16} aria-hidden="true" />
-              <ChevronDown className={styles.chevronOpen} size={16} aria-hidden="true" />
-              <span>Related grouped issues</span>
-            </span>
-            <span className={styles.countBubble}>+{root.instances.length}</span>
-          </summary>
-          <InstanceList
-            instances={root.instances}
-            selectedIds={selectedInstanceIds}
-            onToggleSelected={onToggleInstanceSelected}
-            onSelectAll={onSelectAllInstances}
-            onShowOnCanvas={onShowOnCanvas}
-            onLocate={onLocate}
-          />
-        </details>
+    <li className={`${styles.card} ${isDeferred ? styles.deferred : ""}`}>
+      {isDeferred && (
+        <button
+          type="button"
+          className={styles.restoreButton}
+          onClick={onRestoreDeferred}
+          title="Bring back and re-enable this issue"
+          aria-label="Bring back and re-enable this issue"
+        >
+          <Plus size={16} aria-hidden="true" />
+        </button>
       )}
+      <div className={isDeferred ? styles.dimmedContent : undefined}>
+        <RootCardSummary
+          root={root}
+          representativeEvidence={representativeEvidence}
+          recordedReason={recordedReason}
+        />
+
+        <RootActionsArea
+          root={root}
+          canAdjust={canAdjust}
+          decisionOffer={decisionOffer}
+          onAdjust={onAdjust}
+          onIgnore={onIgnore}
+          onDefer={onDefer}
+          onToggleImportant={onToggleImportant}
+          onApplyDecisionOffer={onApplyDecisionOffer}
+        />
+
+        {root.instances.length > 1 && (
+          <details className={styles.instancesDisclosure}>
+            <summary className={styles.summary}>
+              <span className={styles.summaryLeft}>
+                <ChevronRight className={styles.chevronClosed} size={16} aria-hidden="true" />
+                <ChevronDown className={styles.chevronOpen} size={16} aria-hidden="true" />
+                <span>Related grouped issues</span>
+                <span className={styles.countBubble}>+{root.instances.length}</span>
+              </span>
+            </summary>
+            <InstanceList
+              instances={root.instances}
+              representativeIssueId={root.representativeIssueId}
+              selectedIds={selectedInstanceIds}
+              onToggleSelected={onToggleInstanceSelected}
+              onSelectAll={onSelectAllInstances}
+              onShowOnCanvas={onShowOnCanvas}
+              onLocate={onLocate}
+            />
+          </details>
+        )}
+      </div>
     </li>
   );
 }

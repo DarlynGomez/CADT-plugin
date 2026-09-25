@@ -5,6 +5,7 @@
   padding: var(--space-2);
   border-radius: var(--radius-button);
   border: var(--size-hairline) solid var(--color-line);
+  background: var(--color-card);
   list-style: none;
 }
 
@@ -31,6 +32,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.currentTag {
+  color: var(--color-muted);
+  font-weight: var(--font-weight-regular);
 }
 
 .meta {

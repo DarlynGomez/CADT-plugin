@@ -28,10 +28,16 @@ export interface AdjustOptionsReadyMessage {
   binding: AdjustFillBinding | null;
 }
 
-/** Requests a live preview of one candidate colour on the finding's node */
+/**
+ * Requests a live preview of one candidate colour. `issueId` is the representative,
+ * used only to correlate replies with the open popup; `issueIds` is the actual scope
+ * to write, GROUPING_SPEC.md section 8's "preview scope is apply scope" (with nothing
+ * selected, that scope is just the representative, so the two arrays may match)
+ */
 export interface AdjustPreviewMessage {
   type: "ADJUST_PREVIEW";
   issueId: string;
+  issueIds: string[];
   color: RGBColor;
 }
 
@@ -41,13 +47,15 @@ export interface AdjustClearPreviewMessage {
 }
 
 /**
- * Writes the given colour for real and commits it as one undo step. The three trailing
- * fields exist only for the log entry: which tile it came from, and whether the wheel
- * or a rejected hex played any part in this session. See ADJUST_SPEC.md section 9
+ * Writes the given colour for real, to every node in `issueIds`, and commits it as one
+ * undo step. The three trailing fields exist only for the log entry: which tile it came
+ * from, and whether the wheel or a rejected hex played any part in this session. See
+ * ADJUST_SPEC.md section 9 and GROUPING_SPEC.md section 8
  */
 export interface AdjustApplyMessage {
   type: "ADJUST_APPLY";
   issueId: string;
+  issueIds: string[];
   color: RGBColor;
   optionChosen: AdjustOptionChoice;
   wheelOpened: boolean;
@@ -58,6 +66,7 @@ export interface AdjustApplyMessage {
 export interface AdjustAbandonedMessage {
   type: "ADJUST_ABANDONED";
   issueId: string;
+  issueIds: string[];
   wheelOpened: boolean;
   hexRejected: boolean;
 }

@@ -6,6 +6,7 @@ import styles from "./InstanceList.module.css";
 
 interface InstanceListProps {
   instances: readonly GroupableFinding[];
+  representativeIssueId: string;
   selectedIds: ReadonlySet<string>;
   onToggleSelected: (issueId: string) => void;
   onSelectAll: () => void;
@@ -13,20 +14,36 @@ interface InstanceListProps {
   onLocate: (issueId: string) => void;
 }
 
+/** The representative, section 3.5, first; the rest keep their existing relative order */
+function representativeFirst(
+  instances: readonly GroupableFinding[],
+  representativeIssueId: string
+): GroupableFinding[] {
+  const representative = instances.find((i) => i.issueId === representativeIssueId);
+  if (!representative) {
+    return [...instances];
+  }
+  return [representative, ...instances.filter((i) => i.issueId !== representativeIssueId)];
+}
+
 /**
  * GROUPING_SPEC.md 6.4: nothing pre-selected, real controls, and a fixed-height,
  * internally scrolling container so a long list never stalls the panel. Scrolling over
  * paging, matching the mockup: every row is still a real, focusable element in the DOM
  * the whole time it exists, without the extra Previous/Next controls a pager needs.
+ * The representative sorts first and reads "(Current)": it is the instance a
+ * single-instance Adjust targets, section 8.
  */
 export function InstanceList({
   instances,
+  representativeIssueId,
   selectedIds,
   onToggleSelected,
   onSelectAll,
   onShowOnCanvas,
   onLocate
 }: InstanceListProps) {
+  const ordered = representativeFirst(instances, representativeIssueId);
   const allSelected = selectedIds.size === instances.length && instances.length > 0;
 
   return (
@@ -49,10 +66,11 @@ export function InstanceList({
       </div>
 
       <ul className={styles.list}>
-        {instances.map((instance) => (
+        {ordered.map((instance) => (
           <InstanceRow
             key={instance.issueId}
             instance={instance}
+            isCurrent={instance.issueId === representativeIssueId}
             selected={selectedIds.has(instance.issueId)}
             onToggleSelected={() => onToggleSelected(instance.issueId)}
             onLocate={() => onLocate(instance.issueId)}

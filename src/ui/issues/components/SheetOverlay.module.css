@@ -1,5 +1,7 @@
 .backdrop {
-  position: absolute;
+  /* fixed, not absolute: pins to the real iframe viewport regardless of scroll,
+     instead of sizing to the scrolled content's full height */
+  position: fixed;
   inset: 0;
   z-index: 1;
   display: flex;

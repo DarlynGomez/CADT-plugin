@@ -5,12 +5,9 @@ import type { ActionError } from "../hooks/useIssues";
 import { DecisionsView } from "./DecisionsView";
 import { FilterBar, type FilterCounts, type StateFilter } from "./FilterBar";
 import styles from "./LiveWatchBody.module.css";
-import { SelectionBanner } from "./SelectionBanner";
 import { ToReviewList } from "./ToReviewList";
 
 interface LiveWatchBodyProps {
-  showingCount: number | null;
-  onRestoreSelection: () => void;
   actionError: ActionError | null;
   stateFilter: StateFilter;
   onStateFilterChange: (filter: StateFilter) => void;
@@ -32,16 +29,14 @@ interface LiveWatchBodyProps {
   onDefer: (root: Root) => void;
   onToggleImportant: (root: Root) => void;
   onApplyDecisionOffer: (root: Root, decision: RootDecision) => void;
+  onRestoreDeferred: (root: Root) => void;
   onReopen: (issueIds: string[]) => void;
 }
 
-/** The Live Watch tab's body: banner, error, filter bar, and whichever list is active */
+/** The Live Watch tab's body: error, filter bar, and whichever list is active */
 export function LiveWatchBody(props: LiveWatchBodyProps) {
   return (
     <>
-      {props.showingCount !== null && (
-        <SelectionBanner count={props.showingCount} onRestore={props.onRestoreSelection} />
-      )}
       {props.actionError && (
         <p role="alert" className={styles.error}>
           {props.actionError.message}
@@ -77,6 +72,7 @@ export function LiveWatchBody(props: LiveWatchBodyProps) {
           onDefer={props.onDefer}
           onToggleImportant={props.onToggleImportant}
           onApplyDecisionOffer={props.onApplyDecisionOffer}
+          onRestoreDeferred={props.onRestoreDeferred}
         />
       )}
     </>

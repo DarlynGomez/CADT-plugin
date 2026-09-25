@@ -13,19 +13,23 @@ export interface ApplyAdjustmentResult {
 }
 
 /**
- * The full apply path: re-validate against the node's current background, write for
- * real, commit one undo step, and log the before and after state. Composes the
- * adapter pieces so adjustProtocol.ts stays a thin message router
+ * The full apply path: re-validate against the representative node's current
+ * background, write every node in the scope for real, commit exactly one undo step,
+ * and log the before and after state once with the instance count. Composes the
+ * adapter pieces so adjustProtocol.ts stays a thin message router.
+ *
+ * GROUPING_SPEC.md section 8: a group apply is the same fill write ADR-017 permits,
+ * many times, committed as one undo step rather than one per node
  */
 export async function applyAdjustment(
-  node: TextNode,
+  nodes: readonly TextNode[],
   issueId: string,
   color: RGBColor,
   optionChosen: AdjustOptionChoice,
   wheelOpened: boolean,
   hexRejected: boolean
 ): Promise<ApplyAdjustmentResult> {
-  const before = await captureAdjustLogState(node);
+  const before = await captureAdjustLogState(nodes[0]);
   if (!before) {
     return { ok: false, reason: "That node's contrast can no longer be evaluated." };
   }
@@ -34,7 +38,7 @@ export async function applyAdjustment(
     return { ok: false, reason: "That colour no longer meets the required contrast ratio." };
   }
 
-  await applyFill(node, solidFill(color));
+  await Promise.all(nodes.map((node) => applyFill(node, solidFill(color))));
   figma.commitUndo();
 
   await logAdjustEvent({
@@ -48,6 +52,7 @@ export async function applyAdjustment(
     wheelOpened,
     hexRejected,
     abandoned: false,
+    instanceCount: nodes.length,
     loggedAt: new Date().toISOString()
   });
 
