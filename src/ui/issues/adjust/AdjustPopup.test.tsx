@@ -345,6 +345,35 @@ describe("AdjustPopup", () => {
     expect(screen.getByText("Keep your colour")).toBeInTheDocument();
   });
 
+  it("labels the scope row by count when several instances are checked", () => {
+    render(
+      <AdjustPopup
+        root={rootFor(ISSUE.id, 2)}
+        representativeIssue={ISSUE}
+        selectedInstanceIds={new Set([ISSUE.id, "contrast:2:2"])}
+        aiAssistanceLevel={3}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Change 2 layers")).toBeInTheDocument();
+    expect(screen.queryByText("Change only the current instance")).not.toBeInTheDocument();
+  });
+
+  it("keeps the single-instance label when nothing is checked", () => {
+    render(
+      <AdjustPopup
+        root={rootFor(ISSUE.id, 2)}
+        representativeIssue={ISSUE}
+        selectedInstanceIds={new Set()}
+        aiAssistanceLevel={3}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Change only the current instance")).toBeInTheDocument();
+  });
+
   it("shows a diagnostic message instead of an empty sheet when evidence cannot be read", () => {
     const brokenIssue: IssueSummary = { ...ISSUE, evidence: { requiredRatio: 4.5 } };
     render(

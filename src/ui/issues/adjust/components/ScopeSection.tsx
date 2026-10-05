@@ -14,6 +14,10 @@ interface ScopeSectionProps {
   variableConsequence: VariableConsequenceData | null;
 }
 
+function instancesLabel(scopeCount: number): string {
+  return scopeCount > 1 ? `Change ${scopeCount} layers` : "Change only the current instance";
+}
+
 function instancesDetail(scopeCount: number, remaining: number): string {
   const layerWord = scopeCount === 1 ? "layer" : "layers";
   const suffix = remaining > 0 ? ` ${remaining} more in this group left unchanged.` : "";
@@ -60,7 +64,7 @@ export function ScopeSection({
         <span className={styles.radio} data-checked={scope === "instances"} aria-hidden="true" />
         <span className={styles.optionBody}>
           <span className={styles.optionLabelRow}>
-            <span className={styles.optionLabel}>Change only the current instance</span>
+            <span className={styles.optionLabel}>{instancesLabel(scopeCount)}</span>
             <span
               className={styles.infoIcon}
               title="Every layer checked in Related grouped issues, or just this one if none are checked"
