@@ -89,7 +89,7 @@ export function AdjustPopup({
 
   return (
     <div className={styles.popup} onKeyDown={session.handleKeyDown}>
-      <AdjustHeader title={headline} onClose={onClose} />
+      <AdjustHeader title={headline} onClose={session.handleCancel} />
       {options?.binding && <BindingNotice binding={options.binding} />}
       <AdjustBody
         aiAssistanceLevel={aiAssistanceLevel}

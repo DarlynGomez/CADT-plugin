@@ -176,7 +176,7 @@ describe("AdjustPopup", () => {
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 
-  it("closes without applying when the close button is clicked", () => {
+  it("restores the preview and logs an abandonment when the close button is clicked, same as Cancel", () => {
     const onClose = vi.fn();
     render(
       <AdjustPopup
@@ -190,7 +190,8 @@ describe("AdjustPopup", () => {
 
     screen.getByRole("button", { name: "Close" }).click();
 
-    expect(postedMessages(posted).filter((m) => m.type === "ADJUST_ABANDONED")).toHaveLength(0);
+    expect(postedMessages(posted).filter((m) => m.type === "ADJUST_CLEAR_PREVIEW")).toHaveLength(1);
+    expect(postedMessages(posted).filter((m) => m.type === "ADJUST_ABANDONED")).toHaveLength(1);
     expect(onClose).toHaveBeenCalled();
   });
 
