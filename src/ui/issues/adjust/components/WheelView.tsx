@@ -57,7 +57,7 @@ export function WheelView({
       <div className={styles.card}>
         <p className={styles.cardTitle}>
           <Palette size={14} aria-hidden="true" />
-          Compliant Color Wheel
+          Choose your own
         </p>
         <div className={styles.grid}>
           <ColorWheel

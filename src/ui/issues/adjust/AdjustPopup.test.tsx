@@ -158,7 +158,7 @@ describe("AdjustPopup", () => {
     );
 
     expect(screen.getByText("Keep your colour")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /compliant color wheel/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /choose your own/i })).toBeInTheDocument();
   });
 
   it("shows a close button and the node name in the header", () => {
@@ -269,7 +269,7 @@ describe("AdjustPopup", () => {
 
     const keepTile = screen.getByText("Keep your colour").closest("button");
     const fileTile = screen.getByText("From your file").closest("button");
-    const wheelTile = screen.getByRole("button", { name: /compliant color wheel/i });
+    const wheelTile = screen.getByRole("button", { name: /choose your own/i });
     expect(keepTile).not.toBeNull();
     expect(fileTile).not.toBeNull();
 
@@ -336,7 +336,7 @@ describe("AdjustPopup", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /compliant color wheel/i }));
+    fireEvent.click(screen.getByRole("button", { name: /choose your own/i }));
     expect(screen.getByRole("slider", { name: /colour wheel/i })).toBeInTheDocument();
 
     fireEvent.keyDown(screen.getByRole("slider", { name: /colour wheel/i }), { key: "Escape" });
@@ -372,6 +372,27 @@ describe("AdjustPopup", () => {
     );
 
     expect(screen.getByText("Change only the current instance")).toBeInTheDocument();
+  });
+
+  it("names the wheel option Choose your own, in the option list and in the wheel view", () => {
+    for (const level of [3, 2]) {
+      render(
+        <AdjustPopup
+          root={rootFor(ISSUE.id)}
+          representativeIssue={ISSUE}
+          selectedInstanceIds={new Set()}
+          aiAssistanceLevel={level}
+          onClose={vi.fn()}
+        />
+      );
+      if (level === 3) {
+        expect(screen.getByText("Choose your own")).toBeInTheDocument();
+        fireEvent.click(screen.getByText("Choose your own"));
+      }
+      expect(screen.getAllByText("Choose your own").length).toBeGreaterThan(0);
+      expect(screen.queryByText("Compliant Color Wheel")).not.toBeInTheDocument();
+      cleanup();
+    }
   });
 
   it("shows a diagnostic message instead of an empty sheet when evidence cannot be read", () => {
