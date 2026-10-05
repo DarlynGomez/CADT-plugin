@@ -5,6 +5,7 @@ import type {
   AdjustReplyMessage,
   AdjustVariableScope
 } from "../../../shared/adjustMessageTypes";
+import { FEATURE_VARIABLE_SCOPE } from "../../../shared/featureFlags";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import type { UiToPluginMessage } from "../../../shared/messageTypes";
 
@@ -46,7 +47,7 @@ export function useAdjustVariableScope(issueId: string) {
         return;
       }
       if (message.type === "ADJUST_OPTIONS_READY" && message.issueId === issueId) {
-        setVariableScope(message.variableScope);
+        setVariableScope(FEATURE_VARIABLE_SCOPE ? message.variableScope : null);
       } else if (
         message.type === "ADJUST_VARIABLE_CONSEQUENCE_READY" &&
         message.issueId === issueId

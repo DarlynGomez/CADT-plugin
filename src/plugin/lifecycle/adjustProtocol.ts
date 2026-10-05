@@ -1,4 +1,5 @@
 import type { AdjustMessage, AdjustReplyMessage } from "../../shared/adjustMessageTypes";
+import { FEATURE_VARIABLE_SCOPE } from "../../shared/featureFlags";
 import { parseIssueId } from "../../shared/issues/issueId";
 import { logAdjustEvent } from "../adjust/adapter/adjustLogging";
 import { detectFillBinding } from "../adjust/adapter/bindingLookup";
@@ -48,9 +49,17 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
     const [palette, binding, variableScope] = await Promise.all([
       collectFilePalette(),
       detectFillBinding(node),
-      resolveVariableScope(node)
+      FEATURE_VARIABLE_SCOPE ? resolveVariableScope(node) : null
     ]);
     reply({ type: "ADJUST_OPTIONS_READY", issueId: message.issueId, palette, binding, variableScope });
+    return;
+  }
+
+  const isVariableMessage =
+    message.type === "ADJUST_VARIABLE_CONSEQUENCE_REQUEST" ||
+    message.type === "ADJUST_APPLY_VARIABLE";
+  if (isVariableMessage && !FEATURE_VARIABLE_SCOPE) {
+    reply(failed(message.issueId, "Changing a variable is turned off in this build."));
     return;
   }
 
