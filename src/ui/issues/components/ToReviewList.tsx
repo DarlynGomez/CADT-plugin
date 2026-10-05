@@ -1,5 +1,5 @@
 import { matchRootDecision } from "../../../shared/grouping/decisionMatch";
-import type { Root, RootDecision } from "../../../shared/grouping/groupingTypes";
+import type { DecisionMatch, Root, RootDecision } from "../../../shared/grouping/groupingTypes";
 import type { RootSection } from "../../../shared/grouping/sectionRoots";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import { IgnoredTray } from "./IgnoredTray";
@@ -7,6 +7,7 @@ import { RootCard } from "./RootCard";
 import styles from "./ToReviewList.module.css";
 
 const EMPTY_SELECTION: ReadonlySet<string> = new Set();
+const NO_OFFER: DecisionMatch = { offered: false, decision: null, reason: "no-match" };
 
 interface ToReviewListProps {
   sections: readonly RootSection[];
@@ -56,7 +57,10 @@ export function ToReviewList(props: ToReviewListProps) {
           {section.label && <h3 className={styles.sectionLabel}>{section.label}</h3>}
           <ul className={styles.list}>
             {section.roots.map((root) => {
-              const decisionOffer = matchRootDecision(root, decisions);
+              // Ignored instances mean the decision still covers part of this root, ADR-032
+              const decisionOffer = root.stateBreakdown.ignored
+                ? NO_OFFER
+                : matchRootDecision(root, decisions);
               // A partially reopened root can still carry its old decision on some
               // instances; the offer banner handles the "brand new match" case, this
               // note handles "you already decided on part of this one."
