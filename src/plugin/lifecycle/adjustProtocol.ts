@@ -97,6 +97,7 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
       wheelOpened: message.wheelOpened,
       hexRejected: message.hexRejected,
       abandoned: true,
+      scope: message.scope,
       instanceCount: nodes.length,
       loggedAt: new Date().toISOString()
     });

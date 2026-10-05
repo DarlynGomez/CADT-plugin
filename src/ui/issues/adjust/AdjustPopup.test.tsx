@@ -419,6 +419,39 @@ describe("AdjustPopup", () => {
       expect(apply).toMatchObject({ issueId: ISSUE.id, variableId: "VariableID:1:1" });
     });
 
+    it("records the selected scope on an abandonment", async () => {
+      render(
+        <AdjustPopup
+          root={rootFor(ISSUE.id)}
+          representativeIssue={ISSUE}
+          selectedInstanceIds={new Set()}
+          aiAssistanceLevel={3}
+          onClose={vi.fn()}
+        />
+      );
+      await act(async () => {
+        emit({
+          type: "ADJUST_OPTIONS_READY",
+          issueId: ISSUE.id,
+          palette: [],
+          binding: null,
+          variableScope: {
+            variableId: "VariableID:1:1",
+            name: "sage/muted",
+            collectionName: "Brand colours",
+            modeName: "Default",
+            remote: false
+          }
+        });
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /Update variable/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      const abandoned = postedMessages(posted).find((m) => m.type === "ADJUST_ABANDONED");
+      expect(abandoned).toMatchObject({ scope: "variable" });
+    });
+
     it("shows a library variable as unavailable, not selectable", async () => {
       render(
         <AdjustPopup

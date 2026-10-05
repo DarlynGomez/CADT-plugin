@@ -52,6 +52,7 @@ export async function applyAdjustment(
     wheelOpened,
     hexRejected,
     abandoned: false,
+    scope: "instances",
     instanceCount: nodes.length,
     loggedAt: new Date().toISOString()
   });

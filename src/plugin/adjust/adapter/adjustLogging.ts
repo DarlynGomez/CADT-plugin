@@ -1,3 +1,4 @@
+import type { AdjustScopeChoice } from "../../../shared/adjustMessageTypes";
 import { resolveCalibration } from "../../storage/calibrationStore";
 import { STORAGE_KEY_ADJUST_LOG } from "../../storage/storageKeys";
 
@@ -17,6 +18,8 @@ export interface AdjustLogEntry {
   wheelOpened: boolean;
   hexRejected: boolean;
   abandoned: boolean;
+  /** The scope selected when the event happened, so an abandonment still says what was being weighed */
+  scope: AdjustScopeChoice;
   /** How many nodes this event covered. GROUPING_SPEC.md section 8: logged once per group apply */
   instanceCount: number;
   loggedAt: string;

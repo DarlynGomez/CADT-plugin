@@ -66,6 +66,7 @@ export async function applyVariableAdjustment(
     wheelOpened,
     hexRejected,
     abandoned: false,
+    scope: "variable",
     instanceCount: consumerCount,
     loggedAt: new Date().toISOString()
   });

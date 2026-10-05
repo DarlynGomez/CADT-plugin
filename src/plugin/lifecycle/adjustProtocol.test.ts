@@ -88,11 +88,21 @@ describe("isAdjustMessage", () => {
         type: "ADJUST_ABANDONED",
         issueId: ISSUE_ID,
         issueIds: [ISSUE_ID],
+        scope: "instances",
         wheelOpened: true,
         hexRejected: false
       })
     ).toBe(true);
     expect(isAdjustMessage({ type: "ADJUST_ABANDONED", issueId: ISSUE_ID })).toBe(false);
+    expect(
+      isAdjustMessage({
+        type: "ADJUST_ABANDONED",
+        issueId: ISSUE_ID,
+        issueIds: [ISSUE_ID],
+        wheelOpened: true,
+        hexRejected: false
+      })
+    ).toBe(false);
   });
 
   it("rejects an unrecognized type and non-objects", async () => {
@@ -317,6 +327,7 @@ describe("handleAdjustMessage", () => {
           type: "ADJUST_ABANDONED",
           issueId: ISSUE_ID,
           issueIds: [ISSUE_ID],
+          scope: "variable",
           wheelOpened: true,
           hexRejected: true
         },
@@ -330,6 +341,7 @@ describe("handleAdjustMessage", () => {
         afterHex: null,
         afterRatio: null,
         abandoned: true,
+        scope: "variable",
         wheelOpened: true,
         hexRejected: true
       });
@@ -354,6 +366,7 @@ describe("handleAdjustMessage", () => {
           type: "ADJUST_ABANDONED",
           issueId: ISSUE_ID,
           issueIds: [ISSUE_ID],
+          scope: "variable",
           wheelOpened: false,
           hexRejected: false
         },
@@ -398,6 +411,7 @@ describe("handleAdjustMessage", () => {
           type: "ADJUST_ABANDONED",
           issueId: ISSUE_ID,
           issueIds: [ISSUE_ID],
+          scope: "variable",
           wheelOpened: false,
           hexRejected: false
         },

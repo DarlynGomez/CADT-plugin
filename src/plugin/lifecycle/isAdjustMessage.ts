@@ -35,7 +35,12 @@ export function isAdjustMessage(value: unknown): value is AdjustMessage {
           message.optionChosen === "c")
       );
     case "ADJUST_ABANDONED":
-      return typeof message.issueId === "string" && hasIssueIds() && hasSessionFlags();
+      return (
+        typeof message.issueId === "string" &&
+        hasIssueIds() &&
+        hasSessionFlags() &&
+        (message.scope === "instances" || message.scope === "variable")
+      );
     case "ADJUST_VARIABLE_CONSEQUENCE_REQUEST":
       return (
         typeof message.issueId === "string" &&

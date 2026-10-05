@@ -13,6 +13,9 @@ export type {
   AdjustApplyVariableMessage
 } from "./adjustVariableMessageTypes";
 
+/** Which scope the sheet had selected: the checked layers, or the bound variable itself */
+export type AdjustScopeChoice = "instances" | "variable";
+
 /** Which of the three options a chosen or applied colour came from */
 export type AdjustOptionChoice = "a" | "b" | "c";
 
@@ -81,6 +84,7 @@ export interface AdjustAbandonedMessage {
   type: "ADJUST_ABANDONED";
   issueId: string;
   issueIds: string[];
+  scope: AdjustScopeChoice;
   wheelOpened: boolean;
   hexRejected: boolean;
 }

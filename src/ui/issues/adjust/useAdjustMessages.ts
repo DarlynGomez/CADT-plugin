@@ -4,7 +4,8 @@ import type {
   AdjustFillBinding,
   AdjustOptionChoice,
   AdjustPaletteColor,
-  AdjustReplyMessage
+  AdjustReplyMessage,
+  AdjustScopeChoice
 } from "../../../shared/adjustMessageTypes";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import type { UiToPluginMessage } from "../../../shared/messageTypes";
@@ -87,11 +88,17 @@ export function useAdjustMessages(issueId: string) {
   );
 
   const abandon = useCallback(
-    (issueIds: readonly string[], wheelOpened: boolean, hexRejected: boolean) => {
+    (
+      issueIds: readonly string[],
+      scope: AdjustScopeChoice,
+      wheelOpened: boolean,
+      hexRejected: boolean
+    ) => {
       sendMessage({
         type: "ADJUST_ABANDONED",
         issueId,
         issueIds: [...issueIds],
+        scope,
         wheelOpened,
         hexRejected
       });

@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { AdjustOptionChoice, AdjustVariableScope } from "../../../shared/adjustMessageTypes";
+import type {
+  AdjustOptionChoice,
+  AdjustScopeChoice,
+  AdjustVariableScope
+} from "../../../shared/adjustMessageTypes";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import type { FocusedOption } from "./components/OptionsList";
 
-export type AdjustScope = "instances" | "variable";
+export type AdjustScope = AdjustScopeChoice;
 
 interface UseAdjustSessionArgs {
   aiAssistanceLevel: number;
@@ -21,7 +25,12 @@ interface UseAdjustSessionArgs {
     wheelOpened: boolean,
     hexRejected: boolean
   ) => void;
-  abandon: (issueIds: readonly string[], wheelOpened: boolean, hexRejected: boolean) => void;
+  abandon: (
+    issueIds: readonly string[],
+    scope: AdjustScope,
+    wheelOpened: boolean,
+    hexRejected: boolean
+  ) => void;
   requestVariableConsequence: (variableId: string, color: RGBColor) => void;
   applyVariable: (
     variableId: string,
@@ -109,7 +118,7 @@ export function useAdjustSession({
 
   function handleCancel() {
     clearPreview();
-    abandon(scopeIds, wheelOpened, hexRejected);
+    abandon(scopeIds, scope, wheelOpened, hexRejected);
     onClose();
   }
 
