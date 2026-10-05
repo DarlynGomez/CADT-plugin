@@ -335,6 +335,58 @@ describe("handleAdjustMessage", () => {
       });
     });
 
+    it("logs the original colour as before when an abandon arrives mid preview", async () => {
+      const node = textNode();
+      const { pluginData } = stubFigma(node, true);
+      const { handleAdjustMessage } = await import("./adjustProtocol");
+
+      await handleAdjustMessage(
+        {
+          type: "ADJUST_PREVIEW",
+          issueId: ISSUE_ID,
+          issueIds: [ISSUE_ID],
+          color: { r: 0.5, g: 0.5, b: 0.5 }
+        },
+        vi.fn()
+      );
+      await handleAdjustMessage(
+        {
+          type: "ADJUST_ABANDONED",
+          issueId: ISSUE_ID,
+          issueIds: [ISSUE_ID],
+          wheelOpened: false,
+          hexRejected: false
+        },
+        vi.fn()
+      );
+
+      const log = JSON.parse(pluginData["cadt.adjustLog.v1"]);
+      expect(log[0].beforeHex).toBe("#000000");
+    });
+
+    it("logs the original colour as before when apply follows a different preview", async () => {
+      const node = textNode();
+      const { pluginData } = stubFigma(node, true);
+      const { handleAdjustMessage } = await import("./adjustProtocol");
+
+      await handleAdjustMessage(
+        {
+          type: "ADJUST_PREVIEW",
+          issueId: ISSUE_ID,
+          issueIds: [ISSUE_ID],
+          color: { r: 0.5, g: 0.5, b: 0.5 }
+        },
+        vi.fn()
+      );
+      await handleAdjustMessage(
+        { type: "ADJUST_APPLY", issueId: ISSUE_ID, color: { r: 0, g: 0, b: 0.2 }, ...APPLY_ARGS },
+        vi.fn()
+      );
+
+      const log = JSON.parse(pluginData["cadt.adjustLog.v1"]);
+      expect(log[0].beforeHex).toBe("#000000");
+    });
+
     it("sends no reply for ADJUST_ABANDONED", async () => {
       const node = textNode();
       stubFigma(node, true);

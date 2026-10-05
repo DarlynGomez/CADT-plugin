@@ -99,3 +99,8 @@ export async function applyFill(node: TextNode, fills: Paint[]): Promise<void> {
 export function activePreviewNodeIds(): ReadonlySet<string> {
   return activePreview?.nodeIds ?? new Set();
 }
+
+/** The fills a node had before the active preview touched it, or null when it is not previewed */
+export function originalFillsFor(nodeId: string): readonly Paint[] | null {
+  return activePreview?.originalFills.get(nodeId) ?? null;
+}

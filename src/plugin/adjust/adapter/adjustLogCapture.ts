@@ -5,6 +5,7 @@ import { contrastRatio } from "../../../shared/colour/contrastRatio";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import { detectFillBinding } from "./bindingLookup";
 import { resolveTextNodeSnapshot } from "../../lifecycle/resolveSnapshot";
+import { originalFillsFor } from "./previewState";
 
 export interface AdjustLogState {
   hex: string;
@@ -36,10 +37,17 @@ export async function captureAdjustLogState(node: TextNode): Promise<AdjustLogSt
     sizeClass === "large" ? CONTRAST_THRESHOLD_LARGE_TEXT : CONTRAST_THRESHOLD_NORMAL_TEXT;
   const binding = await detectFillBinding(node);
 
+  // A live preview has overwritten the fill and detached its binding, so "before"
+  // comes from the captured original, never the node
+  const original = originalFillsFor(node.id)?.find(
+    (fill): fill is SolidPaint => fill.type === "SOLID"
+  );
+  const foreground = original ? original.color : snapshot.foreground;
+
   return {
-    hex: rgbToHex(snapshot.foreground),
-    ratio: contrastRatio(snapshot.foreground, snapshot.background),
-    bound: binding !== null,
+    hex: rgbToHex(foreground),
+    ratio: contrastRatio(foreground, snapshot.background),
+    bound: binding !== null || Boolean(original?.boundVariables?.color),
     requiredRatio,
     background: snapshot.background
   };
