@@ -15,6 +15,7 @@ import { BindingNotice } from "./components/BindingNotice";
 import { ScopeSection } from "./components/ScopeSection";
 import { useAdjustMessages } from "./useAdjustMessages";
 import { useAdjustSession } from "./useAdjustSession";
+import { useAdjustVariableScope } from "./useAdjustVariableScope";
 
 interface AdjustPopupProps {
   root: Root;
@@ -50,15 +51,20 @@ export function AdjustPopup({
     selectedInstanceIds.size > 0 ? [...selectedInstanceIds] : [root.representativeIssueId];
 
   const { options, applied, preview, clearPreview, apply, abandon } = useAdjustMessages(issue.id);
+  const { variableScope, variableConsequence, requestVariableConsequence, applyVariable } =
+    useAdjustVariableScope(issue.id);
   const session = useAdjustSession({
     aiAssistanceLevel,
     optionA,
     scopeIds,
     applied,
+    variableScope,
     preview,
     clearPreview,
     apply,
     abandon,
+    requestVariableConsequence,
+    applyVariable,
     onClose
   });
 
@@ -100,11 +106,14 @@ export function AdjustPopup({
         onColorChange={session.selectWheelColor}
         onHexRejected={session.onHexRejected}
       />
-      {(root.instances.length > 1 || options?.binding) && (
+      {(root.instances.length > 1 || variableScope) && (
         <ScopeSection
+          scope={session.scope}
+          onScopeChange={session.setScope}
           scopeCount={scopeIds.length}
           totalInstances={root.instances.length}
-          binding={options?.binding ?? null}
+          variableScope={variableScope}
+          variableConsequence={variableConsequence}
         />
       )}
 

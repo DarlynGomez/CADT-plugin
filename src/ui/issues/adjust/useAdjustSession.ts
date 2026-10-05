@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { AdjustOptionChoice } from "../../../shared/adjustMessageTypes";
+import type { AdjustOptionChoice, AdjustVariableScope } from "../../../shared/adjustMessageTypes";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import type { FocusedOption } from "./components/OptionsList";
+
+export type AdjustScope = "instances" | "variable";
 
 interface UseAdjustSessionArgs {
   aiAssistanceLevel: number;
   optionA: RGBColor | null;
   scopeIds: readonly string[];
   applied: boolean;
+  variableScope: AdjustVariableScope | null;
   preview: (color: RGBColor, issueIds: readonly string[]) => void;
   clearPreview: () => void;
   apply: (
@@ -19,23 +22,30 @@ interface UseAdjustSessionArgs {
     hexRejected: boolean
   ) => void;
   abandon: (issueIds: readonly string[], wheelOpened: boolean, hexRejected: boolean) => void;
+  requestVariableConsequence: (variableId: string, color: RGBColor) => void;
+  applyVariable: (
+    variableId: string,
+    color: RGBColor,
+    optionChosen: AdjustOptionChoice,
+    wheelOpened: boolean,
+    hexRejected: boolean
+  ) => void;
   onClose: () => void;
 }
 
-/**
- * Owns the popup's focus, preview, and apply session state: which option is focused,
- * the colour that follows from it, the wheel's own chosen colour, and the two session
- * flags the log entry needs. Split out of AdjustPopup.tsx to keep it under 150 lines.
- */
+/** Owns the popup's focus, preview, scope, and apply session state. Split out of AdjustPopup.tsx */
 export function useAdjustSession({
   aiAssistanceLevel,
   optionA,
   scopeIds,
   applied,
+  variableScope,
   preview,
   clearPreview,
   apply,
   abandon,
+  requestVariableConsequence,
+  applyVariable,
   onClose
 }: UseAdjustSessionArgs) {
   const [focused, setFocused] = useState<FocusedOption>(null);
@@ -43,7 +53,15 @@ export function useAdjustSession({
   const [wheelColor, setWheelColor] = useState<RGBColor | null>(null);
   const [wheelOpened, setWheelOpened] = useState(aiAssistanceLevel === 2);
   const [hexRejected, setHexRejected] = useState(false);
+  const [scope, setScope] = useState<AdjustScope>("instances");
   const autoFocusedRef = useRef(false);
+
+  // GROUPING_SPEC.md section 9: recomputed on every colour change while this scope is selected
+  useEffect(() => {
+    if (scope === "variable" && activeColor && variableScope && !variableScope.remote) {
+      requestVariableConsequence(variableScope.variableId, activeColor);
+    }
+  }, [scope, activeColor, variableScope, requestVariableConsequence]);
 
   useEffect(() => {
     if (applied) {
@@ -96,7 +114,12 @@ export function useAdjustSession({
   }
 
   function handleApply() {
-    if (activeColor && focused) {
+    if (!activeColor || !focused) {
+      return;
+    }
+    if (scope === "variable" && variableScope && !variableScope.remote) {
+      applyVariable(variableScope.variableId, activeColor, focused, wheelOpened, hexRejected);
+    } else {
       apply(activeColor, scopeIds, focused, wheelOpened, hexRejected);
     }
   }
@@ -113,6 +136,8 @@ export function useAdjustSession({
     focused,
     activeColor,
     wheelColor,
+    scope,
+    setScope,
     openWheel,
     focusOption,
     selectWheelColor,

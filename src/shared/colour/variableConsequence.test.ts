@@ -5,7 +5,6 @@ import { evaluateConsumer, summarizeVariableConsequence } from "./variableConseq
 const WHITE = { r: 1, g: 1, b: 1 };
 const BLACK = { r: 0, g: 0, b: 0 };
 const MID_GRAY = { r: 0.5, g: 0.5, b: 0.5 };
-const DARK_SURFACE = { r: 0.05, g: 0.05, b: 0.05 };
 
 describe("evaluateConsumer", () => {
   it("returns null for an indeterminate consumer", () => {

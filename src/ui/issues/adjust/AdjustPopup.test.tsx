@@ -359,4 +359,94 @@ describe("AdjustPopup", () => {
     expect(screen.getByText(/could not be read/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
+
+  describe("variable scope", () => {
+    it("offers the variable row once bound, requests and shows its live consequence, and applies through it", async () => {
+      render(
+        <AdjustPopup
+          root={rootFor(ISSUE.id)}
+          representativeIssue={ISSUE}
+          selectedInstanceIds={new Set()}
+          aiAssistanceLevel={3}
+          onClose={vi.fn()}
+        />
+      );
+
+      await act(async () => {
+        emit({
+          type: "ADJUST_OPTIONS_READY",
+          issueId: ISSUE.id,
+          palette: [],
+          binding: null,
+          variableScope: {
+            variableId: "VariableID:1:1",
+            name: "sage/muted",
+            collectionName: "Brand colours",
+            modeName: "Default",
+            remote: false
+          }
+        });
+      });
+
+      expect(screen.getByText(/Update variable/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("Keep your colour"));
+      fireEvent.click(screen.getByRole("button", { name: /Update variable/ }));
+
+      const request = postedMessages(posted).find(
+        (message) => message.type === "ADJUST_VARIABLE_CONSEQUENCE_REQUEST"
+      );
+      expect(request).toMatchObject({ issueId: ISSUE.id, variableId: "VariableID:1:1" });
+
+      await act(async () => {
+        emit({
+          type: "ADJUST_VARIABLE_CONSEQUENCE_READY",
+          issueId: ISSUE.id,
+          totalConsumers: 12,
+          newlyFailingCount: 2,
+          newlyFailingNames: ["A", "B"]
+        });
+      });
+
+      expect(screen.getByText(/Updates 12 layers\. 2 would newly fail\./)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+      const apply = postedMessages(posted).find(
+        (message) => message.type === "ADJUST_APPLY_VARIABLE"
+      );
+      expect(apply).toMatchObject({ issueId: ISSUE.id, variableId: "VariableID:1:1" });
+    });
+
+    it("shows a library variable as unavailable, not selectable", async () => {
+      render(
+        <AdjustPopup
+          root={rootFor(ISSUE.id)}
+          representativeIssue={ISSUE}
+          selectedInstanceIds={new Set()}
+          aiAssistanceLevel={3}
+          onClose={vi.fn()}
+        />
+      );
+
+      await act(async () => {
+        emit({
+          type: "ADJUST_OPTIONS_READY",
+          issueId: ISSUE.id,
+          palette: [],
+          binding: null,
+          variableScope: {
+            variableId: "VariableID:1:1",
+            name: "sage/muted",
+            collectionName: "Brand colours",
+            modeName: "Default",
+            remote: true
+          }
+        });
+      });
+
+      expect(screen.getByText("Library colour. Edit it in its source file.")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Update variable/ })).toBeDisabled();
+    });
+  });
 });

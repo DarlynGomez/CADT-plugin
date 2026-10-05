@@ -1,31 +1,64 @@
-import { Info } from "lucide-react";
+import { Check, Info } from "lucide-react";
 
-import type { AdjustFillBinding } from "../../../../shared/adjustMessageTypes";
+import type { AdjustVariableScope } from "../../../../shared/adjustMessageTypes";
+import type { AdjustScope } from "../useAdjustSession";
+import type { VariableConsequenceData } from "../useAdjustVariableScope";
 import styles from "./ScopeSection.module.css";
 
 interface ScopeSectionProps {
-  /** How many instances this apply would actually write. Selected, or just the representative. */
+  scope: AdjustScope;
+  onScopeChange: (scope: AdjustScope) => void;
   scopeCount: number;
   totalInstances: number;
-  binding: AdjustFillBinding | null;
+  variableScope: AdjustVariableScope | null;
+  variableConsequence: VariableConsequenceData | null;
+}
+
+function instancesDetail(scopeCount: number, remaining: number): string {
+  const layerWord = scopeCount === 1 ? "layer" : "layers";
+  const suffix = remaining > 0 ? ` ${remaining} more in this group left unchanged.` : "";
+  return `Changes ${scopeCount} ${layerWord}.${suffix}`;
+}
+
+function variableDetail(consequence: VariableConsequenceData | null): string {
+  if (!consequence) {
+    return "Calculating how many layers this would change...";
+  }
+  const layerWord = consequence.totalConsumers === 1 ? "layer" : "layers";
+  const failingClause =
+    consequence.newlyFailingCount > 0 ? ` ${consequence.newlyFailingCount} would newly fail.` : "";
+  return `Updates ${consequence.totalConsumers} ${layerWord}.${failingClause}`;
 }
 
 /**
- * GROUPING_SPEC.md section 8: states the apply scope plainly, one line, so a group
- * change is never a silent default. "Update the variable" is section 9, a different
- * and larger act deferred to a later slice; shown here, disabled, so the designer
- * knows it exists rather than wondering why it is missing.
+ * GROUPING_SPEC.md section 8's instances scope, always available, and section 9's
+ * variable scope, offered whenever the foreground is bound to a local variable and
+ * disabled with its own explanation for a library one. Both are real, selectable
+ * options; the count on the variable row is computed fresh for whatever colour is
+ * currently active, never assumed. See ADR-033.
  */
-export function ScopeSection({ scopeCount, totalInstances, binding }: ScopeSectionProps) {
-  const layerWord = scopeCount === 1 ? "layer" : "layers";
+export function ScopeSection({
+  scope,
+  onScopeChange,
+  scopeCount,
+  totalInstances,
+  variableScope,
+  variableConsequence
+}: ScopeSectionProps) {
   const remaining = totalInstances - scopeCount;
+  const variableDisabled = !variableScope || variableScope.remote;
 
   return (
     <div className={styles.section}>
       <p className={styles.heading}>2. Choose adjustment scope</p>
-      <div className={styles.option} data-checked="true">
-        <span className={styles.radio} data-checked="true" aria-hidden="true" />
-        <div className={styles.optionBody}>
+      <button
+        type="button"
+        className={styles.option}
+        data-checked={scope === "instances"}
+        onClick={() => onScopeChange("instances")}
+      >
+        <span className={styles.radio} data-checked={scope === "instances"} aria-hidden="true" />
+        <span className={styles.optionBody}>
           <span className={styles.optionLabelRow}>
             <span className={styles.optionLabel}>Change only the current instance</span>
             <span
@@ -35,42 +68,39 @@ export function ScopeSection({ scopeCount, totalInstances, binding }: ScopeSecti
               <Info size={14} aria-hidden="true" />
             </span>
           </span>
-          <span className={styles.optionDetail}>
-            Changes {scopeCount} {layerWord}.
-            {remaining > 0 && ` ${remaining} more in this group left unchanged.`}
-          </span>
-        </div>
-        <svg className={styles.check} viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
-          <path
-            d="M3.5 8.5 6.5 11.5 12.5 4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      {binding && (
-        <div className={styles.option} data-disabled="true">
-          <span className={styles.radio} aria-hidden="true" />
-          <div className={styles.optionBody}>
+          <span className={styles.optionDetail}>{instancesDetail(scopeCount, remaining)}</span>
+        </span>
+        {scope === "instances" && <Check className={styles.check} size={18} aria-hidden="true" />}
+      </button>
+      {variableScope && (
+        <button
+          type="button"
+          className={styles.option}
+          data-checked={scope === "variable"}
+          disabled={variableDisabled}
+          onClick={() => onScopeChange("variable")}
+        >
+          <span className={styles.radio} data-checked={scope === "variable"} aria-hidden="true" />
+          <span className={styles.optionBody}>
             <span className={styles.optionLabelRow}>
               <span className={styles.optionLabel}>
-                Update variable &ldquo;{binding.name}&rdquo;
+                Update variable &ldquo;{variableScope.name}&rdquo;
               </span>
               <span
                 className={styles.infoIcon}
-                title="Not available yet. Edit this variable in its own definition for now."
+                title={`Writes ${variableScope.collectionName} / ${variableScope.modeName}. Every layer bound to this variable changes, including layers that currently pass.`}
               >
                 <Info size={14} aria-hidden="true" />
               </span>
             </span>
             <span className={styles.optionDetail}>
-              Not available yet. Edit this variable in its own definition for now.
+              {variableScope.remote
+                ? "Library colour. Edit it in its source file."
+                : variableDetail(variableConsequence)}
             </span>
-          </div>
-        </div>
+          </span>
+          {scope === "variable" && <Check className={styles.check} size={18} aria-hidden="true" />}
+        </button>
       )}
     </div>
   );
