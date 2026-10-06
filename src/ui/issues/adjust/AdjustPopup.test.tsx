@@ -6,6 +6,10 @@ import type { Root } from "../../../shared/grouping/groupingTypes";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import { AdjustPopup } from "./AdjustPopup";
 
+// The flag defaults to false. The "variable scope" block below tests what happens with it on,
+// so it is turned on for this file; AdjustPopup.variableFlagDefault.test.tsx covers the default.
+vi.mock("../../../shared/featureFlags", () => ({ FEATURE_VARIABLE_SCOPE: true }));
+
 function emit(message: unknown) {
   window.dispatchEvent(new MessageEvent("message", { data: { pluginMessage: message } }));
 }
