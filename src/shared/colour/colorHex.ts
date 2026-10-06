@@ -6,7 +6,7 @@ function toHexByte(channel: number): string {
     .padStart(2, "0");
 }
 
-/** RGBColor's 0 to 1 float channels as an uppercase "#RRGGBB" string */
+/** Channels from 0 to 1 as an uppercase hex string like #RRGGBB */
 export function rgbToHex(color: RGBColor): string {
   return `#${toHexByte(color.r)}${toHexByte(color.g)}${toHexByte(color.b)}`.toUpperCase();
 }

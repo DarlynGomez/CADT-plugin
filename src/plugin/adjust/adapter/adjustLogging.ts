@@ -2,11 +2,7 @@ import type { AdjustScopeChoice } from "../../../shared/adjustMessageTypes";
 import { resolveCalibration } from "../../storage/calibrationStore";
 import { STORAGE_KEY_ADJUST_LOG } from "../../storage/storageKeys";
 
-/**
- * One recorded Adjust event, per ADJUST_SPEC.md section 9. This is study data, not
- * telemetry: abandonment matters as much as adoption, so the entry exists whether or
- * not the designer applied anything
- */
+
 export interface AdjustLogEntry {
   issueId: string;
   optionChosen: "a" | "b" | "c" | null;
@@ -18,35 +14,50 @@ export interface AdjustLogEntry {
   wheelOpened: boolean;
   hexRejected: boolean;
   abandoned: boolean;
-  /** The scope selected when the event happened, so an abandonment still says what was being weighed */
+  /** The scope selected at the time, so an abandon still says what was weighed */
   scope: AdjustScopeChoice;
-  /** How many nodes this event covered. GROUPING_SPEC.md section 8: logged once per group apply */
   instanceCount: number;
   loggedAt: string;
 }
 
-function readLog(): AdjustLogEntry[] {
+function readStoredLog(): unknown[] {
   try {
     const raw = figma.root.getPluginData(STORAGE_KEY_ADJUST_LOG);
     if (!raw) {
       return [];
     }
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as AdjustLogEntry[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("adjustLogging: stored log was not valid JSON", error);
     return [];
   }
 }
 
-/** Only when loggingConsent is true; a silent no-op otherwise, never an error */
+function isScopeChoice(value: unknown): value is AdjustScopeChoice {
+  return value === "instances" || value === "variable";
+}
+
+// The log for anything that reads it
+export function loadAdjustLog(): AdjustLogEntry[] {
+  return readStoredLog()
+    .filter(
+      (entry): entry is Record<string, unknown> => typeof entry === "object" && entry !== null
+    )
+    .map((entry) => ({
+      ...(entry as unknown as AdjustLogEntry),
+      scope: isScopeChoice(entry.scope) ? entry.scope : "instances"
+    }));
+}
+
+/** Only when loggingConsent is true, a silent no-op otherwise, never an error */
 export async function logAdjustEvent(entry: AdjustLogEntry): Promise<void> {
   const resolution = await resolveCalibration();
   if (!resolution?.profile.loggingConsent) {
     return;
   }
 
-  const log = readLog();
+  const log = readStoredLog();
   log.push(entry);
   try {
     figma.root.setPluginData(STORAGE_KEY_ADJUST_LOG, JSON.stringify(log));

@@ -12,9 +12,8 @@ interface WhySurfacedPopoverProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.3 item 7: a small "?" trigger opening plain-language context on
- * why the shortfall matters. Card-level explanation, not the Teach Me Why curriculum:
- * no WCAG citation, no link out.
+ * A small help button opening plain context on why the shortfall matters
+ * Short card level help, not the Teach Me Why content, no standards citations or links
  */
 export function WhySurfacedPopover({
   measuredRatio,

@@ -11,11 +11,8 @@ interface IgnoredTrayProps {
 }
 
 /**
- * A quick-access, collapsed-by-default tray for ignored roots at the bottom of the
- * active list, on direct instruction to match the mockup's tray. This sits alongside
- * the dedicated Ignored filter, FilterBar.tsx, rather than replacing it: the filter
- * gives the full Decisions view, section 6.5; this gives a peek without leaving
- * whatever filter is active.
+ * Collapsed tray of ignored roots at the bottom of the list
+ * A quick peek that sits beside the Ignored filter and does not replace it
  */
 export function IgnoredTray({ roots, decisions, onRestore }: IgnoredTrayProps) {
   if (roots.length === 0) {

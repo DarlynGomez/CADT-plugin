@@ -36,9 +36,8 @@ export function CalibrationFlow({ onComplete, saveError }: CalibrationFlowProps)
 
     const saved = onComplete ? await onComplete(profile) : true;
     if (saved === false) {
-      // The save failed. Unlock so the Review screen can offer a retry. On
-      // success the app swaps in the returning-user surface and unmounts this
-      // flow, so there is nothing left to do here.
+      // The save failed so unlock the Review screen for a retry
+      // On success the app swaps surfaces and unmounts this flow
       setSubmitting(false);
     }
   }

@@ -51,9 +51,8 @@ describe("App", () => {
 
     render(<App />);
 
-    // The panel itself subscribes over postMessage, unmocked here, so it renders its
-    // own loading state rather than the full panel; that this appears at all is what
-    // proves hand-off happened. App.handoff.test.tsx exercises the full round trip.
+    // The panel subscribes over postMessage and is not mocked here, so it shows its loading state
+    // Seeing it at all proves hand off happened, the full round trip is in App.handoff.test.tsx
     expect(screen.getByText("Loading issues...")).toBeInTheDocument();
   });
 

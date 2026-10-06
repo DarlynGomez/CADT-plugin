@@ -33,7 +33,7 @@ interface LiveWatchBodyProps {
   onReopen: (issueIds: readonly string[], signature: string, clearDecision: boolean) => void;
 }
 
-/** The Live Watch tab's body: error, filter bar, and whichever list is active */
+/** Body of the Live Watch tab, error, filters and the active list */
 export function LiveWatchBody(props: LiveWatchBodyProps) {
   return (
     <>

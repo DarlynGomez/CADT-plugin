@@ -27,7 +27,7 @@ function parsePersistedMap(raw: string): PersistedMap {
   }
 }
 
-/** signature lives only in the map key; reconstruct the full RootDecision from both */
+/** The signature lives in the map key so rebuild the decision from both */
 function toDecision(signature: string, fields: PersistedDecisionFields): RootDecision {
   return { signature, ...fields };
 }
@@ -40,12 +40,7 @@ function toPersistedFields(decision: RootDecision): PersistedDecisionFields {
   };
 }
 
-/**
- * Load the persisted decision record. Unlike issueStore.ts's loadIssues, there is no
- * pruning pass: a decision is keyed by signature, a colour combination, not by a node
- * id that could stop existing, so nothing here ever goes stale the way an issue record
- * does. Synchronous for the same reason, no node lookup is needed to decide what survives
- */
+/** Decisions are keyed by colour combination so nothing goes stale and no pruning is needed */
 export function loadDecisions(): DecisionRecordMap {
   const persisted = parsePersistedMap(figma.root.getPluginData(STORAGE_KEY_DECISIONS));
   const entries = Object.entries(persisted).map(
@@ -62,7 +57,7 @@ export interface DecisionSaveResult {
   error?: string;
 }
 
-/** Persist the full record. Every write replaces the whole map; there is no partial update */
+/** Replaces the whole map on every write */
 export function saveDecisions(record: DecisionRecordMap): DecisionSaveResult {
   const persisted: PersistedMap = {};
   for (const [signature, decision] of Object.entries(record)) {
@@ -79,7 +74,7 @@ export function saveDecisions(record: DecisionRecordMap): DecisionSaveResult {
   }
 }
 
-/** GROUPING_SPEC.md 3.4: one reason per signature; ignoring the same root again overwrites it */
+/** One reason per signature, ignoring again overwrites it */
 export function recordDecision(
   record: DecisionRecordMap,
   decision: RootDecision
@@ -87,11 +82,7 @@ export function recordDecision(
   return { ...record, [decision.signature]: decision };
 }
 
-/**
- * ADR-032: a full root reopen clears its decision, so the offer to reapply it does not
- * immediately reappear on the very root the designer just restored. A no-op when the
- * signature has no recorded decision.
- */
+/** Drops the decision for a signature after a full reopen, does nothing when there is none */
 export function removeDecision(record: DecisionRecordMap, signature: string): DecisionRecordMap {
   if (!(signature in record)) {
     return record;

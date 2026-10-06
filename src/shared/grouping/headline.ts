@@ -14,14 +14,7 @@ export type Headline =
 const COVERAGE_TARGET = 0.8;
 const MAX_BINDINGS = 3;
 
-/**
- * Spec section 4: the panel's opening line, computed rather than written. Sort the
- * foreground bindings among open findings by descending count and take the top one, two,
- * or three, whichever first reaches 80 percent. This is not an approximation: when the
- * goal is the fewest items whose counts reach a threshold, taking the largest counts
- * first is provably minimal, so greedy and "smallest number of bindings that together
- * cover 80 percent" describe the same set.
- */
+/** Takes the biggest bindings until they cover 80 percent of open findings */
 export function computeHeadline(roots: readonly Root[]): Headline {
   const openInstances = roots.flatMap((root) =>
     root.instances.filter((instance) => instance.state === "open")

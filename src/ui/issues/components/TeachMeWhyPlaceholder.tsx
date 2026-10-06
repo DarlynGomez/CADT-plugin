@@ -1,9 +1,8 @@
 import styles from "./TeachMeWhyPlaceholder.module.css";
 
 /**
- * GROUPING_SPEC.md 6.1: the tab's slot is reserved, but the curriculum itself is not
- * built in this slice, per CLAUDE.md's scope list. Plain and short on purpose: this is
- * not the place to describe a feature that does not exist yet.
+ * The tab slot is reserved but the content is not built yet
+ * Kept plain and short on purpose
  */
 export function TeachMeWhyPlaceholder() {
   return (

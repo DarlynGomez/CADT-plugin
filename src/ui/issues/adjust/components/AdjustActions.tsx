@@ -6,7 +6,7 @@ interface AdjustActionsProps {
   onApply: () => void;
 }
 
-/** Cancel restores and abandons; Apply commits whatever is currently previewed */
+/** Cancel restores and abandons, Apply commits what is previewed */
 export function AdjustActions({ canApply, onCancel, onApply }: AdjustActionsProps) {
   return (
     <div className={styles.actions}>

@@ -12,7 +12,7 @@ export function hueSaturationToPoint(hue: number, saturation: number): WheelPoin
   return { x: saturation * Math.cos(angle), y: saturation * Math.sin(angle) };
 }
 
-/** The inverse of hueSaturationToPoint. Saturation is clamped to 1 for a point outside the disc */
+/** Inverse of hueSaturationToPoint, saturation clamps to 1 outside the disc */
 export function pointToHueSaturation(point: WheelPoint): { hue: number; saturation: number } {
   const saturation = Math.min(1, Math.hypot(point.x, point.y));
   const angle = Math.atan2(point.y, point.x);

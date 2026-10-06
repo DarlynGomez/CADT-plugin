@@ -12,9 +12,8 @@ interface SeverityTagProps {
 }
 
 /**
- * The severity word as a coloured pill. Colour is supplementary: the word itself
- * ("High Severity") is what actually conveys severity, matching GROUPING_SPEC.md
- * section 11's "never colour alone," so this reads the same in grayscale.
+ * The severity word as a coloured pill
+ * The word carries the meaning so it reads the same in grayscale
  */
 export function SeverityTag({ severity }: SeverityTagProps) {
   return <span className={`${styles.tag} ${styles[severity]}`}>{TEXT[severity]}</span>;

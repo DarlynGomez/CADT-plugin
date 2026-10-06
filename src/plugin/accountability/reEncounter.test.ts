@@ -86,8 +86,7 @@ describe("applySelectionChange", () => {
     state = markDeferred(state, ISSUE_A.id);
     state = applySelectionChange(state, new Set(), [ISSUE_A]).state;
 
-    // The caller expands the raw Figma selection to include ancestors before calling
-    // in, so selecting a frame that contains the node reads the same as selecting it.
+    // The caller adds ancestors to the selection first, so selecting a parent frame counts
     const outcome = applySelectionChange(state, new Set(["frame:1", "1:1"]), [ISSUE_A]);
     expect(outcome.resurfacedIssueIds).toEqual([ISSUE_A.id]);
   });

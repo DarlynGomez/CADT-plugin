@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// No mock of featureFlags anywhere in this file: it proves what the shipped default does.
+// featureFlags is not mocked in this file so it shows what the shipped default does
 
 const ISSUE_ID = "contrast:1:1";
 const COLOR = { r: 0, g: 0, b: 0.2 };

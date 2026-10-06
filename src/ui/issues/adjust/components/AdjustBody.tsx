@@ -7,7 +7,7 @@ import { WheelView } from "./WheelView";
 const COUNT_WORD: Record<number, string> = { 2: "two", 3: "three" };
 
 interface AdjustBodyProps {
-  /** ADJUST_SPEC.md section 2: "Flag and explain" opens straight into the wheel, no options */
+  /** The lowest help level goes straight to the wheel with no options */
   aiAssistanceLevel: number;
   sampleText: string;
   background: RGBColor;
@@ -23,7 +23,7 @@ interface AdjustBodyProps {
   onHexRejected: () => void;
 }
 
-/** The wheel-only entry point, or the three option cards, split out to keep AdjustPopup under 150 lines */
+/** Wheel only entry or the three option cards */
 export function AdjustBody({
   aiAssistanceLevel,
   sampleText,

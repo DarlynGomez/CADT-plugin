@@ -13,10 +13,8 @@ interface InstanceRowProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.4: layer name, screen, ratio, a checkbox, and a locate control.
- * The representative instance, section 3.5, is the one a single-instance Adjust
- * targets; it sorts first in the list and reads "(Current)" so the designer can see
- * which one that is without opening Adjust to find out.
+ * Layer name, screen, ratio, a checkbox and a locate button
+ * The representative is the one a single adjust targets, so it is marked Current
  */
 export function InstanceRow({
   instance,

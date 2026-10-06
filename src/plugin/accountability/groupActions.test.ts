@@ -42,8 +42,7 @@ describe("deferRoot", () => {
 
     expect(result.record.a.state).toBe("deferred");
     expect(result.record.b.state).toBe("deferred");
-    // Important is a designer-protected flag: a root-level Defer must not sweep it up,
-    // even though the state machine itself would allow important to deferred.
+    // Important is protected, a root level defer must not sweep it up
     expect(result.record.c.state).toBe("important");
     expect(result.record.d.state).toBe("ignored");
   });
@@ -93,8 +92,7 @@ describe("unmarkRootImportant", () => {
     const result = unmarkRootImportant(record, ["a", "b", "c"]);
 
     expect(result.record.a.state).toBe("open");
-    // Neither deferred nor ignored instances are swept along, even though
-    // reopenIssue individually accepts both.
+    // Deferred and ignored instances are left out even though reopen would accept them
     expect(result.record.b.state).toBe("deferred");
     expect(result.record.c.state).toBe("ignored");
   });

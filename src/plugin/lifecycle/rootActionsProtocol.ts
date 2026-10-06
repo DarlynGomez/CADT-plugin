@@ -74,7 +74,7 @@ function computeGroupResult(
   }
 }
 
-/** Handles every group-action message, per GROUPING_SPEC.md sections 3.3 and 3.4 */
+/** Handles every group action message */
 export async function handleRootMessage(message: RootMessage, reply: Reply): Promise<void> {
   const record = await loadIssues();
   const at = new Date().toISOString();

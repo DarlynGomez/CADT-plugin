@@ -11,9 +11,8 @@ export function registerAdjustSelectionRestore(): void {
 }
 
 /**
- * figma.on("close") cannot await anything, so this calls the synchronous restore path
- * directly rather than the one every other trigger uses. A plugin that closes mid
- * preview and leaves the design modified is the worst outcome this feature can produce
+ * The close handler cannot await so it calls the sync restore directly
+ * A plugin closing mid preview and leaving the design changed is the worst outcome here
  */
 export function registerAdjustCloseRestore(): void {
   figma.on("close", () => {

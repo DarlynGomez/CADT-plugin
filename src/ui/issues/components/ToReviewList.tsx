@@ -33,7 +33,7 @@ interface ToReviewListProps {
   onRestoreDeferred: (root: Root) => void;
 }
 
-/** GROUPING_SPEC.md 6.2's sectioned list: unsectioned for root cause, headed sections otherwise */
+/** Sectioned list, unsectioned for root cause grouping and headed sections otherwise */
 export function ToReviewList(props: ToReviewListProps) {
   const { sections, issuesById, decisions } = props;
 
@@ -57,13 +57,12 @@ export function ToReviewList(props: ToReviewListProps) {
           {section.label && <h3 className={styles.sectionLabel}>{section.label}</h3>}
           <ul className={styles.list}>
             {section.roots.map((root) => {
-              // Ignored instances mean the decision still covers part of this root, ADR-032
+              // Ignored instances mean a decision still covers part of this root
               const decisionOffer = root.stateBreakdown.ignored
                 ? NO_OFFER
                 : matchRootDecision(root, decisions);
-              // A partially reopened root can still carry its old decision on some
-              // instances; the offer banner handles the "brand new match" case, this
-              // note handles "you already decided on part of this one."
+              // A partly reopened root can still hold its old decision on some instances
+              // The offer banner is for new matches, this note is for a decision already made on part of it
               const recordedReason = root.stateBreakdown.ignored
                 ? (decisions[root.signature]?.reason ?? null)
                 : null;

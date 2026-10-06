@@ -2,9 +2,8 @@ import type { ChainLayer } from "../colorResolution";
 import { extractNodeLayer, extractPageBackgroundLayer } from "./paintExtraction";
 
 /**
- * Walk from a node's parent up to its page, in ancestor order, ending with the page
- * background as the final fallback layer. Assumes the node's page is already loaded,
- * which lifecycle/startup.ts guarantees before any scan runs.
+ * Walks from the parent up to the page, ending with the page background as the last layer
+ * Assumes the page is already loaded, startup guarantees it before any scan
  */
 export function buildAncestorChain(node: SceneNode): ChainLayer[] {
   const layers: ChainLayer[] = [];

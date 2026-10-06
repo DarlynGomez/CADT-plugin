@@ -23,9 +23,8 @@ async function enrichForDisplay(issue: Issue): Promise<IssueSummary> {
 }
 
 /**
- * Build the panel's view of the record: node name, screen identity, and evidence, the
- * measured ratio against the required one for contrast, recomputed live rather than
- * trusted from a stale persisted value, since section 5.5 stores none of them
+ * Builds the panel view of the record with node name, screen and live evidence
+ * Recomputed on each build so a stale stored value is never shown
  */
 export async function buildDisplayList(record: IssueRecordMap): Promise<IssueSummary[]> {
   return Promise.all(Object.values(record).map(enrichForDisplay));

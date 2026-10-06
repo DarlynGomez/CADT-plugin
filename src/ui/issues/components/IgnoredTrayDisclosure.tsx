@@ -10,7 +10,7 @@ interface IgnoredTrayDisclosureProps {
   onRestoreChecked: () => void;
 }
 
-/** The Ignored tray row's own "Related grouped issues" disclosure, checkboxes for a partial restore */
+/** Related issues list with checkboxes for a partial restore */
 export function IgnoredTrayDisclosure({
   instances,
   checked,

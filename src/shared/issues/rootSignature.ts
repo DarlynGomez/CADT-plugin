@@ -4,19 +4,14 @@ const UNBOUND = "unbound";
 export interface RootSignatureParts {
   foregroundHex: string;
   backgroundHex: string;
-  /** null means unbound; recorded in the signature as the literal "unbound" */
+  /** null means unbound and is stored as the word unbound */
   foregroundBinding: string | null;
   requiredRatio: number;
 }
 
 /**
- * The only place a root signature is built or parsed, mirroring issueId.ts for issues.
- * A root's identity is foreground hex, background hex, foreground binding name or
- * "unbound", and the required ratio. The ratio is part of the signature on purpose: two
- * findings with identical colours can carry different thresholds, 4.5 for normal text
- * and 3.0 for large, and grouping them would let a fix that clears one leave the other
- * failing. The background binding is deliberately not part of the signature, only its
- * resolved hex is. See ADR-019 for both.
+ * Identity is both hex values, the foreground binding and the required ratio
+ * Ratio keeps normal and large text apart, background binding is left out on purpose
  */
 export function buildRootSignature(parts: RootSignatureParts): string {
   const binding = parts.foregroundBinding ?? UNBOUND;
@@ -26,13 +21,8 @@ export function buildRootSignature(parts: RootSignatureParts): string {
 }
 
 /**
- * The inverse of buildRootSignature. Returns null for a malformed signature rather than
- * throwing, so a bad stored record is skippable, the same convention parseIssueId uses.
- *
- * Foreground and background hex never contain the separator, so the first two segments
- * anchor cleanly from the front. A binding name might, in principle, contain it, so
- * whatever remains between the second and the last separator is taken as the binding
- * whole, the same defensive shape issueId.ts uses for node ids that contain colons.
+ * Inverse of buildRootSignature, null when malformed so a bad record can be skipped
+ * A binding name may contain the separator so it is taken whole
  */
 export function parseRootSignature(signature: string): RootSignatureParts | null {
   const firstSeparator = signature.indexOf(SEPARATOR);

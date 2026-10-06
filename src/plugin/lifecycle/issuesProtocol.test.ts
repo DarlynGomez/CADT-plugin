@@ -14,7 +14,7 @@ const RESOLVED_OPEN_ISSUE = {
   ruleId: "contrast",
   nodeId: "1:1",
   nodeName: "Body copy",
-  // TEXT_NODE has no parent in this fixture, so it is its own screen, section 5.1
+  // TEXT_NODE has no parent here so it is its own screen
   screenId: "1:1",
   screenName: "Body copy",
   ...PERSISTED_OPEN

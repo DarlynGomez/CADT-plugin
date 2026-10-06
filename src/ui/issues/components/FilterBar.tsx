@@ -25,11 +25,8 @@ interface FilterBarProps {
 }
 
 /**
- * Replaces the To review / Decisions tabs: a compact grouping control on the left, a
- * state filter on the right. View All is the complete active backlog (pinned first,
- * deferred last); Pinned, Deferred, and Ignored each narrow to one state. Ignored
- * roots render through DecisionsView.tsx instead of the root card list, since a
- * decided root's card has nothing left to act on.
+ * Grouping control on the left and state filter on the right
+ * Ignored roots show in the decisions view because a decided root has nothing to act on
  */
 export function FilterBar({
   groupBy,

@@ -14,7 +14,7 @@ function failed(issueId: string, message: string): AdjustReplyMessage {
   return { type: "ADJUST_ACTION_FAILED", issueId, message };
 }
 
-/** GROUPING_SPEC.md section 9: computed fresh for the exact candidate colour on screen */
+/** Computed fresh for the exact colour on screen */
 export async function handleVariableConsequenceRequest(
   message: AdjustVariableConsequenceRequestMessage,
   reply: Reply
@@ -25,10 +25,8 @@ export async function handleVariableConsequenceRequest(
 }
 
 /**
- * Writes the candidate colour to the variable itself, then rescans every consumer so
- * the panel reflects every instance that changed, not only the one the sheet opened
- * on. See ADR-030 for the same "apply rescans itself" reasoning applied to a single
- * variable write instead of a set of direct fill writes.
+ * Writes the colour to the variable then rescans every consumer
+ * So the panel shows every instance that changed and not only the one the sheet opened on
  */
 export async function handleApplyVariable(
   message: AdjustApplyVariableMessage,

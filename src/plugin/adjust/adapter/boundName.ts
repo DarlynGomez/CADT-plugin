@@ -1,7 +1,6 @@
 /**
- * The variable or style name a solid paint is bound to on this node, or null when
- * neither binding applies. A paint's own bound variable takes precedence over the
- * node's style, since it is the more specific binding
+ * Name of the variable or style the paint is bound to, or null
+ * A bound variable wins over the style because it is more specific
  */
 export async function resolveBoundName(
   node: SceneNode & MinimalFillsMixin,

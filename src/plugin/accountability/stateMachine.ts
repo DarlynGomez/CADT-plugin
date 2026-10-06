@@ -51,10 +51,7 @@ export function flagImportant(issue: Issue): TransitionOutcome {
   return accepted({ ...issue, state: "important" });
 }
 
-/**
- * open, deferred, or important to ignored. Requires a non-empty reason, enforced
- * here and not only in the UI, so a malformed message cannot bypass the invariant.
- */
+/** Needs a non empty reason, checked here so a bad message cannot skip it */
 export function ignoreIssue(issue: Issue, reason: string, at: string): TransitionOutcome {
   if (!IGNORABLE_FROM.has(issue.state)) {
     return rejected(`Cannot ignore an issue in state '${issue.state}'`);
@@ -80,21 +77,15 @@ export function reopenIssue(issue: Issue): TransitionOutcome {
   return accepted({ ...issue, state: "open" });
 }
 
-/** A deferred issue's node was selected again after the guard cleared. See reEncounter.ts. */
+/** The node of a deferred issue was selected again after the guard cleared */
 export function recordResurface(issue: Issue): Issue {
   return { ...issue, encounterCount: issue.encounterCount + 1 };
 }
 
 /**
- * Reconcile a fresh detection pass against an existing issue record. Nothing here ever
- * closes an issue because the tool decided to: resolved only happens because the
- * finding genuinely stopped, and reopening from resolved keeps the same record rather
- * than creating a new one, so its history survives. See spec section 5.1.
- *
- * Ignored is the one state a fresh finding can override, and only one way: a
- * worse severity band than the one it was ignored at reopens the issue once, marked
- * changedSinceIgnore. Same or better severity leaves it ignored. This is ADR-014,
- * flagged there as a judgment call, not settled.
+ * Folds a fresh scan into an existing issue
+ * An issue only resolves when its finding stops, a resolved one reopens as the same record
+ * An ignored issue reopens once if severity gets worse, same or better stays ignored
  */
 export function reconcileDetection(
   issue: Issue,

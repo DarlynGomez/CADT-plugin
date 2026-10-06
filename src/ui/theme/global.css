@@ -7,25 +7,15 @@
   --color-accent: #14161A;
   --color-accent-text: #FFFFFF;
   --color-focus-ring: #14161A;
-  /* Desaturated red-orange, issue surface only, never the calibration flow. Measured
-     5.60:1 against --color-background (#FAFAF8), above the 4.5:1 floor. See
-     DESIGN_SYSTEM.md section 2. */
+  /* Red orange for the issue panel only, 5.60:1 on the background */
   --color-warning: #A8471F;
-  /* Status and severity colour, added on direct request after reviewing the panel in
-     grayscale: the status dot and severity tag now carry colour as a supplementary
-     signal, never the only one. The dot has a text equivalent via aria-label, and the
-     severity tag keeps its word ("High Severity"), so nothing reads by colour alone.
-     --color-warning doubles as both the important-status dot and the high-severity
-     tag's text, on a pale tint background for the tag only. */
+  /* Status and severity colours, always paired with a word so colour is never the only signal */
   --color-status-open: #10B981;
   --color-severity-high-bg: #FDF2F0;
   --color-severity-medium-bg: #FFFBEB;
   --color-severity-medium-text: #92400E;
   --color-severity-low-bg: #F4F4F5;
-  /* The wheel's AA/AAA pass pill only, Adjust's colour wheel. A pass is a fact the
-     wheel has already computed, not a designer decision like state or severity, so it
-     is not bound by ADR-029's "supplementary signal" reasoning; the checkmark and the
-     letters are the real signal, this tint just matches the mockup's pass affordance. */
+  /* Pass pill on the colour wheel only, the check and letters carry the meaning */
   --color-success-bg: #ECFDF5;
   --color-success-border: #A7F3D0;
   --color-success-text: #047857;
@@ -66,9 +56,7 @@
   --size-hairline: 1px;
   --size-focus-ring: 2px;
   --size-focus-offset: 2px;
-  /* Selection on an Adjust tile, deliberately not a border width change: three tiles
-     sit in a row, and changing border width shifts every pixel inside all three.
-     See DESIGN_SYSTEM.md section 7. */
+  /* Selection ring on an Adjust tile, a wider border would shift the content */
   --size-selection-ring: 2px;
 
   --motion-instant: 100ms;

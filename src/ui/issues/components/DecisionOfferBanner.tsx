@@ -6,9 +6,8 @@ interface DecisionOfferBannerProps {
 }
 
 /**
- * GROUPING_SPEC.md 3.4: "Matches your earlier decision: [reason]. Apply the same
- * reason?" Never applied automatically, one confirmation away. Only ever shown on an
- * open root, the caller's job to decide, this component just renders the offer.
+ * Offers the earlier reason, one confirmation to apply and never automatic
+ * The caller decides when to show it, only for open roots
  */
 export function DecisionOfferBanner({ reason, onApply }: DecisionOfferBannerProps) {
   return (

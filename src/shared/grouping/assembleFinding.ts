@@ -2,19 +2,7 @@ import { readContrastEvidence } from "../issues/contrastEvidenceView";
 import type { IssueSummary } from "../issues/issueTypes";
 import type { GroupableFinding } from "./groupingTypes";
 
-/**
- * Turns one IssueSummary from the live list the panel already receives into the plain
- * data deriveRoots needs. Returns null for an issue grouping cannot use: not contrast,
- * or evidence that never resolved, the same indeterminate case ADR-010 already treats
- * as no finding, so a resolved issue is filtered out here exactly because it carries
- * none. backgroundBinding is always null for now: nothing in the pipeline resolves a
- * background's own binding yet, only the foreground's, see ADR-019 on why that
- * asymmetry is deliberate for the signature and incidental for this one field.
- *
- * documentOrder is the issue's position in the list the sandbox sent, not a true
- * document-walk order; nothing assigns one yet. Stable enough for a deterministic
- * representative-instance tiebreak, section 3.5, not a promise of top-to-bottom order.
- */
+/** Turns an issue into plain data for grouping, null when it has no usable contrast evidence */
 export function assembleGroupableFinding(
   issue: IssueSummary,
   documentOrder: number
@@ -45,7 +33,7 @@ export function assembleGroupableFinding(
   };
 }
 
-/** Assembles the whole list, dropping whatever a single issue's assembly could not use */
+/** Assembles the whole list and drops issues that cannot be grouped */
 export function assembleGroupableFindings(issues: readonly IssueSummary[]): GroupableFinding[] {
   return issues
     .map((issue, index) => assembleGroupableFinding(issue, index))

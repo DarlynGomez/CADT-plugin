@@ -1,10 +1,10 @@
 import type { BackgroundSource, RGBColor } from "../../shared/issues/issueTypes";
 
-/** One node's paint, reduced to what resolution needs. No Figma type appears here. */
+/** One node paint reduced to what resolution needs */
 export type PaintLayer =
   | { kind: "solid"; color: RGBColor; opacity: number }
   | { kind: "unresolvable" } // a gradient, image, or video: opaque, but not a single color
-  | { kind: "empty" }; // no paint at all; the walk continues past it
+  | { kind: "empty" };  // no paint at all, the walk continues past it
 
 /** One node in the chain from the text node itself up through its ancestors to the page */
 export interface ChainLayer {
@@ -12,7 +12,7 @@ export interface ChainLayer {
   nodeOpacity: number;
   blendMode: string;
   visible: boolean;
-  /** This layer's identity, carried through so a resolved background can name its source */
+  /** Which layer this is, so a resolved background can name its source */
   source: BackgroundSource;
 }
 
@@ -31,12 +31,8 @@ interface ResolvedFill {
 }
 
 /**
- * Blend modes that do not alter how a layer composites with what is behind it, so they
- * are not indeterminate. Figma's own default for a frame or group is "PASS_THROUGH",
- * not "NORMAL": it means the container applies no blending of its own and its children
- * composite straight through. Treating that as indeterminate would flag nearly every
- * ordinary frame in a real file, which is exactly the bug this comment is here to keep
- * from coming back.
+ * Blend modes that do not change compositing, so they are not indeterminate
+ * Frames and groups default to PASS_THROUGH, flagging that would hit nearly every frame
  */
 const NON_BLOCKING_BLEND_MODES = new Set(["NORMAL", "PASS_THROUGH"]);
 
@@ -52,7 +48,7 @@ function checkLayerValidity(layer: ChainLayer, reasons: Set<string>): void {
   }
 }
 
-/** Resolve one layer's own fill to a color and its alpha, recording why it could not stand as one */
+/** Resolves one layer fill to a colour and alpha, noting why it could not */
 function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): ResolvedFill | null {
   if (fill === "mixed") {
     reasons.add("fill-mixed");
@@ -72,10 +68,9 @@ function resolveFill(fill: PaintLayer | "mixed", reasons: Set<string>): Resolved
 }
 
 /**
- * Resolve foreground and background from a plain chain the adapter has already
- * extracted, so this function never touches a Figma type. chain[0] is the text node
- * itself; the rest are ancestors in order, ending with the page background as the
- * final fallback. Never guesses: any indeterminate reason blanks both colors.
+ * Resolves foreground and background from a plain chain, first entry is the text node
+ * The rest are ancestors ending with the page background
+ * Never guesses, any indeterminate reason blanks both colours
  */
 export function resolveColors(chain: readonly ChainLayer[]): ColorResolutionResult {
   const [textLayer, ...ancestors] = chain;

@@ -19,7 +19,7 @@ export type AdjustScopeChoice = "instances" | "variable";
 /** Which of the three options a chosen or applied colour came from */
 export type AdjustOptionChoice = "a" | "b" | "c";
 
-/** Requests the file palette and binding disclosure for one finding's node */
+/** Asks for the file palette and binding info for one finding */
 export interface AdjustOptionsRequestMessage {
   type: "ADJUST_OPTIONS_REQUEST";
   issueId: string;
@@ -31,7 +31,7 @@ export interface AdjustPaletteColor {
   name: string | null;
 }
 
-/** Whether the node's fill is bound, and how many other page nodes share that binding */
+/** Whether the fill is bound, and how many other nodes on the page share the binding */
 export interface AdjustFillBinding {
   name: string;
   usageCount: number;
@@ -45,12 +45,7 @@ export interface AdjustOptionsReadyMessage {
   variableScope: AdjustVariableScope | null;
 }
 
-/**
- * Requests a live preview of one candidate colour. `issueId` is the representative,
- * used only to correlate replies with the open popup; `issueIds` is the actual scope
- * to write, GROUPING_SPEC.md section 8's "preview scope is apply scope" (with nothing
- * selected, that scope is just the representative, so the two arrays may match)
- */
+/** Live preview of one colour, issueId only matches replies and issueIds is what gets written */
 export interface AdjustPreviewMessage {
   type: "ADJUST_PREVIEW";
   issueId: string;
@@ -63,12 +58,7 @@ export interface AdjustClearPreviewMessage {
   type: "ADJUST_CLEAR_PREVIEW";
 }
 
-/**
- * Writes the given colour for real, to every node in `issueIds`, and commits it as one
- * undo step. The three trailing fields exist only for the log entry: which tile it came
- * from, and whether the wheel or a rejected hex played any part in this session. See
- * ADJUST_SPEC.md section 9 and GROUPING_SPEC.md section 8
- */
+/** Writes to every node in issueIds as one undo step, the last three fields feed the log */
 export interface AdjustApplyMessage {
   type: "ADJUST_APPLY";
   issueId: string;
@@ -79,7 +69,7 @@ export interface AdjustApplyMessage {
   hexRejected: boolean;
 }
 
-/** The popup closed without applying anything; logged as a result, not an error */
+/** Popup closed without applying, logged as a result and not an error */
 export interface AdjustAbandonedMessage {
   type: "ADJUST_ABANDONED";
   issueId: string;
@@ -113,7 +103,7 @@ export interface AdjustAppliedMessage {
   issueId: string;
 }
 
-/** An adjust action was rejected; message explains why for display, not just logging */
+/** An action was rejected, the message says why */
 export interface AdjustActionFailedMessage {
   type: "ADJUST_ACTION_FAILED";
   issueId: string;

@@ -57,8 +57,7 @@ async function handleSave(message: CalibrationSaveMessage, reply: Reply): Promis
   reply({ type: "CALIBRATION_SAVED" });
 
   try {
-    // Re-resolve so the UI hands off to the returning-user surface with the
-    // sandbox's scope decision rather than one guessed above the storage layer.
+    // Resolve again so the UI uses the sandbox scope decision and not a guess
     const resolution = await resolveCalibration();
     if (resolution) {
       reply({
@@ -68,8 +67,8 @@ async function handleSave(message: CalibrationSaveMessage, reply: Reply): Promis
       });
     }
   } catch (error) {
-    // The write already succeeded, so the UI keeps the profile it authored. A
-    // failed re-resolve only costs the returning-user screen its scope label.
+    // The write already succeeded so the UI keeps its profile
+    // A failed resolve only costs the returning user screen its scope label
     console.error("Calibration re-resolve after save failed", error);
   }
 }

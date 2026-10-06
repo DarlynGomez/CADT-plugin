@@ -2,16 +2,14 @@ import type { Finding, NodeSnapshot } from "../../shared/issues/issueTypes";
 import { RULES } from "./rules/registry";
 
 /**
- * Resolves one node id to a snapshot, or null if it is gone or not a resolvable node.
- * Injected so this file never touches figma.getNodeByIdAsync itself: the real resolver
- * lives in lifecycle/resolveSnapshot.ts, which is Figma-touching and allowed to be.
+ * Turns a node id into a snapshot, or null when gone
+ * Injected so this file never calls the Figma API itself
  */
 export type SnapshotResolver = (nodeId: string) => Promise<NodeSnapshot | null>;
 
 /**
- * Turn a flushed set of node ids into findings: resolve each id to a snapshot, then run
- * every registered rule against it. A node that no longer resolves, deleted since the
- * change was queued, contributes no findings rather than throwing.
+ * Turns changed node ids into findings by running every rule on each snapshot
+ * A node deleted since it was queued gives no findings instead of throwing
  */
 export async function runDetection(
   nodeIds: ReadonlySet<string>,

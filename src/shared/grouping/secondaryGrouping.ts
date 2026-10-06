@@ -22,16 +22,12 @@ function groupBy(
   return [...byKey.entries()].map(([key, instances]) => ({ key, instances }));
 }
 
-/**
- * Spec section 6.2's "Screen" view: the same flat instance list, bucketed by screen
- * instead of root. Keyed by screenId, not screenName, since two screens can share a
- * name, MARKERS_SPEC.md 5.1; every instance in a group shares one screenName for display
- */
+/** Buckets by screen id because screen names can repeat */
 export function groupByScreen(findings: readonly GroupableFinding[]): SecondaryGroup[] {
   return groupBy(findings, (finding) => finding.screenId);
 }
 
-/** Spec section 6.2's "Severity" view: the same flat instance list, bucketed by severity band */
+/** Buckets by severity band */
 export function groupBySeverity(findings: readonly GroupableFinding[]): SecondaryGroup[] {
   return groupBy(findings, (finding) => finding.severity);
 }

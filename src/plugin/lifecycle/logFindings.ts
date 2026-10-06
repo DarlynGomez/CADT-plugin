@@ -2,9 +2,7 @@ import type { Finding } from "../../shared/issues/issueTypes";
 import type { ContrastEvidence } from "../detection/rules/contrast/contrastRule";
 import { describeContrastEvidence } from "../detection/rules/contrast/describeEvidence";
 
-/**
- * Evidence is typed per rule (see ADR-016) but logged generically
- */
+/** Evidence is typed per rule but logged generically */
 const EVIDENCE_DESCRIBERS: Record<string, (evidence: unknown, severity: Finding["severity"]) => string> = {
   contrast: (evidence, severity) => describeContrastEvidence(evidence as ContrastEvidence, severity)
 };

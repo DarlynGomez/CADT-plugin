@@ -1,8 +1,7 @@
 /**
- * Property names, as plain strings rather than Figma's own NodeChangeProperty type, that
- * the registered rules care about. Contrast reads fills, characters, fontSize, fontName,
- * visible, opacity, and parent (a reparent can change the resolved background). A move
- * or resize, x, y, width, height, never reaches here as a reason to rescan.
+ * Property names the rules care about, as plain strings
+ * Fills, text, font, visibility, opacity and parent, a reparent can change the background
+ * Moves and resizes never trigger a rescan
  */
 const RELEVANT_PROPERTIES = new Set<string>([
   "fills",

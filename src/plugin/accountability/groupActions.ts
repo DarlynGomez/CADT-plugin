@@ -19,12 +19,7 @@ export interface GroupTransitionResult {
   outcomes: readonly GroupActionOutcome[];
 }
 
-/**
- * GROUPING_SPEC.md 3.3: every group action is a set of ordinary per-instance
- * transitions through the existing state machine, nothing bypasses it. One outcome per
- * requested issueId, so a caller can tell "not eligible in this state" apart from "no
- * longer exists" without inspecting the record itself
- */
+/** Each action runs the normal per issue transition and reports one outcome per id */
 function applyToEach(
   record: IssueRecordMap,
   issueIds: readonly string[],
@@ -49,7 +44,7 @@ function applyToEach(
   return { record: updated, outcomes };
 }
 
-/** Every open instance in the root becomes deferred; important instances are left alone */
+/** Defers open instances and leaves important ones alone */
 export function deferRoot(
   record: IssueRecordMap,
   issueIds: readonly string[]
@@ -58,7 +53,7 @@ export function deferRoot(
   return applyToEach(record, eligible, deferIssue);
 }
 
-/** Every instance becomes important; the state machine's own transitions decide which are eligible */
+/** Marks everything important, the state machine decides which can change */
 export function markRootImportant(
   record: IssueRecordMap,
   issueIds: readonly string[]
@@ -85,7 +80,7 @@ export function ignoreRoot(
   return applyToEach(record, issueIds, (issue) => ignoreIssue(issue, reason, at));
 }
 
-/** Section 6.5's Decisions-view Reopen control: only ignored instances return to open */
+/** Reopens only ignored instances */
 export function reopenRoot(
   record: IssueRecordMap,
   issueIds: readonly string[]
@@ -94,7 +89,7 @@ export function reopenRoot(
   return applyToEach(record, eligible, reopenIssue);
 }
 
-/** The deferred card's restore control: only deferred instances return to open */
+/** Reopens only deferred instances */
 export function restoreDeferredRoot(
   record: IssueRecordMap,
   issueIds: readonly string[]

@@ -6,7 +6,7 @@ interface RatioBadgeProps {
   requiredRatio: number;
 }
 
-/** A neutral pill, ratio and pass level together, sitting inline beside an option's title */
+/** A neutral pill with ratio and pass level, inline beside the option title */
 export function RatioBadge({ achievedRatio, requiredRatio }: RatioBadgeProps) {
   const level = passLevel(achievedRatio, requiredRatio);
 

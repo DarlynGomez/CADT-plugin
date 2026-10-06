@@ -9,9 +9,8 @@ interface RootSpecimenProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.3: a short sample in the actual foreground colour on the actual
- * background, exactly as the Adjust tiles do. The colours are the file's own data, not
- * design tokens, so this is one of the sanctioned inline styles, CLAUDE.md rule 5.
+ * A sample in the real foreground on the real background
+ * Colours come from the file and are not tokens, so inline styles are allowed
  */
 export function RootSpecimen({ foregroundHex, backgroundHex, sampleText }: RootSpecimenProps) {
   const style = { color: foregroundHex, backgroundColor: backgroundHex } as CSSProperties;

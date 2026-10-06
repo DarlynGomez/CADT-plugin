@@ -10,8 +10,10 @@
   font-family: var(--font-body);
 }
 
-/* CLAUDE.md: the UI size is set once and scrolls internally. Header and the
-   selection banner sit outside this region so they stay put while it scrolls. */
+/*
+   The UI size is set once and the panel scrolls internally
+   Header and selection banner sit outside this region so they stay put
+*/
 .panel > header {
   flex-shrink: 0;
 }

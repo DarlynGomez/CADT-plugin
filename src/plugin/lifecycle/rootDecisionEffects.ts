@@ -9,11 +9,8 @@ import type { IssueRecordMap } from "../accountability/issueStore";
 import type { RootMessage } from "../../shared/rootMessageTypes";
 
 /**
- * GROUPING_SPEC.md 3.4: a root's ignore action also records a decision. Severity comes
- * from the just-updated record rather than a live re-evaluation: ignoreIssue
- * already set severityAtIgnore on every instance that succeeded, and every
- * instance in a root shares one severity by construction of the signature, so any one
- * of them stands for the root.
+ * Ignoring a root also records a decision
+ * Severity comes from the updated record because every instance shares one
  */
 export function recordRootDecision(
   message: Extract<RootMessage, { type: "ROOT_IGNORE" }>,
@@ -41,11 +38,8 @@ export function recordRootDecision(
 }
 
 /**
- * ADR-032: called only when the caller says this reopen leaves nothing ignored under
- * `signature` behind, a full restore. Clearing the decision then stops the offer to
- * reapply it from immediately re-appearing on the very root the designer just
- * restored. A partial restore never reaches this: the decision still describes the
- * instances that remain ignored.
+ * Called only after a full restore, when nothing stays ignored under the signature
+ * Clearing the decision stops the offer from reappearing on the root just restored
  */
 export function clearRootDecision(signature: string): void {
   const saveResult = saveDecisions(removeDecision(loadDecisions(), signature));

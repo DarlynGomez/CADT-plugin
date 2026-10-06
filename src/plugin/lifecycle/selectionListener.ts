@@ -25,11 +25,8 @@ function collectDescendantIds(node: BaseNode, ids: Set<string>): void {
 }
 
 /**
- * The ids that count as "selected" for re-encounter purposes: every selected node
- * plus all of its descendants. Spec 5.3 resurfaces a deferred issue when its node OR
- * AN ANCESTOR of its node is selected; expanding each selected node downward, rather
- * than walking each issue's node upward, is what makes a plain `.has(issue.nodeId)`
- * check in reEncounter.ts correct for the ancestor case.
+ * Ids that count as selected, each selected node plus its descendants
+ * Done downward so an ancestor selection matches with a plain has check
  */
 function collectSelectedIdsIncludingDescendants(): Set<string> {
   const ids = new Set<string>();
@@ -54,17 +51,14 @@ export async function initializeReEncounterFromCurrentSelection(): Promise<void>
   );
 }
 
-/** Called by the DEFER handler so deferring while still selected does not resurface it instantly */
+/** Called on defer so deferring a still selected node does not resurface it */
 export function markIssueDeferred(issueId: string): void {
   reEncounterState = markDeferred(reEncounterState, issueId);
 }
 
 /**
- * GROUPING_SPEC.md section 5.2, the critical rule: a selection this plugin set itself,
- * to show a root or locate one instance, is not the designer returning to anything.
- * isPluginOriginated defaults to false so every existing caller, real designer
- * selections throughout, is unaffected; the real listener below always passes it
- * explicitly, read fresh off the marker for this one event.
+ * Selections the plugin set itself are not the designer returning to anything
+ * Defaults to false so existing callers are unaffected, the real listener always passes it
  */
 export async function handleSelectionChange(isPluginOriginated: boolean = false): Promise<void> {
   if (isPluginOriginated) {

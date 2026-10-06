@@ -2,7 +2,7 @@ import type { ChainLayer, PaintLayer } from "../colorResolution";
 
 const NORMAL_BLEND_MODE = "NORMAL";
 
-/** The subset of a node's shape this file ever reads, since not every node has fills */
+/** The part of a node this file reads, not every node has fills */
 interface PartialPaintNode {
   fills?: ReadonlyArray<Paint> | typeof figma.mixed;
   opacity?: number;
@@ -29,9 +29,8 @@ function classifyFill(fills: ReadonlyArray<Paint> | typeof figma.mixed): PaintLa
 }
 
 /**
- * Reduce any node encountered while walking the ancestor chain to a plain layer.
- * Nodes with no fills property at all, such as groups, are treated as unpainted so
- * the walk continues through them rather than erroring.
+ * Reduces any node in the ancestor walk to a plain layer
+ * Nodes without fills such as groups count as unpainted so the walk continues
  */
 export function extractNodeLayer(node: BaseNode): ChainLayer {
   const partial = node as PartialPaintNode;
@@ -44,7 +43,7 @@ export function extractNodeLayer(node: BaseNode): ChainLayer {
   };
 }
 
-/** The page background is the walk's final fallback and reads `backgrounds`, not `fills` */
+/** The page background is the final fallback and is read from backgrounds not fills */
 export function extractPageBackgroundLayer(page: PageNode): ChainLayer {
   return {
     fill: classifyFill(page.backgrounds),

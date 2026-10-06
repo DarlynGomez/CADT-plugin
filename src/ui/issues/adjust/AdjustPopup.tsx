@@ -20,19 +20,16 @@ import { useAdjustVariableScope } from "./useAdjustVariableScope";
 interface AdjustPopupProps {
   root: Root;
   representativeIssue: IssueSummary;
-  /** Instances checked in this root's "Related grouped issues" list, if any */
+  /** Instances checked in the related issues list, if any */
   selectedInstanceIds: ReadonlySet<string>;
-  /** The raw 1 to 4 calibration answer for "How much should CADT do on its own?" */
+  /** The raw 1 to 4 calibration answer for how much CADT should do on its own */
   aiAssistanceLevel: number;
   onClose: () => void;
 }
 
 /**
- * Three option cards, the third expanding into the wheel inline when chosen, or the
- * wheel alone at the "Flag and explain" calibration level. Scope is GROUPING_SPEC.md
- * section 8: whatever the designer checked in the instance list, or just the
- * representative when nothing is checked; preview and apply always target exactly that
- * set, never more. Gating on aiAssistanceLevel happens in the caller.
+ * Three option cards, the third expands into the wheel, level 2 shows the wheel alone
+ * Preview and apply use the checked instances, or just the representative
  */
 export function AdjustPopup({
   root,
@@ -111,6 +108,7 @@ export function AdjustPopup({
           scope={session.scope}
           onScopeChange={session.setScope}
           scopeCount={scopeIds.length}
+          checkedCount={selectedInstanceIds.size}
           totalInstances={root.instances.length}
           variableScope={variableScope}
           variableConsequence={variableConsequence}

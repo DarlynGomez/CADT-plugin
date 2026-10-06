@@ -14,10 +14,8 @@ interface RootActionsAreaProps {
 }
 
 /**
- * Section 6.3 item 8's actions row, plus the decision-offer banner above it. The Adjust
- * and Ignore sheets themselves are no longer rendered here, ADR-027: they are
- * panel-covering overlays now, hosted once at the panel root by RootSheetHost.tsx, so
- * this component's only job is the buttons that open them.
+ * The actions row plus the decision offer banner above it
+ * Sheets render once at the panel root, this only holds the buttons that open them
  */
 export function RootActionsArea({
   root,

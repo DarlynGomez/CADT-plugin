@@ -25,13 +25,13 @@ function parsePersistedMap(raw: string): PersistedMap {
   }
 }
 
-/** ruleId and nodeId live only in the map key; reconstruct the full Issue from both */
+/** Rule id and node id live in the map key so rebuild the issue from both */
 function toIssue(id: string, fields: PersistedIssueFields): Issue | null {
   const parsed = parseIssueId(id);
   return parsed ? { id, ruleId: parsed.ruleId, nodeId: parsed.nodeId, ...fields } : null;
 }
 
-/** The mirror of toIssue: exactly spec section 5.5's fields, nothing derivable from the key */
+/** Inverse of toIssue, stores only what cannot be derived from the key */
 function toPersistedFields(issue: Issue): PersistedIssueFields {
   return {
     state: issue.state,
@@ -46,13 +46,8 @@ function toPersistedFields(issue: Issue): PersistedIssueFields {
 }
 
 /**
- * Load the persisted record with no existence check. This is the one path that must
- * never prune: scanAndSync reconciles a DELETE against exactly this, and a node just
- * deleted resolves to null from getNodeByIdAsync immediately, before reconciliation
- * ever runs. Pruning here would drop the record instead of marking it resolved,
- * contradicting spec section 3.1 ("a delete removes the node's issues from the active
- * list but not from the record"). Reconciliation is itself how a genuinely gone node
- * gets accounted for; this function's job is only to not get in its way.
+ * Loads the record without checking that nodes exist
+ * Never prune here, a node just deleted must be marked resolved by the scan and not dropped
  */
 export function loadRawIssues(): IssueRecordMap {
   const persisted = parsePersistedMap(figma.root.getPluginData(STORAGE_KEY_ISSUES));
@@ -66,15 +61,8 @@ export function loadRawIssues(): IssueRecordMap {
 }
 
 /**
- * Load the persisted issue record and prune entries whose node no longer exists in
- * this file. For every read that is not itself reconciling a scan, this is the right
- * view: a node that vanished across a session boundary, without CADT ever seeing the
- * delete event live, will never be scanned again to earn a "resolved" verdict, so
- * pruning on load is the only cleanup path that ever reaches it. Figma enforces a size
- * limit on plugin data, so this is not optional. This is the one file in
- * accountability/ that touches the Figma API, the same category as the storage
- * modules: only the snapshot adapter and the storage surfaces read Figma state, and
- * this is a storage surface.
+ * Loads the record and drops entries whose node is gone
+ * A node deleted while closed is never scanned again, and plugin data has a size limit
  */
 export async function loadIssues(): Promise<IssueRecordMap> {
   const record = loadRawIssues();
@@ -96,7 +84,7 @@ export interface IssueSaveResult {
   error?: string;
 }
 
-/** Persist the full record. Every write replaces the whole map; there is no partial update. */
+/** Replaces the whole map on every write */
 export function saveIssues(record: IssueRecordMap): IssueSaveResult {
   const persisted: PersistedMap = {};
   for (const [id, issue] of Object.entries(record)) {

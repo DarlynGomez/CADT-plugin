@@ -23,7 +23,7 @@ interface OptionsListProps {
   onHexRejected: () => void;
 }
 
-/** The three option cards; the third expands the wheel inline in place when chosen */
+/** The option cards, the third expands the wheel in place when chosen */
 export function OptionsList({
   sampleText,
   background,

@@ -7,7 +7,7 @@ interface SelectionBannerProps {
   onRestore: () => void;
 }
 
-/** GROUPING_SPEC.md 5.1: "Showing N layers on canvas" with a Restore selection control */
+/** Shows how many layers are on canvas with a button to restore the selection */
 export function SelectionBanner({ count, onRestore }: SelectionBannerProps) {
   return (
     <div className={styles.banner} role="status">

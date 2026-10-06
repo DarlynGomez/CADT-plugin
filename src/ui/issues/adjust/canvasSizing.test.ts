@@ -8,7 +8,7 @@ describe("computeCanvasBufferSize", () => {
   });
 
   it("rounds a fractional device pixel ratio before multiplying", () => {
-    // 2.5 would leave every pixel index fractional if used directly; round first
+    // 2.5 would leave every pixel index fractional, so round first
     const result = computeCanvasBufferSize(200, 2.5);
     expect(Number.isInteger(result.width)).toBe(true);
     expect(Number.isInteger(result.height)).toBe(true);

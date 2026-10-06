@@ -16,17 +16,14 @@ function describeError(error: unknown): string {
 }
 
 /**
- * Clear both calibration persistence surfaces for development testing.
- *
- * The two surfaces are cleared independently so a failure on one is still
- * reported alongside a success on the other. Errors are surfaced in the result
- * and logged, never swallowed.
+ * Clears both calibration surfaces for development testing
+ * Cleared independently so one failure is still reported next to the other success
  */
 export async function resetCalibration(): Promise<CalibrationResetResult> {
   const result: CalibrationResetResult = { fileCleared: false, userCleared: false };
 
   try {
-    // figma.root plugin data is per file and travels to collaborators.
+    // Plugin data is per file and travels to collaborators
     figma.root.setPluginData(STORAGE_KEY_PROFILE, "");
     result.fileCleared = true;
   } catch (error) {
@@ -35,7 +32,7 @@ export async function resetCalibration(): Promise<CalibrationResetResult> {
   }
 
   try {
-    // figma.clientStorage is per user across all files.
+    // clientStorage is per user across all files
     await figma.clientStorage.deleteAsync(STORAGE_KEY_PROFILE);
     result.userCleared = true;
   } catch (error) {

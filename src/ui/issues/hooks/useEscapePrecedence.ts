@@ -3,10 +3,8 @@ import { useEffect } from "react";
 import type { SheetTarget } from "./useRootSheet";
 
 /**
- * GROUPING_SPEC.md 5.1: Escape restores the selection, but only when no sheet is open.
- * The ignore sheet closes on its own Escape; the Adjust popup already handles
- * Escape internally, so this listener deliberately does nothing for it. Innermost open
- * surface wins.
+ * Escape restores the selection only when no sheet is open
+ * The ignore sheet and the adjust popup handle their own Escape so the innermost wins
  */
 export function useEscapePrecedence(
   sheet: SheetTarget | null,

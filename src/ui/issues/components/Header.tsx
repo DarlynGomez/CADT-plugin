@@ -13,10 +13,8 @@ interface HeaderProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.1: wordmark, a quiet live indicator, the Live Watch and Teach Me
- * Why tabs, the computed headline (Live Watch only), no footer. The trailing empty
- * slot is reserved for the markers toggle MARKERS_SPEC.md 6.3 adds in phase 24,
- * deliberately not built ahead of that phase.
+ * Wordmark, live dot, tabs and the computed headline, no footer
+ * The empty slot at the end is reserved for the markers toggle
  */
 export function Header({ headline, activeMainTab, onMainTabChange }: HeaderProps) {
   const isLiveWatch = activeMainTab === "live-watch";

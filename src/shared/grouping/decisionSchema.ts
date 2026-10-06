@@ -7,7 +7,7 @@ function isValidSeverity(value: unknown): value is Severity {
   return typeof value === "string" && VALID_SEVERITIES.has(value);
 }
 
-/** Exactly the fields spec section 3.4 says to store; signature lives in the map key */
+/** Stored fields only, the signature lives in the map key */
 export type PersistedDecisionFields = Omit<RootDecision, "signature">;
 
 /** Structural validation for the on-disk shape */

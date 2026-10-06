@@ -49,8 +49,7 @@ describe("pickRepresentativeInstance", () => {
       finding({ issueId: "acked", nodeId: "1:1", state: "ignored", documentOrder: 0 }),
       finding({ issueId: "open", nodeId: "1:2", state: "open", documentOrder: 1 })
     ];
-    // The designer's most recent selection was the ignored one, but it is not
-    // eligible for To review, so the eligible instance wins regardless of selection
+    // The ignored one was selected last but is not eligible, so the eligible one wins
     const result = pickRepresentativeInstance(pool, TO_REVIEW_ELIGIBLE_STATES, ["1:1"]);
     expect(result.issueId).toBe("open");
   });

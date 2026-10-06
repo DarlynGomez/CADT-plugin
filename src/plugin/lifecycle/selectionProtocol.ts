@@ -17,9 +17,8 @@ export function isSelectionMessage(value: unknown): value is SelectionMessage {
 }
 
 /**
- * GROUPING_SPEC.md section 5.1: native selection and viewport control only, nothing is
- * written, and neither message ever replies. The panel already knows what it asked for,
- * "showing N layers" is client-side bookkeeping, not something the sandbox confirms.
+ * Selection and zoom only, nothing is written and neither message replies
+ * The panel already knows what it asked for so the count is tracked client side
  */
 export async function handleSelectionMessage(message: SelectionMessage): Promise<void> {
   if (message.type === "SHOW_ON_CANVAS") {

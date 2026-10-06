@@ -5,7 +5,7 @@ import { contrastRule } from "./contrastRule";
 
 const BLACK = { r: 0, g: 0, b: 0 };
 const WHITE = { r: 1, g: 1, b: 1 };
-// Roughly 3.5:1 against white: fails the 4.5:1 normal-text bar, passes the 3.0:1 large-text bar.
+// About 3.5:1 on white, fails the normal text bar and passes the large text bar
 const MID_GRAY = { r: 0.537, g: 0.537, b: 0.537 };
 
 function baseSnapshot(overrides: Partial<NodeSnapshot> = {}): NodeSnapshot {

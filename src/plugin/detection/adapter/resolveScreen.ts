@@ -3,7 +3,7 @@ export interface ScreenIdentity {
   screenName: string;
 }
 
-/** MARKERS_SPEC.md section 5.1: the node types that count as a screen boundary */
+/** Node types that count as a screen boundary */
 const SCREEN_CONTAINER_TYPES: ReadonlySet<string> = new Set([
   "FRAME",
   "COMPONENT",
@@ -12,9 +12,8 @@ const SCREEN_CONTAINER_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * MARKERS_SPEC.md section 5.1: a node's screen is its outermost frame, component,
- * component set, or instance ancestor, groups and sections transparent to the walk,
- * falling back to the nearest section and then to the node itself
+ * A screen is the outermost frame, component, component set or instance above the node
+ * Groups and sections are skipped, fall back to the nearest section then the node itself
  */
 export function resolveScreen(node: SceneNode): ScreenIdentity {
   let outermostContainer: { id: string; name: string } | null = null;

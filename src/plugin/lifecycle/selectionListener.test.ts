@@ -101,8 +101,7 @@ describe("selectionListener", () => {
     selection = [TEXT_NODE];
     await initializeReEncounterFromCurrentSelection();
 
-    // Reopening the plugin with the node still selected must not resurface it
-    // instantly; only leaving and returning should.
+    // Reopening with the node still selected must not resurface it
     await handleSelectionChange();
     expect(setPluginData).not.toHaveBeenCalled();
   });

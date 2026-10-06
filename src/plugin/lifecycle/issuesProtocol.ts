@@ -47,10 +47,8 @@ async function replyWithFullList(reply: Reply): Promise<void> {
 }
 
 /**
- * Load the record, apply a designer-initiated transition to one issue, and save.
- * On success the reply is the full updated list, per ADR-012. On a rejected
- * transition or a failed save, the reply is ISSUE_ACTION_FAILED and nothing is
- * saved, so the UI never shows a change that did not actually persist.
+ * Loads the record, applies one transition to one issue and saves
+ * A rejected transition or failed save stores nothing and replies ISSUE_ACTION_FAILED
  */
 async function applyTransition(
   issueId: string,
@@ -89,7 +87,7 @@ function transitionFor(
   return apply(issue);
 }
 
-/** Selects the node and scrolls it into view. Never creates or modifies a canvas node. */
+/** Selects the node and scrolls to it, never creates or changes a node */
 async function focusIssue(issueId: string, reply: Reply): Promise<void> {
   const parsed = parseIssueId(issueId);
   if (!parsed) {
@@ -106,16 +104,14 @@ async function focusIssue(issueId: string, reply: Reply): Promise<void> {
   selectResolvedNodesAndZoom([node]);
 }
 
-/** Handles the six inbound issue messages, per spec section 6 */
+/** Handles the six inbound issue messages */
 export async function handleIssueMessage(message: IssueMessage, reply: Reply): Promise<void> {
   switch (message.type) {
     case "ISSUES_SUBSCRIBE":
       await replyWithFullList(reply);
       return;
     case "ISSUE_DEFER":
-      // On defer, arm the re-encounter guard so an issue whose node is still selected
-      // does not resurface the instant selection changes elsewhere and back. See
-      // spec section 5.3.
+      // Arm the guard on defer so a still selected node does not resurface right away
       await applyTransition(
         message.issueId,
         reply,

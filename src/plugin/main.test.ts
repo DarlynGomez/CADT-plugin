@@ -18,11 +18,8 @@ const ui: {
   postMessage: typeof uiPostMessage;
 } = { onmessage: null, postMessage: uiPostMessage };
 
-// Detection lifecycle surface: an empty page, no selection, and no documentchange
-// activity is enough for these calibration-focused tests, which do not exercise live
-// detection itself. currentPage.selection must exist even though it is empty: the
-// re-encounter startup wiring reads it unconditionally, and a missing property would
-// throw where these tests would only ever see it as a silently swallowed rejection.
+// Detection surface stubs, an empty page and no changes is enough here
+// currentPage.selection must exist because startup reads it
 const loadAllPagesAsync = vi.fn(async () => undefined);
 const documentChangeOn = vi.fn();
 const findAllWithCriteria = vi.fn(() => []);
@@ -81,16 +78,13 @@ describe("plugin entry routing", () => {
     stubFigma("open");
     await import("./main");
 
-    // getPluginData is only reached once loadAllPagesAsync, both listener
-    // registrations, and the re-encounter startup read have all completed without
-    // throwing, so waiting for it is a stronger completion signal than waiting for
-    // the listener registration alone.
+    // getPluginData is only reached after loading, listeners and the startup read all finish
+    // so waiting for it is a stronger completion signal than the listener registration alone
     await vi.waitFor(() => expect(getPluginData).toHaveBeenCalled());
     expect(documentChangeOn).toHaveBeenCalledWith("documentchange", expect.any(Function));
     expect(documentChangeOn).toHaveBeenCalledWith("selectionchange", expect.any(Function));
     expect(loadAllPagesAsync).toHaveBeenCalledTimes(1);
-    // Guards against a startup step throwing and being silently swallowed by main.ts's
-    // top-level .catch, which would otherwise pass this test for the wrong reason.
+    // Guards against a startup step throwing unseen inside the top level catch
     expect(console.error).not.toHaveBeenCalled();
   });
 
@@ -153,8 +147,8 @@ describe("sandbox to UI message envelope", () => {
 
     expect(uiPostMessage).toHaveBeenCalledTimes(1);
     const payload = uiPostMessage.mock.calls[0][0];
-    // figma.ui.postMessage(payload) is delivered to the UI as
-    // event.data.pluginMessage === payload. Wrapping it here hides the type.
+    // postMessage payloads reach the UI as event.data.pluginMessage
+    // Wrapping the payload here would hide the type
     expect(payload).toMatchObject({ type: "CALIBRATION_LOADED", profile: null });
     expect(payload).not.toHaveProperty("pluginMessage");
   });

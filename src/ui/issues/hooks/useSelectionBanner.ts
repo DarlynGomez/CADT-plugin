@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 
 import type { Root } from "../../../shared/grouping/groupingTypes";
 
-/** GROUPING_SPEC.md 5.1: the "Showing on canvas" banner's count and its two actions */
+/** Count shown on the canvas banner and its two actions */
 export function useSelectionBanner(
   showOnCanvas: (nodeIds: string[]) => void,
   restoreSelection: () => void

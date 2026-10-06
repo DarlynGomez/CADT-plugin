@@ -14,10 +14,8 @@ interface IgnoreSheetProps {
 }
 
 /**
- * GROUPING_SPEC.md section 7. The reason field opens empty and focused, starting points
- * only ever insert text for the designer to edit, never submit on their own, and Ignore
- * issue stays disabled until there is real text: no fallback reason exists anywhere in
- * the UI.
+ * The reason field opens empty and focused, starting points only insert text
+ * Ignore stays disabled until there is real text and there is no fallback reason
  */
 export function IgnoreSheet({ instanceCount, onRecord, onCancel }: IgnoreSheetProps) {
   const [reason, setReason] = useState("");

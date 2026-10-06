@@ -33,7 +33,7 @@ describe("registerAdjustCloseRestore", () => {
     await beginPreview([node], { r: 1, g: 0, b: 0 });
     expect(node.fills).toEqual([{ type: "SOLID", color: { r: 1, g: 0, b: 0 }, opacity: 1 }]);
 
-    // figma.on("close") cannot await anything, so this must be a synchronous call
+    // The close handler cannot await, so this must be a synchronous call
     handlers.close();
 
     expect(node.fills).toEqual([{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }]);

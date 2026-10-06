@@ -12,15 +12,7 @@ export interface ApplyAdjustmentResult {
   reason?: string;
 }
 
-/**
- * The full apply path: re-validate against the representative node's current
- * background, write every node in the scope for real, commit exactly one undo step,
- * and log the before and after state once with the instance count. Composes the
- * adapter pieces so adjustProtocol.ts stays a thin message router.
- *
- * GROUPING_SPEC.md section 8: a group apply is the same fill write ADR-017 permits,
- * many times, committed as one undo step rather than one per node
- */
+/** Checks the colour, writes every node in scope, commits one undo step and logs once */
 export async function applyAdjustment(
   nodes: readonly TextNode[],
   issueId: string,

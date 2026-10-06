@@ -1,27 +1,17 @@
-/**
- * The only module that writes figma.currentPage.selection. GROUPING_SPEC.md section
- * 5.2: every selection this module sets is marked, so re-encounter, and phase 25's
- * current-screen tracking once it exists, can tell it apart from the designer's own.
- * Module-level singleton state, the same pattern previewState.ts already uses
- */
+/** Marks plugin made selections so they are not mistaken for the designer selecting */
 let pluginSetSelectionPending = false;
 
-/** Design storage for GROUPING_SPEC.md 5.1: only ever set from a designer-originated change */
+/** Only set from a change the designer made */
 let lastDesignerSelection: readonly string[] = [];
 
-/**
- * Reads and clears the marker in one step. Call exactly once per selectionchange
- * event, from the single registered listener in selectionListener.ts; a second,
- * independent reader must receive the same boolean as a parameter from that call
- * rather than reading this again, since a second read always sees false
- */
+/** Reads and clears the marker, call once per selection change and pass the result on */
 export function consumePluginSetSelectionMarker(): boolean {
   const wasPluginSet = pluginSetSelectionPending;
   pluginSetSelectionPending = false;
   return wasPluginSet;
 }
 
-/** GROUPING_SPEC.md 5.1: only a selection the designer made themselves is ever storable */
+/** Only selections made by the designer are stored */
 export function recordDesignerSelection(nodeIds: readonly string[]): void {
   lastDesignerSelection = nodeIds;
 }
@@ -42,24 +32,20 @@ function applySelection(nodes: readonly SceneNode[]): void {
   figma.currentPage.selection = [...nodes];
 }
 
-/**
- * Selects already-resolved nodes and zooms to fit. For a caller that already holds
- * live node references, such as issuesProtocol.ts's focusIssue, avoiding a redundant
- * lookup through selectAndZoomToFit
- */
+/** Selects nodes already in hand and zooms to fit, skips a lookup by id */
 export function selectResolvedNodesAndZoom(nodes: readonly SceneNode[]): void {
   applySelection(nodes);
   figma.viewport.scrollAndZoomIntoView([...nodes]);
 }
 
-/** GROUPING_SPEC.md 5.1: "Show on canvas". Resolves nodeIds, selects them, zooms to fit */
+/** Selects the nodes by id and zooms to fit */
 export async function selectAndZoomToFit(nodeIds: readonly string[]): Promise<SceneNode[]> {
   const nodes = await resolveSceneNodes(nodeIds);
   selectResolvedNodesAndZoom(nodes);
   return nodes;
 }
 
-/** GROUPING_SPEC.md 5.1's Restore control: selects without zooming */
+/** Selects without zooming */
 export async function restoreSelection(nodeIds: readonly string[]): Promise<void> {
   const nodes = await resolveSceneNodes(nodeIds);
   applySelection(nodes);

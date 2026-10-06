@@ -91,8 +91,7 @@ describe("adjust variable protocol", () => {
     return { commitUndo, pluginData };
   }
 
-  // The flag defaults to false; these tests are about what happens with it on, so they
-  // turn it on explicitly, the same way adjustVariableFlag.test.ts turns it off.
+  // The flag is off by default so these tests turn it on explicitly
   beforeEach(() => {
     vi.resetModules();
     vi.doMock("../../shared/featureFlags", () => ({ FEATURE_VARIABLE_SCOPE: true }));

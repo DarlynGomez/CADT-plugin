@@ -13,7 +13,7 @@ function isValidState(value: unknown): value is IssueState {
   return typeof value === "string" && VALID_STATES.has(value);
 }
 
-/** Exactly the fields spec section 5.5 says to store; ruleId and nodeId live in the map key */
+/** Stored fields only, rule id and node id live in the map key */
 export type PersistedIssueFields = Omit<Issue, "id" | "ruleId" | "nodeId">;
 
 function hasValidPersistedFields(issue: Record<string, unknown>): boolean {
@@ -45,7 +45,7 @@ function hasValidPersistedFields(issue: Record<string, unknown>): boolean {
   return true;
 }
 
-/** Structural validation for the on-disk shape: section 5.5's fields, nothing more */
+/** Checks the shape of what is stored on disk */
 export function isPersistedIssueFields(value: unknown): value is PersistedIssueFields {
   if (!value || typeof value !== "object") {
     return false;

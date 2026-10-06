@@ -28,10 +28,8 @@ function textNode(id: string) {
 }
 
 /**
- * Spans the sandbox's real decision persistence and the shared pure matching
- * function, proving the contract between them: the signature decisionStore.ts
- * persists under is exactly the one matchRootDecision computes for a later finding.
- * GROUPING_SPEC.md section 3.4.
+ * Runs real decision storage with the shared matching function
+ * The signature stored under must equal the one matching computes for a later finding
  */
 describe("a root decision, recorded then matched by a later finding", () => {
   let pluginData: Record<string, string> = {};
@@ -107,7 +105,7 @@ describe("a root decision, recorded then matched by a later finding", () => {
     const betterSeverity = { instances: [instanceAt("low")], ...SAGE_ON_WHITE };
     expect(matchRootDecision(betterSeverity, decisions)).toMatchObject({ offered: true });
 
-    // A worse severity than what was decided is a materially different tradeoff, ADR-014.
+    // A worse severity than the decision is a different tradeoff
     const worseSeverity = { instances: [instanceAt("high")], ...SAGE_ON_WHITE };
     const worseDecision = {
       ...decisions,

@@ -28,11 +28,8 @@ export interface VariableConsequenceData {
 }
 
 /**
- * GROUPING_SPEC.md section 9: the variable scope's static facts, arriving on the same
- * ADJUST_OPTIONS_READY reply useAdjustMessages.ts already requests, and the live,
- * per-colour consequence, requested separately since it depends on the candidate
- * colour rather than the node alone. A sibling of useAdjustMessages.ts, not a part of
- * it, so neither file needs to grow past 150 lines.
+ * Variable facts arrive on the options reply, the consequence is requested per colour
+ * Separate from useAdjustMessages to keep both files short
  */
 export function useAdjustVariableScope(issueId: string) {
   const [variableScope, setVariableScope] = useState<AdjustVariableScope | null>(null);

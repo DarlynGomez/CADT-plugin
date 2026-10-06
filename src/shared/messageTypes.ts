@@ -5,25 +5,25 @@ import type { IssueSummary } from "./issues/issueTypes";
 import type { RootActionFailedMessage, RootMessage } from "./rootMessageTypes";
 import type { SelectionMessage } from "./selectionMessageTypes";
 
-/** Requests that the sandbox persist a completed calibration profile */
+/** Asks the sandbox to save a finished calibration profile */
 export interface CalibrationSaveMessage {
   type: "CALIBRATION_SAVE";
   profile: CalibrationProfile;
 }
 
-/** Requests that the sandbox load the applicable calibration profile */
+/** Asks the sandbox to load the saved profile */
 export interface CalibrationLoadMessage {
   type: "CALIBRATION_LOAD";
 }
 
-/** Returns the profile selected by the sandbox's storage resolution rule */
+/** The profile the sandbox picked */
 export interface CalibrationLoadedMessage {
   type: "CALIBRATION_LOADED";
   profile: CalibrationProfile | null;
   resolvedScope: "file" | "user" | null;
 }
 
-/** Reports that the sandbox could not persist a calibration profile. */
+/** The sandbox could not save the profile */
 export interface CalibrationSaveFailedMessage {
   type: "CALIBRATION_SAVE_FAILED";
   message: string;
@@ -33,18 +33,18 @@ export interface CalibrationSavedMessage {
   type: "CALIBRATION_SAVED";
 }
 
-/** Requests the current issue list. The sandbox replies with ISSUES_UPDATED. */
+/** Asks for the issue list, answered with ISSUES_UPDATED */
 export interface IssuesSubscribeMessage {
   type: "ISSUES_SUBSCRIBE";
 }
 
-/** Puts an issue off; it will resurface on re-encounter */
+/** Puts an issue off until the node is met again */
 export interface IssueDeferMessage {
   type: "ISSUE_DEFER";
   issueId: string;
 }
 
-/** Documents a final decision. Reason is required and enforced again in the state machine. */
+/** Records a final decision, the reason is required and checked again in the state machine */
 export interface IssueIgnoreMessage {
   type: "ISSUE_IGNORE";
   issueId: string;
@@ -63,13 +63,13 @@ export interface IssueReopenMessage {
   issueId: string;
 }
 
-/** Selects the issue's node and scrolls it into view. Creates nothing on the canvas. */
+/** Selects the node and scrolls to it, draws nothing */
 export interface IssueFocusMessage {
   type: "ISSUE_FOCUS";
   issueId: string;
 }
 
-/** Every inbound message the accountability panel sends */
+/** Every message the panel sends */
 export type IssueMessage =
   | IssuesSubscribeMessage
   | IssueDeferMessage
@@ -78,31 +78,25 @@ export type IssueMessage =
   | IssueReopenMessage
   | IssueFocusMessage;
 
-/**
- * The full current issue list, and the full current decision record. Always complete,
- * never a delta, see ADR-012; decisions ride along on the same message rather than a
- * second round trip, since the panel needs both to derive roots and offer a matching
- * decision, and both are already small, whole-file records with no reconciliation logic
- * to get wrong.
- */
+/** The full issue list and decisions every time, never a delta */
 export interface IssuesUpdatedMessage {
   type: "ISSUES_UPDATED";
   issues: readonly IssueSummary[];
   decisions: Readonly<Record<string, RootDecision>>;
 }
 
-/** An issue action was rejected; message explains why for display, not just logging */
+/** An issue action was rejected, the message says why */
 export interface IssueActionFailedMessage {
   type: "ISSUE_ACTION_FAILED";
   issueId: string;
   message: string;
 }
 
-/** Every outbound message the accountability panel receives */
+/** Every message the panel receives */
 export type IssuesPluginMessage =
   IssuesUpdatedMessage | IssueActionFailedMessage | RootActionFailedMessage;
 
-/** Messages sent from the UI iframe to the plugin sandbox. */
+/** UI to sandbox messages */
 export type UiToPluginMessage =
   | CalibrationLoadMessage
   | CalibrationSaveMessage
@@ -111,7 +105,7 @@ export type UiToPluginMessage =
   | SelectionMessage
   | AdjustMessage;
 
-/** Messages sent from the plugin sandbox to the UI iframe. */
+/** Sandbox to UI messages */
 export type PluginToUiMessage =
   | CalibrationLoadedMessage
   | CalibrationSaveFailedMessage
@@ -121,5 +115,5 @@ export type PluginToUiMessage =
   | RootActionFailedMessage
   | AdjustReplyMessage;
 
-/** Every message permitted across the plugin boundary. */
+/** Every message that crosses the plugin boundary */
 export type PluginMessage = UiToPluginMessage | PluginToUiMessage;

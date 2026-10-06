@@ -5,7 +5,7 @@ import {
   registerAdjustSelectionRestore
 } from "./lifecycle/adjustLifecycle";
 import { handleCalibrationMessage, isCalibrationMessage } from "./lifecycle/calibrationProtocol";
-// TEMPORARY, see exportIssuesDebug.ts for the removal checklist.
+// Temporary, see exportIssuesDebug.ts for how to remove it
 import { exportIssuesToConsole } from "./lifecycle/exportIssuesDebug";
 import { handleIssueMessage, isIssueMessage } from "./lifecycle/issuesProtocol";
 import { handleRootMessage, isRootMessage } from "./lifecycle/rootActionsProtocol";
@@ -18,8 +18,8 @@ const EXPORT_ISSUES_COMMAND = "export-issues"; // TEMPORARY, see exportIssuesDeb
 const UI_WIDTH = 460;
 const UI_HEIGHT = 680;
 
-// figma.ui.postMessage takes the payload directly; Figma delivers it to the UI
-// as event.data.pluginMessage. Do not wrap it in { pluginMessage: ... } here.
+// postMessage takes the payload directly and Figma adds the pluginMessage wrapper
+// Do not wrap it here
 
 async function handleUiMessage(rawMessage: unknown): Promise<void> {
   if (!rawMessage || typeof rawMessage !== "object") {
@@ -103,8 +103,8 @@ if (figma.command === RESET_COMMAND) {
   startCalibrationUi();
   registerAdjustSelectionRestore();
   registerAdjustCloseRestore();
-  // Fire-and-forget: the calibration UI does not wait on live detection, and a
-  // failure here (a hostile document, a rejected loadAllPagesAsync) must not block it.
+  // Fire and forget so the calibration UI does not wait on live detection
+  // A failure here must not block it
   startDetectionLifecycle().catch((error: unknown) => {
     console.error("Detection lifecycle failed to start", error);
   });

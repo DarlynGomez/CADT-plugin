@@ -9,13 +9,18 @@ interface ScopeSectionProps {
   scope: AdjustScope;
   onScopeChange: (scope: AdjustScope) => void;
   scopeCount: number;
+  /** Layers the designer checked, scopeCount cannot tell none from one */
+  checkedCount: number;
   totalInstances: number;
   variableScope: AdjustVariableScope | null;
   variableConsequence: VariableConsequenceData | null;
 }
 
-function instancesLabel(scopeCount: number): string {
-  return scopeCount > 1 ? `Change ${scopeCount} layers` : "Change only the current instance";
+function instancesLabel(checkedCount: number): string {
+  if (checkedCount === 0) {
+    return "Change only the current instance";
+  }
+  return checkedCount === 1 ? "Change this layer" : `Change ${checkedCount} layers`;
 }
 
 function instancesDetail(scopeCount: number, remaining: number): string {
@@ -35,16 +40,14 @@ function variableDetail(consequence: VariableConsequenceData | null): string {
 }
 
 /**
- * GROUPING_SPEC.md section 8's instances scope, always available, and section 9's
- * variable scope, offered whenever the foreground is bound to a local variable and
- * disabled with its own explanation for a library one. Both are real, selectable
- * options; the count on the variable row is computed fresh for whatever colour is
- * currently active, never assumed. See ADR-033.
+ * Instances scope always, variable scope when the foreground is bound to a local variable
+ * A library variable is disabled with its reason, its count is computed for the current colour
  */
 export function ScopeSection({
   scope,
   onScopeChange,
   scopeCount,
+  checkedCount,
   totalInstances,
   variableScope,
   variableConsequence
@@ -64,7 +67,7 @@ export function ScopeSection({
         <span className={styles.radio} data-checked={scope === "instances"} aria-hidden="true" />
         <span className={styles.optionBody}>
           <span className={styles.optionLabelRow}>
-            <span className={styles.optionLabel}>{instancesLabel(scopeCount)}</span>
+            <span className={styles.optionLabel}>{instancesLabel(checkedCount)}</span>
             <span
               className={styles.infoIcon}
               title="Every layer checked in Related grouped issues, or just this one if none are checked"

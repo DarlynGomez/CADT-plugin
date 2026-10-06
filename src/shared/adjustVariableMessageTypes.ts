@@ -1,11 +1,7 @@
 import type { AdjustOptionChoice } from "./adjustMessageTypes";
 import type { RGBColor } from "./issues/issueTypes";
 
-/**
- * GROUPING_SPEC.md section 9's static facts about the foreground's bound variable,
- * independent of any candidate colour: null when the foreground is unbound, or bound
- * to a style rather than a variable, since only a variable can be this scope's target.
- */
+/** Facts about the bound variable, null when unbound or bound to a style */
 export interface AdjustVariableScope {
   variableId: string;
   name: string;
@@ -15,12 +11,7 @@ export interface AdjustVariableScope {
   remote: boolean;
 }
 
-/**
- * GROUPING_SPEC.md section 9: "the consequence is computed, not assumed." Requested
- * whenever the designer switches to the variable scope, or changes their candidate
- * colour while it is already selected, so the sheet's count reflects exactly the
- * colour that would actually be written.
- */
+/** Asked on switching to variable scope and on each colour change after */
 export interface AdjustVariableConsequenceRequestMessage {
   type: "ADJUST_VARIABLE_CONSEQUENCE_REQUEST";
   issueId: string;
@@ -36,11 +27,7 @@ export interface AdjustVariableConsequenceReadyMessage {
   newlyFailingNames: readonly string[];
 }
 
-/**
- * Writes the candidate colour to the variable's current mode, not to any one node's
- * fill: every consumer of that variable changes. Commits one undo step, same as a
- * multi-instance ADJUST_APPLY. See ADR-033.
- */
+/** Writes to the variable for the current mode so every consumer changes in one undo step */
 export interface AdjustApplyVariableMessage {
   type: "ADJUST_APPLY_VARIABLE";
   issueId: string;

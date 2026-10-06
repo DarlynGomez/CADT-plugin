@@ -75,8 +75,7 @@ describe("beginPreview and restorePreview", () => {
 });
 
 describe("multi-node preview, GROUPING_SPEC.md section 8", () => {
-  // A fresh set per test: beginPreview mutates fills in place, so a shared fixture
-  // reused across tests would carry one test's leftover preview into the next.
+  // Fresh set per test because beginPreview changes fills in place
   function makeTwelve() {
     return Array.from({ length: 12 }, (_, i) =>
       textNode(`1:${i + 1}`, [{ type: "SOLID", color: { r: 0, g: 0, b: i / 20 } }])

@@ -6,7 +6,7 @@ function instanceIds(root: Root): string[] {
   return root.instances.map((instance) => instance.issueId);
 }
 
-/** GROUPING_SPEC.md 6.4: per-root Adjust selection, keyed by signature, nothing pre-selected */
+/** Checked instances per root for adjust, keyed by signature, nothing pre selected */
 export function useInstanceSelection() {
   const [selectedInstances, setSelectedInstances] = useState<
     Readonly<Record<string, ReadonlySet<string>>>

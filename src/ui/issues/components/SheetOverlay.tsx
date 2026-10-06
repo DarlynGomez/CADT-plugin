@@ -7,9 +7,8 @@ interface SheetOverlayProps {
 }
 
 /**
- * ADR-027: Adjust and Ignore are true overlay sheets, a dimmed backdrop over the whole
- * panel with the sheet itself anchored to the bottom edge, not inline replacements of a
- * card's actions row. Shared by both sheets so they read as one family.
+ * Dimmed backdrop over the whole panel with the sheet anchored to the bottom
+ * Shared by the adjust and ignore sheets so they match
  */
 export function SheetOverlay({ children }: SheetOverlayProps) {
   return (

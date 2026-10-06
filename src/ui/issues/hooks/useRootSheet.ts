@@ -7,7 +7,7 @@ export interface SheetTarget {
   kind: RootSheetKind;
 }
 
-/** Which root, if any, has an open Adjust or Ignore sheet. At most one at a time. */
+/** Which root has an open adjust or ignore sheet, at most one */
 export function useRootSheet() {
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
 

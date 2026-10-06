@@ -2,10 +2,8 @@ import type { AdjustVariableScope } from "../../../shared/adjustMessageTypes";
 import { firstSolidFill } from "./bindingLookup";
 
 /**
- * GROUPING_SPEC.md section 9's static facts about a node's bound foreground variable:
- * null when unbound, or bound to a style rather than a variable, since a style is not
- * a valid target for this scope. `remote` distinguishes a library variable, which
- * cannot be edited from a consuming file, from a local one.
+ * Facts about the bound foreground variable, null when unbound or bound to a style
+ * remote means a library variable that cannot be edited from this file
  */
 export async function resolveVariableScope(node: TextNode): Promise<AdjustVariableScope | null> {
   const variableId = firstSolidFill(node)?.boundVariables?.color?.id;

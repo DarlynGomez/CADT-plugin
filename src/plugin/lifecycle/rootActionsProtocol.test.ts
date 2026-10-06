@@ -117,7 +117,7 @@ describe("handleRootMessage", () => {
     const persisted = JSON.parse(setPluginData.mock.calls[0][1]);
     expect(persisted["contrast:1:1"].state).toBe("deferred");
     expect(persisted["contrast:1:2"].state).toBe("deferred");
-    // Important is left alone by a root-level defer, per GROUPING_SPEC.md 3.3.
+    // Important is left alone by a root level defer
     expect(persisted["contrast:1:3"].state).toBe("important");
 
     expect(reply).toHaveBeenCalledWith(
@@ -294,7 +294,7 @@ describe("handleRootMessage", () => {
 
   it("changes nothing, and still replies with success, when no instance is eligible", async () => {
     const reply = vi.fn();
-    // Every instance is already open; nothing is important, so there is nothing to unmark.
+    // Every instance is already open so there is nothing to unmark
     await handleRootMessage(
       { type: "ROOT_UNMARK_IMPORTANT", issueIds: ["contrast:1:1", "contrast:1:2"] },
       reply

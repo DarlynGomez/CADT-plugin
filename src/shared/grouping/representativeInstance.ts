@@ -1,25 +1,17 @@
 import type { IssueState } from "../issues/issueTypes";
 import type { GroupableFinding } from "./groupingTypes";
 
-/** Spec section 3.5: the root card, Adjust's single-instance fallback */
+/** Used by the root card and the single instance adjust fallback */
 export const TO_REVIEW_ELIGIBLE_STATES: ReadonlySet<IssueState> = new Set([
   "open",
   "important",
   "deferred"
 ]);
 
-/** Spec section 3.5: the Decisions view's specimen */
+/** Used by the decisions view */
 export const DECISIONS_ELIGIBLE_STATES: ReadonlySet<IssueState> = new Set(["ignored", "resolved"]);
 
-/**
- * Spec section 3.5, one picker for every caller: the eligible instance the designer
- * most recently selected themselves, otherwise the first eligible one in document
- * order. designerSelectionOrder is node ids, most recent first, and must contain only
- * selections the designer made, a plugin-set selection is never eligible, the same rule
- * that keeps it out of re-encounter (section 5.2). Markers, MARKERS_SPEC.md 5.3, narrow
- * pool to one screen before calling this; every other caller passes a root's full
- * instance list
- */
+/** Last selected eligible instance, else first in document order, plugin selections never count */
 export function pickRepresentativeInstance(
   pool: readonly GroupableFinding[],
   eligibleStates: ReadonlySet<IssueState>,

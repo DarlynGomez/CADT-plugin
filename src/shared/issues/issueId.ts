@@ -1,10 +1,6 @@
 const SEPARATOR = ":";
 
-/**
- * The only place issue ids are built or parsed. issueId = ruleId + ":" + nodeId.
- * Figma node ids already contain colons (for example "1:23"), so parsing splits on
- * only the first colon; everything after it, colons included, is the node id.
- */
+/** Id is rule id plus node id, split on the first colon since node ids contain colons */
 export function buildIssueId(ruleId: string, nodeId: string): string {
   return `${ruleId}${SEPARATOR}${nodeId}`;
 }

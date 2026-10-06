@@ -6,8 +6,8 @@ import type { Root } from "../../../shared/grouping/groupingTypes";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import { AdjustPopup } from "./AdjustPopup";
 
-// The flag defaults to false. The "variable scope" block below tests what happens with it on,
-// so it is turned on for this file; AdjustPopup.variableFlagDefault.test.tsx covers the default.
+// The flag is off by default so the variable scope block turns it on for this file
+// The default is covered by AdjustPopup.variableFlagDefault.test.tsx
 vi.mock("../../../shared/featureFlags", () => ({ FEATURE_VARIABLE_SCOPE: true }));
 
 function emit(message: unknown) {
@@ -362,6 +362,36 @@ describe("AdjustPopup", () => {
 
     expect(screen.getByText("Change 2 layers")).toBeInTheDocument();
     expect(screen.queryByText("Change only the current instance")).not.toBeInTheDocument();
+  });
+
+  it("labels the scope row Change this layer when exactly one layer is checked", () => {
+    render(
+      <AdjustPopup
+        root={rootFor(ISSUE.id, 2)}
+        representativeIssue={ISSUE}
+        selectedInstanceIds={new Set(["contrast:2:2"])}
+        aiAssistanceLevel={3}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Change this layer")).toBeInTheDocument();
+    expect(screen.queryByText("Change only the current instance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Change 1 layers?$/)).not.toBeInTheDocument();
+  });
+
+  it("labels the scope row Change 3 layers when three are checked", () => {
+    render(
+      <AdjustPopup
+        root={rootFor(ISSUE.id, 3)}
+        representativeIssue={ISSUE}
+        selectedInstanceIds={new Set([ISSUE.id, "contrast:2:2", "contrast:3:3"])}
+        aiAssistanceLevel={3}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Change 3 layers")).toBeInTheDocument();
   });
 
   it("keeps the single-instance label when nothing is checked", () => {

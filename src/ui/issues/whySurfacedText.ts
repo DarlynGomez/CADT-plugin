@@ -7,9 +7,8 @@ const CONTEXT_BY_SEVERITY: Record<Severity, string> = {
 };
 
 /**
- * GROUPING_SPEC.md 6.3 item 7's "Why this surfaced" popover. Bands on severity, the
- * same computeSeverity bands every other part of the panel already uses, rather than
- * re-deriving a shortfall threshold here.
+ * Plain context for the why this surfaced popover
+ * Keyed by severity so it matches the bands used elsewhere in the panel
  */
 export function whySurfacedContext(severity: Severity): string {
   return CONTEXT_BY_SEVERITY[severity];

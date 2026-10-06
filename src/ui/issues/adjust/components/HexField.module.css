@@ -4,8 +4,10 @@
   gap: var(--space-1);
 }
 
-/* Visually hidden, not display:none: the field still needs a real accessible name.
-   The mockup shows only the swatch and the input, no visible label text. */
+/*
+   Visually hidden, not display none, the field still needs an accessible name
+   The design shows only the swatch and the input
+*/
 .label {
   position: absolute;
   width: 1px;

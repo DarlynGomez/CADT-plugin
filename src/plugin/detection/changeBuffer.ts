@@ -14,11 +14,8 @@ export interface ChangeBuffer {
 }
 
 /**
- * Coalesces node ids into one flush after a quiet period, or immediately if the batch
- * grows past its limit. Takes the timer functions as parameters rather than calling
- * global setTimeout/clearTimeout directly, so this stays a pure module with no ambient
- * dependency at all, not even a standard one, and is testable with a hand-built fake
- * clock or with vitest's fake timers passed through, with no Figma involved either way.
+ * Batches node ids into one flush after a quiet period, or at once past the size limit
+ * Timer functions are passed in so this stays pure and tests can fake the clock
  */
 export function createChangeBuffer(options: ChangeBufferOptions): ChangeBuffer {
   const flushDelayMs = options.flushDelayMs ?? DEFAULT_FLUSH_DELAY_MS;

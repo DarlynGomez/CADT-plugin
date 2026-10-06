@@ -40,14 +40,7 @@ export function parseHex(input: string): RGBColor | null {
   };
 }
 
-/**
- * Validates a typed hex against background and requiredRatio plus headroom
- *
- * Malformed input is rejected outright. A well formed hex that fails contrast reports
- * the achieved ratio and, when reachable, the nearest passing colour on the same hue
- * (via keepHue, since that is exactly the same search). Nothing here silently corrects
- * the typed value, since a typed hex is an exact request, not an approximate gesture
- */
+/** A failing hex is rejected with its ratio, never silently corrected */
 export function validateHexInput(
   input: string,
   background: RGBColor,

@@ -13,7 +13,7 @@ function respond(message: unknown) {
   window.dispatchEvent(new MessageEvent("message", { data: { pluginMessage: message } }));
 }
 
-/** Stand in for the plugin sandbox on the postMessage boundary. */
+/** Stands in for the plugin sandbox on the postMessage boundary */
 function fakeSandbox(handlers: {
   onLoad?: () => void;
   onSave?: (profile: unknown) => void;
@@ -27,7 +27,7 @@ function fakeSandbox(handlers: {
       const profile = message.profile;
       setTimeout(() => handlers.onSave?.(profile), 0);
     }
-    // The issue panel subscribes as soon as it mounts, right after hand-off.
+    // The issue panel subscribes as soon as it mounts, right after hand off
     if (message?.type === "ISSUES_SUBSCRIBE") {
       setTimeout(() => respond({ type: "ISSUES_UPDATED", issues: [], decisions: {} }), 0);
     }

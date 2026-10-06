@@ -6,10 +6,8 @@ import { logFindings } from "./logFindings";
 import { resolveTextNodeSnapshot } from "./resolveSnapshot";
 
 /**
- * Run detection over a set of node ids, reconcile the results into the persisted
- * issue record, save, and push the updated list to any open UI. The one place
- * detection output reaches the store, so this is the only file that needs to change
- * if a second rule, or a second trigger for a scan, is added later.
+ * Detects, reconciles into the record, saves and pushes the list to the UI
+ * All detection output reaches the store here
  */
 export async function scanAndSync(nodeIds: ReadonlySet<string>, label: string): Promise<void> {
   const findings = await runDetection(nodeIds, resolveTextNodeSnapshot);

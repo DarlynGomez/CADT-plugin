@@ -17,12 +17,7 @@ function distinctBackgroundBindings(instances: readonly GroupableFinding[]): str
   ];
 }
 
-/**
- * The full finding list, grouped by root signature. Pure: the same list always produces
- * the same roots, and nothing here is stored, see ADR-019. This is the one place
- * findings are folded into roots; the panel and any future plugin logic both call it
- * over the same data rather than each computing their own view.
- */
+/** Groups findings by root signature, pure and never stored */
 export function deriveRoots(
   findings: readonly GroupableFinding[],
   designerSelectionOrder: readonly string[] = []
@@ -48,9 +43,7 @@ export function deriveRoots(
     const { displayState, breakdown } = deriveRootState(
       instances.map((instance) => instance.state)
     );
-    // A root is only ever shown in one view at a time, so its one representative always
-    // matches whichever view that is: Decisions once every instance is decided, To review
-    // otherwise
+    // Pick the representative that suits the view showing this root
     const eligibleStates =
       displayState === "decided" ? DECISIONS_ELIGIBLE_STATES : TO_REVIEW_ELIGIBLE_STATES;
     const representative = pickRepresentativeInstance(

@@ -19,18 +19,9 @@ function withPreservedAlpha(current: VariableValue | undefined, color: RGBColor)
 }
 
 /**
- * The variable-scope apply path: writes the candidate colour to the variable's
- * current mode, not to any one node's fill, so every consumer changes at once.
- * Re-validates against the representative node's own requirement, the same floor
- * applyAdjustment.ts checks; the full consequence for every other consumer was
- * already shown to the designer before they chose to apply, GROUPING_SPEC.md
- * section 9, so it is not re-blocked here. See ADR-033.
- *
- * Restores any active preview first: preview writes a raw override fill, ADR-018,
- * which detaches the representative's own variable binding. Left in place, the
- * variable write below would silently miss the one node the designer was looking
- * at. Restoring returns it to its original, still-bound fill, so it picks the new
- * value back up the same way every other consumer does.
+ * Writes the colour to the variable for the current mode so every consumer changes
+ * The consequence was already shown, so only the representative is rechecked
+ * Restore the preview first, it detaches the binding and this layer would miss the write
  */
 export async function applyVariableAdjustment(
   representative: TextNode,

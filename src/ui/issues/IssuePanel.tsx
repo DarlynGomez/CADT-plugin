@@ -21,16 +21,16 @@ function instanceIds(root: Root): string[] {
 }
 
 interface IssuePanelProps {
-  /** The raw 1 to 4 "How much should CADT do on its own?" answer, or null when no
-   *  calibration profile is loaded, which gates the Adjust control on each card */
+  /**
+   * The raw 1 to 4 answer for how much CADT should do on its own
+   * Null when no profile is loaded, which gates the Adjust control on each card
+   */
   aiAssistanceLevel: number | null;
 }
 
 /**
- * GROUPING_SPEC.md 6: the redesigned panel. Owns filter and grouping choice and
- * delegates per-root selection, sheet, and selection-banner state to their own hooks;
- * every root card is otherwise a pure function of its own root and the callbacks this
- * hands it.
+ * The issue panel, owns filter and grouping choice
+ * Selection, sheet and banner state live in their own hooks
  */
 export function IssuePanel({ aiAssistanceLevel }: IssuePanelProps) {
   const {

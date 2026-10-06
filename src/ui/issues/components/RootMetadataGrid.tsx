@@ -14,9 +14,8 @@ interface RootMetadataGridProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.3 item 6: the two-column grid restored from the mockup, for
- * scanning at a glance. The colours in the swatches are the file's own data, not
- * tokens, the same sanctioned exception RootSpecimen.tsx uses, CLAUDE.md rule 5.
+ * Two column grid for scanning at a glance
+ * The colours come from the file and are not tokens, so inline styles are allowed
  */
 export function RootMetadataGrid({
   root,

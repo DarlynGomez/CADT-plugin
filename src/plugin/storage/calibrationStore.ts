@@ -29,7 +29,7 @@ async function readUserProfile(): Promise<CalibrationResolution | null> {
   return isCalibrationProfile(profile) ? { scope: "user", profile } : null;
 }
 
-/** Resolve file-first calibration while the ownership rule remains provisional and pending advisor input */
+/** Resolves file first while the ownership rule is provisional */
 export async function resolveCalibration(): Promise<CalibrationResolution | null> {
   const [fileProfile, userProfile] = await Promise.all([readFileProfile(), readUserProfile()]);
   return fileProfile ?? userProfile ?? null;
@@ -51,10 +51,8 @@ function describeError(error: unknown): string {
 }
 
 /**
- * Write the profile to both persistence surfaces independently. The save counts
- * as successful when either surface accepts it, so one surface failing (a
- * read-only document, a clientStorage quota, a runtime restriction) does not
- * block the designer. Each failure is captured with its reason.
+ * Writes the profile to both surfaces independently, it counts as saved if either accepts it
+ * So one surface failing does not block the designer, each failure keeps its reason
  */
 export async function saveCalibration(
   profile: CalibrationProfile
@@ -62,7 +60,7 @@ export async function saveCalibration(
   const result: CalibrationSaveResult = { fileSaved: false, userSaved: false };
 
   try {
-    // Per file, travels to collaborators.
+    // Per file, travels to collaborators
     figma.root.setPluginData(STORAGE_KEY_PROFILE, JSON.stringify(profile));
     result.fileSaved = true;
   } catch (error) {
@@ -71,7 +69,7 @@ export async function saveCalibration(
   }
 
   try {
-    // Per user, across every file they open.
+    // Per user, across every file they open
     await figma.clientStorage.setAsync(STORAGE_KEY_PROFILE, profile);
     result.userSaved = true;
   } catch (error) {

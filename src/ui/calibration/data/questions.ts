@@ -54,7 +54,7 @@ export const consentScreen: ConsentScreen = {
   declineLabel: "Continue without logging"
 };
 
-/** The ordered authored questions; disabled entries are filtered by the flow at runtime */
+/** The ordered questions, disabled entries are filtered out at runtime */
 export const questions: readonly CalibrationQuestion[] = [
   {
     id: "projectType",
@@ -103,7 +103,7 @@ export const questions: readonly CalibrationQuestion[] = [
   {
     id: "communityFocus",
     type: "multi",
-    // Disabled pending explicit advisor sign-off; enable when the advisor approves this values question
+    // Disabled until the advisor signs off on this values question
     enabled: false,
     prompt: "Any communities you want extra focus on?",
     helperText:

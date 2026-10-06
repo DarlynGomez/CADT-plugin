@@ -19,13 +19,7 @@ export interface ConsumerOutcome {
   wouldPass: boolean;
 }
 
-/**
- * GROUPING_SPEC.md section 9: "the consequence is computed, not assumed." One
- * consumer, given its own current fill and background, evaluated against the same
- * candidate colour every other consumer is. Null for an indeterminate consumer
- * (mixed fill, unresolved background, and so on): excluded from the count entirely,
- * the same as detection excludes it from ever becoming a finding.
- */
+/** Judges one consumer against the proposed colour, null when it cannot be measured */
 export function evaluateConsumer(
   snapshot: ConsumerSnapshot,
   nodeName: string,
@@ -57,12 +51,7 @@ export interface VariableConsequence {
   newlyFailingNames: readonly string[];
 }
 
-/**
- * "Newly failing" is currently passing and would not: a consumer already failing is
- * not this change's doing, and stays out of the count, so the sheet's number is
- * exactly the harm this specific edit would cause, GROUPING_SPEC.md section 9's
- * "3 would newly fail."
- */
+/** Newly failing means passing now and failing after, layers already failing are not counted */
 export function summarizeVariableConsequence(
   outcomes: readonly ConsumerOutcome[]
 ): VariableConsequence {

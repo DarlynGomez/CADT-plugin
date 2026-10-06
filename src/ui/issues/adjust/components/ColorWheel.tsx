@@ -42,9 +42,8 @@ export function ColorWheel({
   const lastAnnounceRef = useRef(0);
 
   const target = requiredRatio + CONTRAST_ADJUST_HEADROOM;
-  // Coalesced to at most one real write per animation frame: a drag fires far more
-  // raw events than that, and each one otherwise becomes an immediate write to the
-  // node's fill, flooding the plugin boundary and racing the detection rescan.
+  // At most one real write per animation frame
+  // A drag fires far more events and each would write to the fill and race the rescan
   const throttledColorChange = useRafThrottledCallback(onColorChange);
 
   function announce(resolved: RGBColor, snapped: boolean, throttled: boolean) {
@@ -110,9 +109,8 @@ export function ColorWheel({
 
   useWheelPaint(canvasRef, lightness, background, requiredRatio);
 
-  // A fragment, not a wrapping div: WheelView.tsx places the canvas, the lightness
-  // control, and its own ratio and hex elements into one CSS grid together, so the
-  // slider can sit under the hex field rather than under the wheel. See its module CSS.
+  // A fragment so WheelView can place the canvas and slider in its own grid
+  // That lets the slider sit under the hex field
   return (
     <>
       <canvas

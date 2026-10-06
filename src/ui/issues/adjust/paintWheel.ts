@@ -4,8 +4,7 @@ import { hslToRgb } from "../../../shared/colour/hsl";
 import { pointToHueSaturation } from "../../../shared/colour/wheelGeometry";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 
-// Faded rather than hidden: the boundary stays visible instead of the constraint
-// becoming a fence. See ADJUST_SPEC.md section 3
+// Failing colours fade instead of hiding so the boundary stays visible
 const FADED_ALPHA = 0.25;
 
 function toByte(channel: number): number {
@@ -13,12 +12,8 @@ function toByte(channel: number): number {
 }
 
 /**
- * Paints one frame of the wheel into imageData: every pixel's hue and saturation come
- * from its position on the disc at the given lightness, faded when it fails
- * requiredRatio plus headroom against background rather than hidden
- *
- * Reads width and height back from imageData itself rather than trusting a requested
- * size, since a mismatched buffer silently discards writes past its actual length
+ * Paints one wheel frame, hue and saturation come from position and lightness is given
+ * Failing colours fade, size is read from imageData because a mismatched buffer drops writes
  */
 export function paintWheelFrame(
   imageData: ImageData,

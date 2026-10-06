@@ -1,18 +1,15 @@
 import type { BackgroundSource } from "./issueTypes";
 
-// A local, narrowed view of contrast's evidence rather than importing the plugin-side
-// ContrastEvidence type, since IssueSummary.evidence stays unknown at the shared spine
-// on purpose, see ADR-016. Lives in shared/, not ui/, because both the UI (AdjustPopup)
-// and the pure root-grouping assembly need the same reader.
+// Narrow view of the evidence, kept in shared because the popup and grouping both read it
 
 export interface ContrastEvidenceView {
   foregroundHex: string;
   backgroundHex: string;
   requiredRatio: number;
   measuredRatio: number;
-  /** GROUPING_SPEC.md 3.1's signature field. Null when unbound, undefined when unknown */
+  /** Null when unbound, undefined when unknown */
   foregroundBinding: string | null | undefined;
-  /** For the Details disclosure, GROUPING_SPEC.md 6.3 item 7. Undefined when unknown */
+  /** Undefined when unknown */
   fontSizePx: number | undefined;
   isBold: boolean | undefined;
   backgroundSource: BackgroundSource | undefined;
@@ -36,7 +33,7 @@ function readBackgroundSource(value: unknown): BackgroundSource | undefined {
   return undefined;
 }
 
-/** Also used by AdjustPopup's wheel chrome for the background-ancestor callout */
+/** Also used for the wheel callout */
 export function backgroundSourceName(evidence: ContrastEvidenceView | null): string {
   const source = evidence?.backgroundSource;
   if (!source) {

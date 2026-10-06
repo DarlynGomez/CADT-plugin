@@ -13,11 +13,8 @@ interface IgnoredTrayRowProps {
 }
 
 /**
- * One ignored root's row. Restore, on the row itself, always restores every instance,
- * the common case. When the root has more than one instance, a "Related grouped
- * issues" disclosure, matching RootCard.tsx's own, offers a checkbox per instance so
- * the designer can restore a subset instead, on direct instruction after grouped
- * ignores were only restorable all at once.
+ * Restore on the row reopens every instance
+ * The related issues list lets the designer restore only some
  */
 export function IgnoredTrayRow({ root, reason, onRestore }: IgnoredTrayRowProps) {
   const [checked, setChecked] = useState<ReadonlySet<string>>(

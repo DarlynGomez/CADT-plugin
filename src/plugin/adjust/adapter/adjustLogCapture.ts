@@ -1,11 +1,14 @@
 import { classifyTextSize } from "../../detection/rules/contrast/textSizeClass";
-import { CONTRAST_THRESHOLD_LARGE_TEXT, CONTRAST_THRESHOLD_NORMAL_TEXT } from "../../detection/rules/contrast/thresholds";
+import {
+  CONTRAST_THRESHOLD_LARGE_TEXT,
+  CONTRAST_THRESHOLD_NORMAL_TEXT
+} from "../../detection/rules/contrast/thresholds";
 import { rgbToHex } from "../../../shared/colour/colorHex";
 import { contrastRatio } from "../../../shared/colour/contrastRatio";
 import type { RGBColor } from "../../../shared/issues/issueTypes";
 import { detectFillBinding } from "./bindingLookup";
 import { resolveTextNodeSnapshot } from "../../lifecycle/resolveSnapshot";
-import { originalFillsFor } from "./previewState";
+import { originalFillsFor, originalFillStyleIdFor } from "./previewState";
 
 export interface AdjustLogState {
   hex: string;
@@ -15,11 +18,6 @@ export interface AdjustLogState {
   background: RGBColor;
 }
 
-/**
- * The node's current colour, ratio, required ratio, and binding state, read once and
- * shared by both re-validation and the log entry's "before" fields, so apply and
- * abandon never fetch the snapshot twice for the same purpose
- */
 export async function captureAdjustLogState(node: TextNode): Promise<AdjustLogState | null> {
   const snapshot = await resolveTextNodeSnapshot(node.id);
   if (
@@ -37,8 +35,7 @@ export async function captureAdjustLogState(node: TextNode): Promise<AdjustLogSt
     sizeClass === "large" ? CONTRAST_THRESHOLD_LARGE_TEXT : CONTRAST_THRESHOLD_NORMAL_TEXT;
   const binding = await detectFillBinding(node);
 
-  // A live preview has overwritten the fill and detached its binding, so "before"
-  // comes from the captured original, never the node
+  // A live preview detaches the binding, so read the original fill for the before values
   const original = originalFillsFor(node.id)?.find(
     (fill): fill is SolidPaint => fill.type === "SOLID"
   );
@@ -47,7 +44,10 @@ export async function captureAdjustLogState(node: TextNode): Promise<AdjustLogSt
   return {
     hex: rgbToHex(foreground),
     ratio: contrastRatio(foreground, snapshot.background),
-    bound: binding !== null || Boolean(original?.boundVariables?.color),
+    bound:
+      binding !== null ||
+      Boolean(original?.boundVariables?.color) ||
+      originalFillStyleIdFor(node.id) !== null,
     requiredRatio,
     background: snapshot.background
   };

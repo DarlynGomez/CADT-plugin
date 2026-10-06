@@ -25,11 +25,7 @@ interface RootCardSummaryProps {
   recordedReason: string | null;
 }
 
-/**
- * GROUPING_SPEC.md 6.3's card header: name, typography line, the compact status and
- * severity row, and the always-visible metadata grid. Split out of RootCard.tsx to
- * keep both files under the 150-line rule.
- */
+/** Card header, name, typography line, status row and the metadata grid, split out of RootCard */
 export function RootCardSummary({
   root,
   representativeEvidence,

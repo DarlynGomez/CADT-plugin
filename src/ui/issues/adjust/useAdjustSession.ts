@@ -42,7 +42,7 @@ interface UseAdjustSessionArgs {
   onClose: () => void;
 }
 
-/** Owns the popup's focus, preview, scope, and apply session state. Split out of AdjustPopup.tsx */
+/** Focus, preview, scope and apply state for the popup */
 export function useAdjustSession({
   aiAssistanceLevel,
   optionA,
@@ -65,7 +65,7 @@ export function useAdjustSession({
   const [scope, setScope] = useState<AdjustScope>("instances");
   const autoFocusedRef = useRef(false);
 
-  // GROUPING_SPEC.md section 9: recomputed on every colour change while this scope is selected
+  // Recomputed on every colour change while this scope is selected
   useEffect(() => {
     if (scope === "variable" && activeColor && variableScope && !variableScope.remote) {
       requestVariableConsequence(variableScope.variableId, activeColor);
@@ -78,8 +78,8 @@ export function useAdjustSession({
     }
   }, [applied, onClose]);
 
-  // Safety net if this popup disappears without an explicit Apply, for example the
-  // issue resolving out from under it; a no-op when nothing is active.
+  // Safety net if the popup goes away without Apply
+  // Does nothing when no preview is active
   useEffect(() => clearPreview, [clearPreview]);
 
   function focusOption(option: FocusedOption, color: RGBColor) {
@@ -89,9 +89,8 @@ export function useAdjustSession({
   }
 
   useEffect(() => {
-    // Level 4 pre-focuses and previews the first suggestion once. A ref guards this,
-    // not focused===null: Escape sets focused back to null, and re-triggering from
-    // that would silently undo it. See ADJUST_SPEC.md section 2.
+    // Level 4 previews the first suggestion once
+    // A ref guards it because Escape resets focus and would retrigger it
     if (aiAssistanceLevel === 4 && optionA && !autoFocusedRef.current) {
       autoFocusedRef.current = true;
       focusOption("a", optionA);

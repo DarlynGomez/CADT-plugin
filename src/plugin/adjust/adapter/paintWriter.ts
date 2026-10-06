@@ -10,16 +10,20 @@ export function solidFill(color: RGBColor): Paint[] {
   return [{ type: "SOLID", color, opacity: 1 }];
 }
 
-/**
- * The only function in the codebase that writes a node's fill. Preview, restore, and
- * apply all call this, since from Figma's point of view they are the same operation:
- * replace this fill, nothing else. See ADR-017 for exactly which writes are permitted
- *
- * A range writes per styled text segment rather than replacing the whole node's fill,
- * for mixed-fill text; the font in that range must be loaded first. Omitting range
- * writes the whole node, which is the only path any current finding can reach, since
- * a mixed-fill node never produces a finding today
- */
+
+/** Re-applies a fill style a preview detached */
+
+export async function writeFillStyle(node: TextNode, styleId: string): Promise<void> {
+  await node.setFillStyleIdAsync(styleId);
+}
+
+export function startFillStyleRestore(node: TextNode, styleId: string): void {
+  node.setFillStyleIdAsync(styleId).catch((error: unknown) => {
+    console.error("startFillStyleRestore: could not re-apply the fill style", error);
+  });
+}
+
+
 export async function writeFill(node: TextNode, fills: Paint[], range?: FillRange): Promise<void> {
   if (!range) {
     node.fills = fills;

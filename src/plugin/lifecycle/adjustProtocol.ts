@@ -32,7 +32,7 @@ async function resolveTextNodes(issueIds: readonly string[]): Promise<TextNode[]
   return nodes.filter((node): node is TextNode => node !== null);
 }
 
-/** Handles every adjust message, per ADJUST_SPEC.md sections 5 and 9 */
+/** Handles every adjust message */
 export async function handleAdjustMessage(message: AdjustMessage, reply: Reply): Promise<void> {
   if (message.type === "ADJUST_CLEAR_PREVIEW") {
     await restorePreview();
@@ -126,10 +126,8 @@ export async function handleAdjustMessage(message: AdjustMessage, reply: Reply):
     reply(failed(message.issueId, result.reason ?? "That colour could not be applied."));
     return;
   }
-  // Rescans and pushes ISSUES_UPDATED synchronously, rather than waiting on the
-  // debounced documentchange listener: for a multi-node group apply, the panel must
-  // show every resolved instance the moment the sheet closes, not on the next
-  // organic scan. See listeners.ts for why applyFill already lets this write through.
+  // Rescans and pushes the new issue list now instead of waiting on the debounced listener
+  // So every resolved instance shows the moment the sheet closes
   await scanAndSync(new Set(nodes.map((node) => node.id)), "rescan-after-apply");
   reply({ type: "ADJUST_APPLIED", issueId: message.issueId });
 }

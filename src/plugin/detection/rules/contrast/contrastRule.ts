@@ -8,16 +8,13 @@ import { classifyTextSize, type TextSizeClass } from "./textSizeClass";
 
 const RULE_ID = "contrast";
 
-/**
- * Contrast's rule-specific evidence. measuredRatio and requiredRatio drive severity;
- * everything else lets the ratio be checked against its own inputs, not trusted on faith
- */
+/** Evidence for contrast, ratios drive severity and the rest lets the ratio be checked */
 export interface ContrastEvidence {
   measuredRatio: number;
   requiredRatio: number;
   foregroundHex: string;
   foregroundAlpha: number;
-  /** GROUPING_SPEC.md 3.1's signature field. Null when unbound */
+  /** Null when unbound */
   foregroundBinding: string | null;
   backgroundHex: string;
   backgroundAlpha: number;
@@ -29,11 +26,7 @@ export interface ContrastEvidence {
   sizeClass: TextSizeClass;
 }
 
-/**
- * Composes the phase 9 pure modules over a snapshot and stays thin: every real
- * decision lives in contrastRatio, textSizeClass, or severity, not here. A finding
- * exists only when the measured ratio actually falls short of what is required.
- */
+/** Runs the pure contrast modules, a finding exists only when the ratio falls short */
 export const contrastRule = {
   id: RULE_ID,
 

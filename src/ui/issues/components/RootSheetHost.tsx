@@ -7,12 +7,13 @@ import { SheetOverlay } from "./SheetOverlay";
 
 interface RootSheetHostProps {
   sheet: SheetTarget | null;
-  /** Every non-decided root, unfiltered by the active state filter: a sheet opened
-   *  under one filter must not go missing if the designer switches filters while it
-   *  is still open. */
+  /**
+   * Every root that is not decided, ignoring the state filter
+   * So an open sheet does not vanish when the filter changes
+   */
   roots: readonly Root[];
   issuesById: ReadonlyMap<string, IssueSummary>;
-  /** Keyed by root signature, GROUPING_SPEC.md section 8's Adjust scope */
+  /** Keyed by root signature */
   selectedInstances: Readonly<Record<string, ReadonlySet<string>>>;
   aiAssistanceLevel: number | null;
   onCloseAdjust: () => void;
@@ -21,9 +22,8 @@ interface RootSheetHostProps {
 }
 
 /**
- * ADR-027: renders whichever sheet is open as one panel-covering overlay, found by
- * signature rather than nested inside the card that opened it, since a card only lives
- * in the scrolling list while the sheet must cover the whole panel.
+ * Renders the open sheet as one overlay over the whole panel, found by signature
+ * A card lives in the scrolling list but the sheet must cover the panel
  */
 export function RootSheetHost({
   sheet,

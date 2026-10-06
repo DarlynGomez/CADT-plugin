@@ -5,7 +5,7 @@ interface BackgroundAncestorCalloutProps {
   backgroundHex: string;
 }
 
-/** The wheel's own context strip: which ancestor's background it is solving against */
+/** Shows which ancestor background the wheel is solving against */
 export function BackgroundAncestorCallout({
   backgroundAncestorName,
   backgroundHex

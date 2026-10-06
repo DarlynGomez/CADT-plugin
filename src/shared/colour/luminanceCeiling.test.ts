@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import { contrastRatio } from "./contrastRatio";
 import { luminanceCeiling } from "./luminanceCeiling";
 
-/** Inverse of contrastRatio.ts's channel linearization, so a target luminance can be
- *  turned into an actual grey RGBColor for a direct-computation test */
+/** Inverse of the channel linearization, turns a target luminance into a grey */
 function greyAtLuminance(luminance: number) {
   const channel = luminance <= 0.0031308 ? luminance * 12.92 : 1.055 * Math.pow(luminance, 1 / 2.4) - 0.055;
   return { r: channel, g: channel, b: channel };

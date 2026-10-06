@@ -1,8 +1,4 @@
-/**
- * Runtime-only session state: which deferred issues are currently waiting for their
- * node to leave the selection before they can resurface. Never persisted. See
- * issueTypes.ts on why waitingForSelectionToLeave does not live on the stored Issue.
- */
+/** Session only state, deferred issues waiting for their node to leave the selection */
 export interface ReEncounterState {
   waitingForSelectionToLeave: ReadonlySet<string>;
 }
@@ -12,12 +8,7 @@ export interface DeferredIssueRef {
   nodeId: string;
 }
 
-/**
- * Build the starting state. A deferred issue already selected at this moment is armed
- * immediately, exactly as if it had just been deferred, so reopening the plugin with
- * the node still selected does not resurface it on the spot. selectedNodeIds is
- * expected already expanded to include ancestors of the actual selection.
- */
+/** A deferred issue already selected starts armed so reopening the plugin does not resurface it */
 export function initializeReEncounterState(
   selectedNodeIds: ReadonlySet<string>,
   deferredIssues: readonly DeferredIssueRef[]
@@ -53,14 +44,7 @@ export interface ReEncounterOutcome {
   resurfacedIssueIds: readonly string[];
 }
 
-/**
- * Decide which deferred issues resurface on a selection change. An issue whose node
- * has left the selection has its guard cleared. An issue whose node is selected and
- * whose guard is already clear resurfaces once, incrementing nothing itself (see
- * stateMachine.recordResurface for that), and re-arms its own guard so continued
- * selection does not resurface it again on the next event. No timers, no cooldown
- * constants: this is a pure function of the current selection and prior guard state.
- */
+/** Resurfaces a selected issue once then re-arms, clears the guard when its node leaves */
 export function applySelectionChange(
   state: ReEncounterState,
   selectedNodeIds: ReadonlySet<string>,

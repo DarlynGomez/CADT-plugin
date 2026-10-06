@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 
 /**
- * Wraps callback so it fires at most once per animation frame, with the latest
- * argument, rather than once per raw input event
- *
- * A drag, whether on the wheel or the lightness slider, fires dozens of events a
- * second. Without this, each one becomes a real cross-boundary write to the node's
- * fill, which floods the plugin boundary and can race the accountability loop's own
- * documentchange-triggered rescan of the same node
+ * Fires at most once per animation frame with the latest argument
+ * A drag sends dozens of events a second and each would write to the node and race the rescan
  */
 export function useRafThrottledCallback<T>(callback: (value: T) => void): (value: T) => void {
   const pendingRef = useRef<T | null>(null);

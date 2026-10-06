@@ -6,10 +6,8 @@ function settle(): Promise<void> {
 }
 
 /**
- * GROUPING_SPEC.md section 5.2, proved against the real registered listener and the
- * real canvasSelection adapter, not a hand-built "isPluginOriginated" flag: that is how
- * the earlier preview bug went unnoticed. Every layer here is the real module; only
- * the Figma API itself is mocked, with a genuine in-memory plugin data store.
+ * Runs the real listener and canvas adapter, not a hand built flag
+ * Only the Figma API is mocked, with a real in-memory plugin data store
  */
 describe("plugin-originated selection and re-encounter", () => {
   let pluginData: Record<string, string> = {};
@@ -101,13 +99,12 @@ describe("plugin-originated selection and re-encounter", () => {
     registerSelectionChangeListener();
     expect(selectionChangeHandler).toBeDefined();
 
-    // The plugin shows all three deferred instances on canvas at once.
+    // The plugin shows all three deferred instances on canvas at once
     await selectAndZoomToFit(["1:1", "1:2", "1:3"]);
     expect(selection).toEqual(NODES);
 
-    // Figma would fire selectionchange as a result; simulate that. The handler is
-    // fire-and-forget, the same as the real figma.on callback, so let its own promise
-    // chain settle rather than guessing a microtask tick count.
+    // Figma would fire a selection change here so simulate it
+    // The handler is fire and forget so let its promise chain settle
     selectionChangeHandler?.();
     await settle();
 
@@ -118,7 +115,7 @@ describe("plugin-originated selection and re-encounter", () => {
     expect(setPluginData).not.toHaveBeenCalled();
     expect(uiPostMessage).not.toHaveBeenCalled();
 
-    // The designer now selects one of them directly, not through the plugin.
+    // The designer now selects one of them directly
     selection = [NODES[1]];
     selectionChangeHandler?.();
     await vi.waitFor(async () => {
@@ -131,8 +128,7 @@ describe("plugin-originated selection and re-encounter", () => {
     expect(afterDesignerSelection["contrast:1:3"].encounterCount).toBe(0);
     expect(uiPostMessage).toHaveBeenCalledTimes(1);
 
-    // And it resurfaces exactly once: further events on the same unbroken selection
-    // do not recount.
+    // It resurfaces exactly once, more events on the same selection do not recount
     selectionChangeHandler?.();
     await settle();
     const stillOne = await loadIssues();

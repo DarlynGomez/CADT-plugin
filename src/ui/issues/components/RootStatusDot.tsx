@@ -12,10 +12,8 @@ interface RootStatusDotProps {
 }
 
 /**
- * A colour-only status indicator, open (green), important (reuses the warning red),
- * deferred (muted grey). Colour is supplementary here, never the only signal: the
- * dot carries an aria-label with the same word a sighted user would read from
- * context, so nothing is conveyed by colour alone. A decided root never renders this.
+ * Status dot, open green, important warning red, deferred muted grey
+ * Colour is extra, the aria label carries the same word, decided roots never show it
  */
 export function RootStatusDot({ displayState }: RootStatusDotProps) {
   if (displayState === "decided") {

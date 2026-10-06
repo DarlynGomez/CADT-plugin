@@ -8,13 +8,8 @@ import { resolveForegroundBinding } from "./resolveBinding";
 import { resolveScreen } from "./resolveScreen";
 
 /**
- * The module that assembles a NodeSnapshot. This, ancestorChain.ts, paintExtraction.ts,
- * resolveScreen.ts, and resolveBinding.ts are the only files that read Figma node
- * properties; nothing downstream of a snapshot touches a Figma type. See CLAUDE.md rule
- * 8 and docs/ENGINEERING_STANDARDS.md section 7.2.
- *
- * Async only because resolveForegroundBinding is: a variable or style lookup needs an
- * await, unlike every other field here, which reads synchronously off the node itself
+ * Builds a NodeSnapshot, one of the few files that read Figma node properties
+ * Async only because the binding lookup awaits, every other field reads straight off the node
  */
 export async function snapshotTextNode(node: TextNode): Promise<NodeSnapshot> {
   const reasons = new Set<string>();

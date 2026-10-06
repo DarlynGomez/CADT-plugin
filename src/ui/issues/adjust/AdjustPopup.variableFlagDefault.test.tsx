@@ -6,7 +6,7 @@ import type { Root } from "../../../shared/grouping/groupingTypes";
 import type { IssueSummary } from "../../../shared/issues/issueTypes";
 import { AdjustPopup } from "./AdjustPopup";
 
-// No mock of featureFlags anywhere in this file: it proves what the shipped default renders.
+// featureFlags is not mocked in this file so it shows what the shipped default renders
 
 const ISSUE: IssueSummary = {
   id: "contrast:1:1",

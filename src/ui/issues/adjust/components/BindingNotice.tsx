@@ -5,7 +5,7 @@ interface BindingNoticeProps {
   binding: AdjustFillBinding;
 }
 
-/** Disclosure, not a veto: names the binding and its page-scoped usage, per section 6 */
+/** Tells the designer about the binding and its usage, it does not block */
 export function BindingNotice({ binding }: BindingNoticeProps) {
   return (
     <p className={styles.binding}>

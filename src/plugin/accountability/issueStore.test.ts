@@ -16,7 +16,7 @@ const ALIVE: Issue = {
 
 const DEAD: Issue = { ...ALIVE, id: "contrast:1:2", nodeId: "1:2" };
 
-/** The on-disk shape: section 5.5's fields only, ruleId/nodeId come from the map key */
+/** Stored shape only, rule id and node id come from the map key */
 function persistedFieldsOf(issue: Issue) {
   const { state, severityAtLastDetection, encounterCount, lastDetectedAt } = issue;
   return { state, severityAtLastDetection, encounterCount, lastDetectedAt };
@@ -106,8 +106,7 @@ describe("loadRawIssues", () => {
     getPluginData.mockReturnValue(
       JSON.stringify({ [ALIVE.id]: persistedFieldsOf(ALIVE), [DEAD.id]: persistedFieldsOf(DEAD) })
     );
-    // No getNodeByIdAsync stubbed at all: loadRawIssues must never call it. If it did,
-    // this would throw, since figma.getNodeByIdAsync is not a function here.
+    // figma.getNodeByIdAsync is not stubbed, so any call to it would throw
     expect(loadRawIssues()).toEqual({ [ALIVE.id]: ALIVE, [DEAD.id]: DEAD });
   });
 

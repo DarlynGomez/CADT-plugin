@@ -6,7 +6,7 @@ export interface FillBinding {
   usageCount: number;
 }
 
-/** Also used by detection/adapter/resolveBinding.ts, the signature's cheaper cousin of this lookup */
+/** Also used by the signature lookup in detection */
 export function firstSolidFill(node: TextNode): SolidPaint | null {
   const fills = node.fills;
   if (fills === figma.mixed) {
@@ -24,12 +24,8 @@ function sharesBinding(candidate: TextNode, variableId: string | undefined, styl
 }
 
 /**
- * Whether a node's fill is bound to a variable or style, and how many other text nodes
- * on the current page carry that same binding
- *
- * Scoped to the current page on purpose: a whole-document count means walking every
- * page under dynamic-page access, the same performance tradeoff the initial scan
- * already makes
+ * Whether the fill is bound, and how many other text nodes on the page share the binding
+ * Page scoped on purpose, a whole document count means walking every page
  */
 export async function detectFillBinding(node: TextNode): Promise<FillBinding | null> {
   const fill = firstSolidFill(node);

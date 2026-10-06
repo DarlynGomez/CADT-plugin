@@ -69,8 +69,7 @@ describe("registerDocumentChangeListener", () => {
     }
 
     beforeEach(() => {
-      // previewState.ts holds genuine module-level singleton state (the active
-      // preview), unlike listeners.ts itself; reset so it starts empty each test.
+      // previewState holds module level state, reset it so each test starts empty
       vi.resetModules();
       vi.stubGlobal("figma", { on, mixed: FIGMA_MIXED });
     });

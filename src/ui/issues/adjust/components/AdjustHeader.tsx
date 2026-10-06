@@ -7,7 +7,7 @@ interface AdjustHeaderProps {
   onClose: () => void;
 }
 
-/** The sheet's title row: one headline naming the finding, and a real close control */
+/** Title row with one headline for the finding and a close button */
 export function AdjustHeader({ title, onClose }: AdjustHeaderProps) {
   return (
     <div className={styles.header}>

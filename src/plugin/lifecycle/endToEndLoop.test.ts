@@ -1,12 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Proves the loop end to end, per spec section 9: detect, defer, reselect, resurface
- * with the count incremented by exactly one, ignore with a reason, confirm it
- * never returns. Every layer here is the real module; only the Figma API itself is
- * mocked, and its plugin data is a real in-memory store shared across every call, not
- * a canned return value, so a bug in how one step reads what a previous step wrote
- * would actually show up here.
+ * Whole loop: detect, defer, reselect, resurface once, ignore and stay ignored
+ * Only the Figma API is mocked, with a real in-memory plugin data store shared across calls
  */
 describe("the accountability loop end to end", () => {
   let pluginData: Record<string, string> = {};
@@ -24,7 +20,7 @@ describe("the accountability loop end to end", () => {
     type: "TEXT",
     fontSize: 16,
     fontName: { family: "Inter", style: "Regular" },
-    // Near-white on white: a real, unambiguous contrast failure, not a fixture stub.
+    // Near white on white, a real contrast failure
     fills: [{ type: "SOLID", color: { r: 0.95, g: 0.95, b: 0.95 } }],
     opacity: 1,
     blendMode: "NORMAL",
@@ -75,33 +71,33 @@ describe("the accountability loop end to end", () => {
     const ISSUE_ID = "contrast:1:1";
     const reply = vi.fn();
 
-    // 1. Detect: the live contrast failure creates a fresh, open issue.
+    // Detect, the live failure creates a fresh open issue
     await scanAndSync(new Set([TEXT_NODE.id]), "detect");
     expect((await loadIssues())[ISSUE_ID]).toMatchObject({ state: "open", encounterCount: 0 });
 
-    // 2. Defer, while the node is still selected (the immediate-resurface problem).
+    // Defer while the node is still selected
     selection = [TEXT_NODE];
     await handleIssueMessage({ type: "ISSUE_DEFER", issueId: ISSUE_ID }, reply);
     expect((await loadIssues())[ISSUE_ID].state).toBe("deferred");
     expect(reply).not.toHaveBeenCalledWith(expect.objectContaining({ type: "ISSUE_ACTION_FAILED" }));
 
-    // Still selected: must not resurface instantly just because it was just deferred.
+    // Still selected, so it must not resurface just because it was deferred
     await handleSelectionChange();
     expect((await loadIssues())[ISSUE_ID].encounterCount).toBe(0);
 
-    // 3. Reselect: leave, then return. That specific return is the resurface.
+    // Reselect, leaving and returning is the resurface
     selection = [];
     await handleSelectionChange();
     selection = [TEXT_NODE];
     await handleSelectionChange();
     expect((await loadIssues())[ISSUE_ID]).toMatchObject({ state: "deferred", encounterCount: 1 });
 
-    // Exactly one: further events on the same unbroken selection do not recount.
+    // Exactly one, more events on the same unbroken selection do not recount
     await handleSelectionChange();
     await handleSelectionChange();
     expect((await loadIssues())[ISSUE_ID].encounterCount).toBe(1);
 
-    // 4. Ignore with a reason.
+    // Ignore with a reason
     await handleIssueMessage(
       { type: "ISSUE_IGNORE", issueId: ISSUE_ID, reason: "Client approved the muted footer" },
       reply
@@ -110,13 +106,12 @@ describe("the accountability loop end to end", () => {
     expect(ignored.state).toBe("ignored");
     expect(ignored.ignoredReason).toBe("Client approved the muted footer");
 
-    // 5. Confirm it never returns. The same failure is detected again...
+    // Confirm it never returns, the same failure is detected again
     await scanAndSync(new Set([TEXT_NODE.id]), "rescan");
     expect((await loadIssues())[ISSUE_ID].state).toBe("ignored");
 
-    // ...and selection leaving and returning again does not resurface it: ignored
-    // issues are excluded from re-encounter matching entirely, by design (never
-    // resurfaces, per spec section 5's state table).
+    // Leaving and returning to the selection does not resurface it
+    // Ignored issues are left out of re-encounter matching
     selection = [];
     await handleSelectionChange();
     selection = [TEXT_NODE];

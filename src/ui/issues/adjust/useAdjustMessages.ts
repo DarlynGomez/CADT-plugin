@@ -53,8 +53,7 @@ export function useAdjustMessages(issueId: string) {
     return () => window.removeEventListener("message", handleMessage);
   }, [issueId]);
 
-  // issueId correlates replies with this popup; issueIds is the scope actually written,
-  // GROUPING_SPEC.md section 8's "preview scope is apply scope"
+  // issueId matches replies to this popup, issueIds is what actually gets written
   const preview = useCallback(
     (color: RGBColor, issueIds: readonly string[]) => {
       sendMessage({ type: "ADJUST_PREVIEW", issueId, issueIds: [...issueIds], color });

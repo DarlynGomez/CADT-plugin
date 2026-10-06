@@ -20,11 +20,8 @@ interface WheelViewProps {
 }
 
 /**
- * The wheel, expanded inline under the third option card (or shown alone at the
- * "Flag and explain" calibration level). ADJUST_SPEC.md section 3C and section 7's
- * second amendment: chrome restyled to the mockup exactly, a live ratio readout with
- * a pass pill and a background-ancestor callout around the wheel; the wheel's own
- * fade rendering and snap-on-click behaviour, ColorWheel.tsx, are untouched.
+ * The wheel expanded under the third card, or alone at the lowest help level
+ * Adds the ratio readout, pass pill and background callout, the wheel itself is unchanged
  */
 export function WheelView({
   background,

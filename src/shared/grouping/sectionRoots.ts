@@ -6,7 +6,7 @@ export type GroupBy = "root-cause" | "screen" | "severity";
 
 export interface RootSection {
   key: string;
-  /** Empty for the default root-cause grouping, which renders unsectioned */
+  /** Empty for root cause grouping, which has no sections */
   label: string;
   roots: readonly Root[];
 }
@@ -17,13 +17,7 @@ const SEVERITY_LABELS: Readonly<Record<string, string>> = {
   low: "Low"
 };
 
-/**
- * GROUPING_SPEC.md 6.2's grouping select. Root cause is deriveRoots over the whole set,
- * unsectioned, exactly as every other view of the panel already works. Screen and
- * severity bucket the flat findings first with the existing pure secondary grouping,
- * then derive roots separately within each bucket, so a root that spans two screens
- * appears once in each screen's section, which is the point of a screen-scoped view.
- */
+/** Root cause groups everything, screen and severity bucket first then derive roots per bucket */
 export function sectionRoots(
   findings: readonly GroupableFinding[],
   groupBy: GroupBy,

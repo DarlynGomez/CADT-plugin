@@ -66,9 +66,8 @@ export function useCalibrationPersistence() {
         window.removeEventListener("message", handleMessage);
         setSaveError(error);
         if (outcome) {
-          // Hand off to the returning-user surface right away using the profile
-          // we just persisted. The sandbox also re-resolves and sends
-          // CALIBRATION_LOADED, which fills in the resolved scope afterwards.
+          // Hand off right away using the profile just saved
+          // The sandbox also re-resolves and sends CALIBRATION_LOADED with the resolved scope
           setLoadedProfile(profile);
         }
         resolve(outcome);
@@ -87,8 +86,7 @@ export function useCalibrationPersistence() {
       }
 
       window.addEventListener("message", handleMessage);
-      // Never leave the Review screen locked if the sandbox goes silent. Offer a
-      // plain retry instead, per the storage write-failure rule.
+      // Never leave the Review screen locked if the sandbox goes silent, offer a retry
       timeout = window.setTimeout(
         () => settle(false, "The setup could not be saved. Check your connection and retry."),
         5000

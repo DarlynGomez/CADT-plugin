@@ -14,10 +14,7 @@ function hueDistance(a: number, b: number): number {
   return Math.min(diff, 1 - diff);
 }
 
-/**
- * Option B: the candidate closest in hue to current that clears requiredRatio plus
- * headroom against background, or null when none of the candidates pass
- */
+/** Closest hue to the current colour that passes, or null when none do */
 export function paletteMatch(
   current: RGBColor,
   candidates: readonly NamedColor[],

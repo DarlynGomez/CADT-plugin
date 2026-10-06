@@ -14,7 +14,7 @@ interface InstanceListProps {
   onLocate: (issueId: string) => void;
 }
 
-/** The representative, section 3.5, first; the rest keep their existing relative order */
+/** The representative goes first, the rest keep their order */
 function representativeFirst(
   instances: readonly GroupableFinding[],
   representativeIssueId: string
@@ -27,12 +27,8 @@ function representativeFirst(
 }
 
 /**
- * GROUPING_SPEC.md 6.4: nothing pre-selected, real controls, and a fixed-height,
- * internally scrolling container so a long list never stalls the panel. Scrolling over
- * paging, matching the mockup: every row is still a real, focusable element in the DOM
- * the whole time it exists, without the extra Previous/Next controls a pager needs.
- * The representative sorts first and reads "(Current)": it is the instance a
- * single-instance Adjust targets, section 8.
+ * Nothing is pre selected and the list scrolls inside a fixed height so long lists stay light
+ * The representative sorts first and reads Current, it is the one a single adjust targets
  */
 export function InstanceList({
   instances,

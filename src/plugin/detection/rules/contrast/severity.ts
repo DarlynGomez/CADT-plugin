@@ -4,15 +4,10 @@ const LOW_SEVERITY_FLOOR = 0.8;
 const MEDIUM_SEVERITY_FLOOR = 0.5;
 
 /**
- * Band a measured contrast ratio against its required threshold. The fraction achieved,
- * not the raw ratio, is what bands: a large-text pass at 3.2 and a normal-text pass at
- * 4.8 are both barely passing, so both should read as low severity when they fall short.
- *
- * Both edges are closed on their upper side by decision, not by however `>=` happened to
- * fall out: a fraction exactly at 0.8 reads as low, and exactly at 0.5 reads as medium.
- * An achieved fraction is a floating-point division, so a value intended to land exactly
- * on a boundary can round a hair to either side; that is a property of the input, not of
- * this function choosing the wrong comparison here.
+ * Bands the fraction of the required ratio achieved, not the raw ratio
+ * So a large text 3.2 and a normal text 4.8 both read as low when they fall short
+ * Edges close on the upper side, exactly 0.8 reads low and exactly 0.5 reads medium
+ * Floating point division can land a hair either side of an edge
  */
 export function computeSeverity(measuredRatio: number, requiredRatio: number): Severity {
   const achievedFraction = measuredRatio / requiredRatio;

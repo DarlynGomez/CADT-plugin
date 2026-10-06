@@ -30,11 +30,9 @@ function matchesFilter(root: Root, filter: StateFilter): boolean {
 }
 
 /**
- * Wraps the pure grouping domain over the live issue and decision records. Findings
- * and the unsectioned root list are derived once and reused for the headline, the
- * filter counts, and the sectioned list, so every view of the panel looks at the same
- * underlying roots. Ignored roots never flow through filteredSections: they render
- * through DecisionsView.tsx, which the "ignored" filter selects instead.
+ * Wraps the pure grouping code over the live records
+ * Roots are derived once and shared by the headline, counts and list
+ * Ignored roots skip the sections and render in the decisions view
  */
 export function useRoots(
   issues: readonly IssueSummary[],

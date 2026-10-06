@@ -1,5 +1,5 @@
 import { contrastRule } from "./contrast/contrastRule";
 import type { Rule } from "./ruleTypes";
 
-/** Every registered detection rule. Adding a rule is an edit to this list alone. */
+/** Every registered rule, adding one means editing this list */
 export const RULES: readonly Rule[] = [contrastRule];

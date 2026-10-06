@@ -13,9 +13,8 @@ interface RootActionsRowProps {
 }
 
 /**
- * GROUPING_SPEC.md 6.3 item 8: Adjust and Ignore on the left, Defer and the Pin
- * toggle on the right. A fully decided root, section 3.2, offers none of these; that
- * is what the Decisions view and its Reopen control are for instead.
+ * Adjust and Ignore on the left, Defer and the pin on the right
+ * A fully decided root offers none of these, reopen lives in the decisions view
  */
 export function RootActionsRow({
   root,

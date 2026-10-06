@@ -23,7 +23,7 @@ interface DecisionRowProps {
   onReopen: () => void;
 }
 
-/** GROUPING_SPEC.md 6.5's row styling amendment: dot, name, ratio chip, then the rest */
+/** Row layout, dot then name then ratio chip */
 function DecisionRow({ root, decision, representativeIssue, onReopen }: DecisionRowProps) {
   const isResolvedOnly = !root.stateBreakdown.ignored && Boolean(root.stateBreakdown.resolved);
   const representative = root.instances.find((i) => i.issueId === root.representativeIssueId);
@@ -70,7 +70,7 @@ interface DecisionsViewProps {
   onReopen: (issueIds: readonly string[], signature: string, clearDecision: boolean) => void;
 }
 
-/** GROUPING_SPEC.md 6.5: the accountability layer's output, name, specimen, reason, date, Reopen */
+/** Ignored and fixed roots with their reason, date and reopen control */
 export function DecisionsView({ roots, decisions, issuesById, onReopen }: DecisionsViewProps) {
   if (roots.length === 0) {
     return <p className={styles.empty}>No decisions recorded yet.</p>;

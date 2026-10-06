@@ -58,8 +58,7 @@ describe("loadDecisions", () => {
   });
 
   it("does not prune anything: a decision has no node to check against", () => {
-    // No getNodeByIdAsync stubbed at all. If loadDecisions ever called it, this test
-    // would throw, since figma.getNodeByIdAsync is not a function here.
+    // figma.getNodeByIdAsync is not stubbed, so any call to it would throw
     getPluginData.mockReturnValue(JSON.stringify({ [SIGNATURE]: persistedFieldsOf(DECISION) }));
     expect(loadDecisions()).toEqual({ [SIGNATURE]: DECISION });
   });

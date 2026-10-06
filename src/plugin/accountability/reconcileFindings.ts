@@ -5,15 +5,9 @@ import type { IssueRecordMap } from "./issueStore";
 import { createIssue, reconcileDetection } from "./stateMachine";
 
 /**
- * Reconcile one scan's findings against the persisted record, for exactly the node
- * ids that were scanned. A finding creates a new issue or updates an existing one; the
- * absence of one for an already-tracked (rule, node) pair resolves that issue rather
- * than deleting its record, per section 5.1. A node outside the scanned set is left
- * completely untouched: no signal this pass, no verdict this pass.
- *
- * Ignored issues are handled by reconcileDetection itself (ADR-014): a same or
- * better severity leaves the ignore standing, so a finding for an already
- * ignored issue does not reappear in the active list just because it recurred.
+ * Applies one scan to the record, for the scanned nodes only
+ * A missing finding marks the issue resolved instead of deleting it
+ * Ignored issues are handled by the state machine
  */
 export function reconcileScanResults(
   record: IssueRecordMap,

@@ -1,14 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Proves ADJUST_SPEC.md section 10: applying moves the issue to resolved through the
- * normal detection path, because the finding stops being produced, not because the
- * Adjust flow marks it resolved directly. adjustProtocol.ts never imports stateMachine
- * and never flips an Issue's state itself; ADJUST_APPLY's own handler calls the real
- * scanAndSync as its last step (GROUPING_SPEC.md section 8's "the panel must never
- * show a resolved instance as still open"), so resolution is immediate rather than
- * waiting on the separate documentchange listener, but it is still detection, run
- * through the same reconcileScanResults every other trigger uses, that resolves it.
+ * Applying resolves the issue through normal detection, not by marking it resolved
+ * The apply handler rescans the node itself so resolution is immediate
  */
 describe("applying an adjustment resolves the issue through the normal detection path", () => {
   let pluginData: Record<string, string> = {};
@@ -27,7 +21,7 @@ describe("applying an adjustment resolves the issue through the normal detection
     fontSize: 16,
     fontName: { family: "Inter", style: "Regular" },
     fontWeight: 400,
-    // Near-white on white: a real, unambiguous contrast failure.
+    // Near white on white, a real contrast failure
     fills: [{ type: "SOLID", color: { r: 0.95, g: 0.95, b: 0.95 } }],
     opacity: 1,
     blendMode: "NORMAL",
@@ -76,14 +70,12 @@ describe("applying an adjustment resolves the issue through the normal detection
 
     const ISSUE_ID = "contrast:1:1";
 
-    // 1. Detect: the live failure creates a fresh, open issue.
+    // Detect, the live failure creates a fresh open issue
     await scanAndSync(new Set([TEXT_NODE.id]), "detect");
     expect((await loadIssues())[ISSUE_ID].state).toBe("open");
 
-    // 2. Apply a passing colour. adjustProtocol.ts never flips Issue.state itself;
-    // its own rescan of exactly this node, the same reconcileScanResults every other
-    // trigger uses, is what resolves it, and it has already happened by the time
-    // handleAdjustMessage returns.
+    // Apply a passing colour, the handler never flips issue state itself
+    // Its rescan of this node resolves the issue before the handler returns
     await handleAdjustMessage(
       {
         type: "ADJUST_APPLY",
@@ -150,8 +142,7 @@ describe("applying an adjustment resolves the issue through the normal detection
       vi.fn()
     );
 
-    // The refresh happens as part of handling ADJUST_APPLY itself, before the reply,
-    // so the panel is never left showing either instance as still open.
+    // The refresh happens before the reply, so the panel never shows either instance as open
     const pushed = uiPostMessage.mock.calls.map((call) => call[0]);
     const latest = pushed[pushed.length - 1] as { issues: Array<{ id: string; state: string }> };
     expect(latest.issues.find((issue) => issue.id === FIRST_ID)?.state).toBe("resolved");

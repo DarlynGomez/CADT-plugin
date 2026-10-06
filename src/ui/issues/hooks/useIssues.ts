@@ -44,7 +44,7 @@ export interface ActionError {
   message: string;
 }
 
-/** Subscribes to the sandbox's issue and decision records, and exposes every designer action */
+/** Subscribes to issue and decision records and exposes every designer action */
 export function useIssues() {
   const [issues, setIssues] = useState<readonly IssueSummary[]>([]);
   const [decisions, setDecisions] = useState<Readonly<Record<string, RootDecision>>>({});
@@ -71,7 +71,7 @@ export function useIssues() {
 
     window.addEventListener("message", handleMessage);
     sendMessage({ type: "ISSUES_SUBSCRIBE" });
-    // A silent sandbox must not leave the panel loading forever.
+    // A silent sandbox must not leave the panel loading forever
     const timeout = window.setTimeout(() => setLoading(false), 3000);
     return () => {
       window.clearTimeout(timeout);

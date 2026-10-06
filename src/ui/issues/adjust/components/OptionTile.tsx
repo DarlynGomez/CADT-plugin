@@ -21,11 +21,8 @@ function toCssColor(color: RGBColor): string {
 }
 
 /**
- * ADJUST_SPEC.md section 7's amended layout: a circular specimen swatch on the left,
- * the label, ratio badge, and a one line reason stacked to its right, a checkmark
- * trailing when selected. Selection is an inset ring, never a border width change,
- * since that shifts every pixel inside a full-width card just as visibly as it did
- * across three tiles in a row.
+ * Swatch on the left, then label, ratio badge and a one line reason, check mark when selected
+ * Selection is an inset ring so the card never shifts
  */
 export function OptionTile({
   label,
@@ -39,9 +36,7 @@ export function OptionTile({
   onFocus,
   onActivate
 }: OptionTileProps) {
-  // The candidate colour is arbitrary data, not a design token: there is no palette
-  // entry for a colour the file or the designer supplied. Sanctioned per CLAUDE.md
-  // rule 5, alongside fade values and computed origins.
+  // Candidate colours are arbitrary data and not tokens, so an inline style is allowed here
   const swatchStyle = { backgroundColor: toCssColor(color) };
 
   return (

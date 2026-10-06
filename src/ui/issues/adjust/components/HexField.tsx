@@ -15,9 +15,8 @@ interface HexFieldProps {
 }
 
 /**
- * The keyboard-equivalent path to the wheel. A typed hex is an exact request, so a
- * failing one is refused with its achieved ratio rather than silently corrected; the
- * nearest passing colour on the same hue is offered as a one-tap alternative instead
+ * Typed path to the same result as the wheel
+ * A failing hex is refused with its ratio and the nearest passing colour is offered
  */
 export function HexField({ background, requiredRatio, onColorChange, onRejected }: HexFieldProps) {
   const [input, setInput] = useState("");
